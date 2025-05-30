@@ -35,16 +35,6 @@
 			path = rihlar_front;
 			sourceTree = "<group>";
 		};
-		C372DC4A2DDC31040044D57F /* rihlar_frontTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = rihlar_frontTests;
-			sourceTree = "<group>";
-		};
-		C372DC542DDC31040044D57F /* rihlar_frontUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = rihlar_frontUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				C372DC382DDC31020044D57F /* rihlar_front */,
-				C372DC4A2DDC31040044D57F /* rihlar_frontTests */,
-				C372DC542DDC31040044D57F /* rihlar_frontUITests */,
 				C372DC372DDC31020044D57F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +118,6 @@
 			dependencies = (
 				C372DC492DDC31040044D57F /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				C372DC4A2DDC31040044D57F /* rihlar_frontTests */,
-			);
 			name = rihlar_frontTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +137,6 @@
 			);
 			dependencies = (
 				C372DC532DDC31040044D57F /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				C372DC542DDC31040044D57F /* rihlar_frontUITests */,
 			);
 			name = rihlar_frontUITests;
 			packageProductDependencies = (
