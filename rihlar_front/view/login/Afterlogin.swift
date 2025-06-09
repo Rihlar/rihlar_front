@@ -1,8 +1,8 @@
 //
-//  loginView.swift
-//  auth-test
+//  Afterlogin.swift
+//  rihlar_front
 //
-//  Created by 川岸遥奈 on 2025/06/02.
+//  Created by 川岸遥奈 on 2025/06/09.
 //
 
 import SwiftUI
