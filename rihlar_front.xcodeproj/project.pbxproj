@@ -6,13 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		C3E3B1B82DF2EACF0044AE62 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3E3B1B62DF2E7EF0044AE62 /* SwiftUI.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-/* End PBXBuildFile section */
+/* Begin PBXContainerItemProxy section */
+		C372DC482DDC31040044D57F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C372DC2E2DDC31020044D57F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C372DC352DDC31020044D57F;
+			remoteInfo = rihlar_front;
+		};
+		C372DC522DDC31040044D57F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C372DC2E2DDC31020044D57F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C372DC352DDC31020044D57F;
+			remoteInfo = rihlar_front;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		C372DC362DDC31020044D57F /* rihlar_front.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rihlar_front.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3E3B1B62DF2E7EF0044AE62 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.2.sdk/System/Library/Frameworks/SwiftUI.framework; sourceTree = DEVELOPER_DIR; };
+		C372DC472DDC31040044D57F /* rihlar_frontTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rihlar_frontTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C372DC512DDC31040044D57F /* rihlar_frontUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rihlar_frontUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -28,7 +42,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3E3B1B82DF2EACF0044AE62 /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C372DC442DDC31040044D57F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C372DC4E2DDC31040044D57F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -39,7 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				C372DC382DDC31020044D57F /* rihlar_front */,
-				C3E3B1B52DF2E7EE0044AE62 /* Frameworks */,
 				C372DC372DDC31020044D57F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,16 +74,10 @@
 			isa = PBXGroup;
 			children = (
 				C372DC362DDC31020044D57F /* rihlar_front.app */,
+				C372DC472DDC31040044D57F /* rihlar_frontTests.xctest */,
+				C372DC512DDC31040044D57F /* rihlar_frontUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		C3E3B1B52DF2E7EE0044AE62 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				C3E3B1B62DF2E7EF0044AE62 /* SwiftUI.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +105,46 @@
 			productReference = C372DC362DDC31020044D57F /* rihlar_front.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C372DC462DDC31040044D57F /* rihlar_frontTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C372DC5E2DDC31040044D57F /* Build configuration list for PBXNativeTarget "rihlar_frontTests" */;
+			buildPhases = (
+				C372DC432DDC31040044D57F /* Sources */,
+				C372DC442DDC31040044D57F /* Frameworks */,
+				C372DC452DDC31040044D57F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C372DC492DDC31040044D57F /* PBXTargetDependency */,
+			);
+			name = rihlar_frontTests;
+			packageProductDependencies = (
+			);
+			productName = rihlar_frontTests;
+			productReference = C372DC472DDC31040044D57F /* rihlar_frontTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C372DC502DDC31040044D57F /* rihlar_frontUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C372DC612DDC31040044D57F /* Build configuration list for PBXNativeTarget "rihlar_frontUITests" */;
+			buildPhases = (
+				C372DC4D2DDC31040044D57F /* Sources */,
+				C372DC4E2DDC31040044D57F /* Frameworks */,
+				C372DC4F2DDC31040044D57F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C372DC532DDC31040044D57F /* PBXTargetDependency */,
+			);
+			name = rihlar_frontUITests;
+			packageProductDependencies = (
+			);
+			productName = rihlar_frontUITests;
+			productReference = C372DC512DDC31040044D57F /* rihlar_frontUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -98,6 +158,14 @@
 					C372DC352DDC31020044D57F = {
 						CreatedOnToolsVersion = 16.2;
 					};
+					C372DC462DDC31040044D57F = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = C372DC352DDC31020044D57F;
+					};
+					C372DC502DDC31040044D57F = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = C372DC352DDC31020044D57F;
+					};
 				};
 			};
 			buildConfigurationList = C372DC312DDC31020044D57F /* Build configuration list for PBXProject "rihlar_front" */;
@@ -109,21 +177,34 @@
 			);
 			mainGroup = C372DC2D2DDC31020044D57F;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				C3E3B1B42DF2E60C0044AE62 /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C372DC372DDC31020044D57F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				C372DC352DDC31020044D57F /* rihlar_front */,
+				C372DC462DDC31040044D57F /* rihlar_frontTests */,
+				C372DC502DDC31040044D57F /* rihlar_frontUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C372DC342DDC31020044D57F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C372DC452DDC31040044D57F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C372DC4F2DDC31040044D57F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -140,7 +221,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C372DC432DDC31040044D57F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C372DC4D2DDC31040044D57F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C372DC492DDC31040044D57F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C372DC352DDC31020044D57F /* rihlar_front */;
+			targetProxy = C372DC482DDC31040044D57F /* PBXContainerItemProxy */;
+		};
+		C372DC532DDC31040044D57F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C372DC352DDC31020044D57F /* rihlar_front */;
+			targetProxy = C372DC522DDC31040044D57F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C372DC592DDC31040044D57F /* Debug */ = {
@@ -335,6 +443,96 @@
 			};
 			name = Release;
 		};
+		C372DC5F2DDC31040044D57F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87W7C4VKFR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kokomeow.rihlar-frontTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/rihlar_front.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/rihlar_front";
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Debug;
+		};
+		C372DC602DDC31040044D57F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87W7C4VKFR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kokomeow.rihlar-frontTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/rihlar_front.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/rihlar_front";
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Release;
+		};
+		C372DC622DDC31040044D57F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87W7C4VKFR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kokomeow.rihlar-frontUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = rihlar_front;
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Debug;
+		};
+		C372DC632DDC31040044D57F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 87W7C4VKFR;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kokomeow.rihlar-frontUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = rihlar_front;
+				XROS_DEPLOYMENT_TARGET = 2.2;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -356,18 +554,25 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-/* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		C3E3B1B42DF2E60C0044AE62 /* XCRemoteSwiftPackageReference "SwiftUIFontIcon" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/huybuidac/SwiftUIFontIcon";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.1.0;
-			};
+		C372DC5E2DDC31040044D57F /* Build configuration list for PBXNativeTarget "rihlar_frontTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C372DC5F2DDC31040044D57F /* Debug */,
+				C372DC602DDC31040044D57F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
-/* End XCRemoteSwiftPackageReference section */
+		C372DC612DDC31040044D57F /* Build configuration list for PBXNativeTarget "rihlar_frontUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C372DC622DDC31040044D57F /* Debug */,
+				C372DC632DDC31040044D57F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
 	};
 	rootObject = C372DC2E2DDC31020044D57F /* Project object */;
 }
