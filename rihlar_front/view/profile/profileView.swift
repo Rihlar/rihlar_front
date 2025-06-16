@@ -9,14 +9,14 @@ import SwiftUI
 
 struct ProfileView: View {
     //    仮データ
-    let images = ["tennpure1", "tennpure2", "tennpure3", "tennpure1", "tennpure2", "tennpure3"]
+    let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon"]
     var body: some View {
         VStack(spacing: 20){
-            Spacer().frame(height: 30)
+            Spacer().frame(height: 100)
             
             // アイコン
             // 仮置きとして、googleのアイコンを置いてる本番ならurl
-            Image(.googleIcon)
+            Image(.user)
                 .resizable()
                 .frame(width: 100, height: 100)
                 .clipShape(Circle())
@@ -24,9 +24,15 @@ struct ProfileView: View {
             // ユーザーネーム＋編集ボタン
             HStack{
                 // 名前
-                Text("prayer name")
-                    .fontWeight(.bold)
-                    .font(.title3)
+                VStack{
+                    Text("prayer name")
+                        .fontWeight(.bold)
+                        .font(.title3)
+                    Rectangle()
+                        .frame(width: 180,height: 4)
+                        .foregroundColor(.gray)
+                }
+                
                 Button {
                     print("名前変更処理")
                 } label: {
@@ -34,6 +40,8 @@ struct ProfileView: View {
                 }
                 
             }
+            
+            
             // 実績バッジ
             HStack(spacing: 20) {
                 ForEach(0..<3) { _ in
@@ -53,21 +61,23 @@ struct ProfileView: View {
                 .padding(10)
             
             // ダラーと三列で並べる
-            ScrollView {
+            ScrollView(.vertical) {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 10) {
                     ForEach(images, id: \.self) { imageName in
                         Image(imageName)
                             .resizable()
                             .scaledToFill()
-                            .frame(width: 100, height: 100)
+                            .frame(width: 120, height: 180)
                             .clipped()
                             .cornerRadius(8)
                     }
                 }
                 .padding(.horizontal)
             }
+            .frame(height: 400)
         }
         Spacer().frame(height: 40)
+        
         
     }
 }
