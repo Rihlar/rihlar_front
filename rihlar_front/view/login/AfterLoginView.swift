@@ -23,6 +23,19 @@ struct LoginView: View {
                     Text("\(code)")
                 
                 Spacer()
+                
+                NavigationView {
+                   VStack {
+                       NavigationLink(destination: Camera()) {
+                           Text("次のページへ")
+                               .padding()
+                               .foregroundColor(.white)
+                               .background(Color.blue)
+                               .cornerRadius(10)
+                       }
+                   }
+                   .navigationTitle("ホーム")
+               }
             }
         }
     }
