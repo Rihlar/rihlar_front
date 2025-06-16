@@ -7,11 +7,15 @@
 
 import SwiftUI
 
-struct header: View {
-    @State private var gameFlag: String = "solo"
+struct Header: View {
+    enum GameMode {
+    case solo, match
+    }
+
+    @State private var gameMode: GameMode = .solo
     
     var body: some View {
-        if gameFlag == "solo" || gameFlag == "mulch" {
+        if gameMode == .match {
             HStack(spacing: 10) {
                 ZStack {
                     Circle()
@@ -56,7 +60,7 @@ struct header: View {
                     }
                 }
                 .onTapGesture {
-                    gameFlag = "so"
+                    gameMode = .solo
                 }
             }
         } else {
@@ -104,7 +108,7 @@ struct header: View {
                     }
                 }
                 .onTapGesture {
-                    gameFlag = "solo"
+                    gameMode = .match
                 }
             }
         }

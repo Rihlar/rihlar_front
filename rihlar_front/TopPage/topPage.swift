@@ -9,12 +9,18 @@ import SwiftUI
 import CoreLocation
 
 struct topPage: View {
+//    プレイヤーに追従モードか自由に移動できるかなどの処理をしている関数
     @StateObject private var locationManager = LocationManager()
+//    地図上に表示する円の座標を表示するためのから配列
     @State private var circles: [CircleData] = []
+//    カメラ画面の表示非表示を制御
     @State private var isShowCamera = false
+//    メニューの表示非表示を制御
+    @State private var isShowMenu = false
     
     var body: some View {
         ZStack {
+            // mapkitを使用した地図表示
             CircleMap(locationManager: locationManager, circles: circles)
                         .ignoresSafeArea()
                         .onAppear {
@@ -22,26 +28,44 @@ struct topPage: View {
                         }
             
             VStack {
-                header()
+                Header()
                 
                 Spacer()
                 
-                Button {
-                    locationManager.resumeFollow()
-                } label: {
-                    Image(systemName: "bookmark.fill")
-                        .frame(width: 48, height: 48)
-                        .foregroundStyle(Color.white.opacity(0.8))
-                        .background(Color.blue.opacity(0.8))
-                        .cornerRadius(8)
-                }
-                
-                Spacer()
-                
-                HStack {
-                    footer {
-                        isShowCamera = true
+                VStack(spacing: 0) {
+//                    現在地に戻るボタン
+//                    デザインは後回しにしているので変更する
+                    HStack {
+                        Button {
+                            locationManager.resumeFollow()
+                        } label: {
+                            Image(systemName: "paperplane.fill")
+                                .frame(width: 48, height: 48)
+                                .foregroundStyle(Color.white.opacity(0.8))
+                                .background(Color.blue.opacity(0.8))
+                                .cornerRadius(8)
+                        }
+                        .padding(16)
+                        
+                        Spacer()
+                        
+                        Button {
+                        } label: {
+                            Image(systemName: "bookmark.fill")
+                                .frame(width: 48, height: 48)
+                        }
+                        .opacity(0)
                     }
+                    Footer (
+//                            カメラ画面を表示するためのflag
+                        onCameraTap: {
+                            isShowCamera = true
+                        },
+//                            メニューを表示するためのflag
+                        onMenuTap: {
+                            isShowMenu = true
+                        }
+                    )
                 }
             }
         }
@@ -52,6 +76,7 @@ struct topPage: View {
                 }
     }
     
+// テストデータなのでバックエンドと繋がったらこれは削除
     private func loadSampleJSON() {
         let jsonString = """
         [
