@@ -26,7 +26,7 @@ struct LoginView: View {
                 
                 NavigationView {
                    VStack {
-                       NavigationLink(destination: camera()) {
+                       NavigationLink(destination: Camera()) {
                            Text("次のページへ")
                                .padding()
                                .foregroundColor(.white)
