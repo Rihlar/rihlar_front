@@ -1,0 +1,8 @@
+# Xcode user-specific settings
+*.xcodeproj/xcuserdata/*
+*.xcworkspace/xcuserdata/*
+*.xcuserstate
+
+rihlar_front.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+rihlar_front.xcodeproj/project.pbxproj
