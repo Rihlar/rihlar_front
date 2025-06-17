@@ -14,7 +14,7 @@ struct FooterBtn: View {
     let padding: EdgeInsets     // 配置調整用
 
     var body: some View {
-        VStack(spacing: -20) {
+        VStack(spacing: -16) {
             ZStack {
                 Image(iconName)
                     .zIndex(10)
@@ -28,7 +28,7 @@ struct FooterBtn: View {
             Text(label)
                 .foregroundColor(.white)
                 .font(.system(size: 16, weight: .bold))
-                .stroke(color: Color("TextBtnColor"), width: 0.8)
+                .stroke(color: Color("TextColor"), width: 0.8)
                 .zIndex(1)
         }
         .padding(padding)
