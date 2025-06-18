@@ -27,17 +27,19 @@ struct Header: View {
                         Text("コレクション")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                         
                         Text("モード")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                     }
                 }
                 .opacity(0)
                 
                 Image("matchHeader")
                     .overlay(Text("対戦モード")
-                        .foregroundColor(Color("TextBtnColor"))
+                        .foregroundColor(Color("TextColor"))
                         .font(.system(size: 16, weight: .bold))
                     )
                 
@@ -53,10 +55,12 @@ struct Header: View {
                         Text("コレクション")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                         
                         Text("モード")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                     }
                 }
                 .onTapGesture {
@@ -85,7 +89,7 @@ struct Header: View {
                 
                 Image("collectionHeader")
                     .overlay(Text("コレクションモード")
-                        .foregroundColor(Color("TextBtnColor"))
+                        .foregroundColor(Color("TextColor"))
                         .font(.system(size: 16, weight: .bold))
                     )
                 
@@ -101,10 +105,12 @@ struct Header: View {
                         Text("対戦")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                         
                         Text("モード")
                             .stroke(color: Color.white, width: 1.4)
                             .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Color("TextColor"))
                     }
                 }
                 .onTapGesture {
