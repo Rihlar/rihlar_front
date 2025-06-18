@@ -17,7 +17,7 @@ struct Menu: View {
                 Spacer()
                 
                 VStack(spacing: -16) {
-                    ZStack 
+//                    ZStack 
                     RoundedRectangle(cornerRadius: 0)
                         .fill(Color("BtnColor"))
                         .frame(width: 340, height: 90)

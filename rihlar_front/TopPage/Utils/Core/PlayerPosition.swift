@@ -9,7 +9,7 @@ import Foundation
 import CoreLocation
 import MapKit
 
-class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     
     // 地図の表示領域 (中心＋ズーム) を保持
