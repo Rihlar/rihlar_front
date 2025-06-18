@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 
-class CameraLocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     @Published var lastLocation: CLLocation?
 
