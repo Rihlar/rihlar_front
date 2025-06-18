@@ -36,6 +36,7 @@ struct MenuItem: View {
             }
             .frame(width: 220, height: 60, alignment: .leading)
         }
+        .padding(EdgeInsets(top: 0, leading: 0, bottom: 4, trailing: 0))
         // DragGesture(minimumDistance:0) で tap の「押し込み／離し」を検知
         .gesture(
             DragGesture(minimumDistance: 0)

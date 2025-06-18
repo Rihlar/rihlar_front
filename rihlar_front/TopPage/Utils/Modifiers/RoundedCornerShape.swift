@@ -28,3 +28,16 @@ struct RoundedCornerShape: Shape {
         return Path(path.cgPath)
     }
 }
+
+// 使用例
+// RoundedRectangle(cornerRadius: 0) // → 角丸の四角を角丸なしで描画
+//    .fill(Color("menuColor"))
+//    .frame(width: 320, height: 494)
+//    .clipShape(
+//        この部分で角丸を自作のShapeで定義
+//        RoundedCornerShape(corners: [.bottomLeft], radius: 20)
+//    )
+//    .shadow(color: Color.black.opacity(0.25), radius: 5)
+
+// 例：左上[.topLeft], 右上[.topRight], 左下[.bottomLeft] 右下[.bottomRight]
+// 組み合わせも可 → [.topLeft, .bottomRight]

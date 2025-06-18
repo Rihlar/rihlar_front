@@ -38,10 +38,9 @@ struct topPage: View {
             .animation(.easeInOut, value: isShowMenu)
             
             if isShowMenu {
-                Color.white.opacity(0.3)
+                Color.white.opacity(0.1)
                     .ignoresSafeArea()
                     .transition(.opacity)
-//                サイドメニュー
                 Menu()
             }
             
