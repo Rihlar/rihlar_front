@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct Camera: View {
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager = CameraLocationManager()
     @State private var showCamera = false
     @State private var capturedImage: UIImage?
     @State private var isUploading = false
