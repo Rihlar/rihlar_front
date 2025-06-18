@@ -10,7 +10,7 @@ import CoreLocation
 
 struct topPage: View {
 //    プレイヤーに追従モードか自由に移動できるかなどの処理をしている関数
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var playerPosition = PlayerPosition()
 //    地図上に表示する円の座標を表示するためのから配列
     @State private var circles: [CircleData] = []
 //    カメラ画面の表示非表示を制御
@@ -22,7 +22,7 @@ struct topPage: View {
         ZStack {
             Group {
                 // mapkitを使用した地図表示
-                CircleMap(locationManager: locationManager, circles: circles)
+                CircleMap(playerPosition: playerPosition, circles: circles)
                     .ignoresSafeArea()
                     .onAppear {
                         loadSampleJSON()
@@ -50,7 +50,7 @@ struct topPage: View {
 //                    デザインは後回しにしているので変更する
                 HStack {
                     Button {
-                        locationManager.resumeFollow()
+                        playerPosition.resumeFollow()
                     } label: {
                         Image(systemName: "paperplane.fill")
                             .frame(width: 48, height: 48)

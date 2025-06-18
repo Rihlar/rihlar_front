@@ -9,7 +9,7 @@ import SwiftUI
 import MapKit
 
 struct CircleMap: UIViewRepresentable {
-    @ObservedObject var locationManager: LocationManager
+    @ObservedObject var playerPosition: PlayerPosition
     /// JSON からデコードしたデータをそのまま渡す
     let circles: [CircleData]
 
@@ -23,7 +23,7 @@ struct CircleMap: UIViewRepresentable {
 
         // 初期表示は LocationManager.region の中心
         context.coordinator.isSettingRegionProgrammatically = true
-        let center = locationManager.region.center
+        let center = playerPosition.region.center
         let initialRegion = MKCoordinateRegion(
             center: center,
             latitudinalMeters: 500,    // 適当な初期ズーム
@@ -39,9 +39,9 @@ struct CircleMap: UIViewRepresentable {
 
     func updateUIView(_ uiView: MKMapView, context: Context) {
         // 自動追従モード中だけ現在地へ移動
-        if locationManager.isFollowing {
+        if playerPosition.isFollowing {
             context.coordinator.isSettingRegionProgrammatically = true
-            let center = locationManager.region.center
+            let center = playerPosition.region.center
             let region = MKCoordinateRegion(
                 center: center,
                 latitudinalMeters: 500,
@@ -105,7 +105,7 @@ struct CircleMap: UIViewRepresentable {
             }
             // ユーザー操作 → 自由モード
             DispatchQueue.main.async {
-                self.parent.locationManager.isFollowing = false
+                self.parent.playerPosition.isFollowing = false
             }
         }
     }
