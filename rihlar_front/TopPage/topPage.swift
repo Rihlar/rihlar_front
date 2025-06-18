@@ -20,54 +20,68 @@ struct topPage: View {
     
     var body: some View {
         ZStack {
-            // mapkitを使用した地図表示
-            CircleMap(locationManager: locationManager, circles: circles)
-                        .ignoresSafeArea()
-                        .onAppear {
-                            loadSampleJSON()
-                        }
-            
-            VStack {
-                Header()
-                
-                Spacer()
-                
-                VStack(spacing: 0) {
-//                    現在地に戻るボタン
-//                    デザインは後回しにしているので変更する
-                    HStack {
-                        Button {
-                            locationManager.resumeFollow()
-                        } label: {
-                            Image(systemName: "paperplane.fill")
-                                .frame(width: 48, height: 48)
-                                .foregroundStyle(Color.white.opacity(0.8))
-                                .background(Color.blue.opacity(0.8))
-                                .cornerRadius(8)
-                        }
-                        .padding(16)
-                        
-                        Spacer()
-                        
-                        Button {
-                        } label: {
-                            Image(systemName: "bookmark.fill")
-                                .frame(width: 48, height: 48)
-                        }
-                        .opacity(0)
+            Group {
+                // mapkitを使用した地図表示
+                CircleMap(locationManager: locationManager, circles: circles)
+                    .ignoresSafeArea()
+                    .onAppear {
+                        loadSampleJSON()
                     }
-                    Footer (
-//                            カメラ画面を表示するためのflag
-                        onCameraTap: {
-                            isShowCamera = true
-                        },
-//                            メニューを表示するためのflag
-                        onMenuTap: {
-                            isShowMenu = true
-                        }
-                    )
+                
+                VStack {
+                    Header()
+                    
+                    Spacer()
                 }
             }
+            .blur(radius: isShowMenu ? 10 : 0)
+            .animation(.easeInOut, value: isShowMenu)
+            
+            if isShowMenu {
+                Color.white.opacity(0.1)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                Menu()
+            }
+            
+            VStack(spacing: 0) {
+                Spacer()
+//                    現在地に戻るボタン
+//                    デザインは後回しにしているので変更する
+                HStack {
+                    Button {
+                        locationManager.resumeFollow()
+                    } label: {
+                        Image(systemName: "paperplane.fill")
+                            .frame(width: 48, height: 48)
+                            .foregroundStyle(Color.white.opacity(0.8))
+                            .background(Color.blue.opacity(0.8))
+                            .cornerRadius(8)
+                    }
+                    .padding(16)
+                    
+                    Spacer()
+                    
+                    Button {
+                    } label: {
+                        Image(systemName: "bookmark.fill")
+                            .frame(width: 48, height: 48)
+                    }
+                    .opacity(0)
+                }
+                Footer (
+                    isMenuOpen: isShowMenu,
+//                            カメラ画面を表示するためのflag
+                    onCameraTap: {
+                        isShowCamera = true
+                    },
+//                            メニューを表示するためのflag
+                    onMenuTap: {
+                        isShowMenu.toggle()
+                    }
+                )
+            }
+            .zIndex(1)
         }
         .sheet(isPresented: $isShowCamera) {
 //            test()をカメラのページに変更するとトップページとカメラが繋がる

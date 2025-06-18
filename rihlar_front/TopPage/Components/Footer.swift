@@ -8,11 +8,16 @@
 import SwiftUI
 
 struct Footer: View {
+//    メニューが開いているかどうかを親から受け取る
+    let isMenuOpen: Bool
+//    カメラアイコンタップ時
     var onCameraTap: () -> Void
+//    メニュー／戻るアイコンタップ時
     var onMenuTap: () -> Void
     
     var body: some View {
         HStack {
+//            ─── カメラボタン ───
             FooterBtn(
                 iconName: "cameraIcon",
                 label: "カメラ",
@@ -22,9 +27,10 @@ struct Footer: View {
             
             Spacer()
             
+//            ─── メニュー⇄戻る 切り替えボタン ───
             FooterBtn(
-                iconName: "menuIcon",
-                label: "メニュー",
+                iconName: isMenuOpen ? "backArrowIcon" : "menuIcon",
+                label: isMenuOpen ? "戻る" : "メニュー",
                 action: onMenuTap,
                 padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
             )
