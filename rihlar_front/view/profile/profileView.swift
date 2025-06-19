@@ -89,29 +89,36 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 120) // ← ここ重要！ナビと被らないように
+                    .padding(.bottom, 120) // 　ナビゲーションと被らないようにする
                 }
             }
             
             // ZStack内で最前面に置くナビゲーション
-            HStack(spacing: 40) {
+            HStack(spacing: 20) {
                 // カメラ
-                VStack(spacing: 4) {
-                    ZStack {
+                VStack(spacing: 0) {
+                    ZStack{
+                        // 円
                         Circle()
                             .fill(Color.subDecorationColor)
                             .frame(width: 50, height: 50)
                             .shadow(radius: 2)
+                        // カメラ
                         Image(systemName: "camera")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 30, height: 25)
+                            .frame(width: 40, height: 30)
                             .foregroundColor(Color.textColor)
+                        
+                        
                     }
+                    .offset(y:8)
+                    // テキスト
                     Text("カメラ")
                         .font(.caption)
+                        .offset(y: -2)
                 }
-
+                
                 // ホーム
                 Button {
                     print("ホームに戻る")
@@ -124,22 +131,28 @@ struct ProfileView: View {
                         .cornerRadius(20)
                         .shadow(radius: 2)
                 }
-
+                
                 // メニュー
-                VStack(spacing: 4) {
+                VStack (spacing:0){
+                    
                     ZStack {
+                        // 円
                         Circle()
                             .fill(Color.subDecorationColor)
                             .frame(width: 50, height: 50)
                             .shadow(radius: 2)
+                        // 設定
                         Image(systemName: "line.3.horizontal")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 30, height: 20)
+                            .frame(width: 35, height: 30)
                             .foregroundColor(Color.textColor)
                     }
+                    .offset(y:8)
+                    // ボタン名
                     Text("メニュー")
                         .font(.caption)
+                        .offset(y: -2)
                 }
             }
             .padding(.bottom, 30)
