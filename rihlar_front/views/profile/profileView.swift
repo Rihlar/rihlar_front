@@ -11,6 +11,9 @@ struct ProfileView: View {
     // 仮データ
     let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon", "googleIcon", "googleIcon", "googleIcon"]
     
+    // 実績を選択する処理をするかどうか
+    @State private var showAchievementSheet = false
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(Color.backgroundColor)
@@ -56,22 +59,27 @@ struct ProfileView: View {
                 }
                 
                 // 実績バッジ
-                HStack(spacing: 20) {
-                    ForEach(0..<3) { _ in
-                        Circle()
-                            .fill(Color.gray)
-                            .frame(width: 70, height: 70)
-                            .overlay(
-                                Image(.king)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .padding(4)
-                            )
+                Button {
+                    showAchievementSheet = true
+                } label: {
+                    HStack(spacing: 20) {
+                        ForEach(0..<3) { _ in
+                            Circle()
+                                .fill(Color.gray)
+                                .frame(width: 70, height: 70)
+                                .overlay(
+                                    Image(.king)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .padding(4)
+                                )
+                        }
                     }
+                    .padding()
+                    .background(Color(red: 0.95, green: 0.93, blue: 0.87))
+                    .cornerRadius(20)
                 }
-                .padding()
-                .background(Color(red: 0.95, green: 0.93, blue: 0.87))
-                .cornerRadius(20)
+                
                 
                 // 記録した写真
                 Text("記録した写真")
@@ -101,9 +109,12 @@ struct ProfileView: View {
             )
             .padding(.bottom, 30)
         }
+        .sheet(isPresented: $showAchievementSheet) {
+            AchievementSelectionView()
+                .presentationDetents([.medium, .large])
+        }
     }
 }
-
 #Preview {
     ProfileView()
 }
