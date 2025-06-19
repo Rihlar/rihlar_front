@@ -8,36 +8,37 @@
 import SwiftUI
 
 struct ProfileView: View {
-    //    仮データ
-    let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon"]
+    // 仮データ
+    let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon", "googleIcon", "googleIcon", "googleIcon"]
     
     var body: some View {
-        ZStack{
+        ZStack(alignment: .bottom) {
             Color(Color.backgroundColor)
+                .ignoresSafeArea()
             
-            VStack{
+            VStack(spacing: 20) {
                 Spacer().frame(height: 40)
                 
                 // プロフィール画像
-                ZStack{
+                ZStack {
                     Circle()
                         .fill(Color.gray.opacity(0.4))
                         .frame(width: 120, height: 120)
-                    Image(.user)
+                    Image("user")
                         .resizable()
                         .frame(width: 120, height: 120)
                         .clipShape(Circle())
-                    
                 }
+                
                 // ユーザーネーム＋編集ボタン
-                HStack(alignment:.center, spacing: 10){
-                    VStack(spacing: 5){
+                HStack(alignment: .center, spacing: 10) {
+                    VStack(spacing: 5) {
                         Text("prayer name")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(Color.textColor)
                         Rectangle()
-                            .frame(width: 180,height: 1)
+                            .frame(width: 180, height: 1)
                             .foregroundColor(.gray)
                     }
                     Button {
@@ -52,7 +53,6 @@ struct ProfileView: View {
                             .cornerRadius(12)
                             .shadow(radius: 2)
                     }
-                    
                 }
                 
                 // 実績バッジ
@@ -79,7 +79,7 @@ struct ProfileView: View {
                     .fontWeight(.medium)
                     .foregroundColor(Color.textColor)
                 
-                // 写真一覧
+                // 写真一覧（下にスペース追加）
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
                         ForEach(images.indices, id: \.self) { _ in
@@ -89,24 +89,63 @@ struct ProfileView: View {
                         }
                     }
                     .padding(.horizontal)
-                }
-                .frame(height: 300)
-                Spacer()
-                
-                // ナビゲーションビュー
-                HStack{
-                    Spacer()
-                    VStack{
-                        Image
-                    }
+                    .padding(.bottom, 120) // ← ここ重要！ナビと被らないように
                 }
             }
+            
+            // ZStack内で最前面に置くナビゲーション
+            HStack(spacing: 40) {
+                // カメラ
+                VStack(spacing: 4) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.subDecorationColor)
+                            .frame(width: 50, height: 50)
+                            .shadow(radius: 2)
+                        Image(systemName: "camera")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 25)
+                            .foregroundColor(Color.textColor)
+                    }
+                    Text("カメラ")
+                        .font(.caption)
+                }
+
+                // ホーム
+                Button {
+                    print("ホームに戻る")
+                } label: {
+                    Text("ホームに戻る")
+                        .font(.headline)
+                        .foregroundColor(Color.textColor)
+                        .frame(width: 180, height: 50)
+                        .background(Color.buttonColor)
+                        .cornerRadius(20)
+                        .shadow(radius: 2)
+                }
+
+                // メニュー
+                VStack(spacing: 4) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.subDecorationColor)
+                            .frame(width: 50, height: 50)
+                            .shadow(radius: 2)
+                        Image(systemName: "line.3.horizontal")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 20)
+                            .foregroundColor(Color.textColor)
+                    }
+                    Text("メニュー")
+                        .font(.caption)
+                }
+            }
+            .padding(.bottom, 30)
         }
-        
     }
 }
-
-
 
 #Preview {
     ProfileView()
