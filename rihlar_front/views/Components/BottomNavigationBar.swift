@@ -51,35 +51,37 @@ struct BottomNavigationBar: View {
             } label: {
                 ShadowedText("ホームに戻る", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
                 
+                
+                    .frame(width: 180, height: 80)
+                    .background(
+                        ZStack {
+                            // 内側のボタンカラー（buttonColor）
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.buttonColor)
+                            
+                            // 左から光が当たるグラデーション
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            Color.white.opacity(0.6),
+                                            Color.white.opacity(0.0)
+                                        ]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                            
+                            // 縁の色（buttonFrameColor）
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.buttonFrameColor, lineWidth: 4)
+                                .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
+                        }
+                    )
             }
-            .frame(width: 180, height: 80)
-            .background(
-                ZStack {
-                    // 内側のボタンカラー（buttonColor）
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.buttonColor)
-                    
-                    // 左から光が当たるグラデーション
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    Color.white.opacity(0.6),
-                                    Color.white.opacity(0.0)
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                    
-                    // 縁の色（buttonFrameColor）
-                    RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.buttonFrameColor, lineWidth: 4)
-                        .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
-                }
-            )
             .cornerRadius(20)
             .shadow(radius:5)
+        
             
             // メニューボタン
             Button {

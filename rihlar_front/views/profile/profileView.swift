@@ -94,7 +94,11 @@ struct ProfileView: View {
             }
             
             // ZStack内で最前面に置くナビゲーション
-            
+            BottomNavigationBar(
+                onCameraTap: { print("カメラタップ") },
+                onHomeTap: { print("ホームタップ") },
+                onMenuTap: { print("メニュータップ") }
+            )
             .padding(.bottom, 30)
         }
     }
