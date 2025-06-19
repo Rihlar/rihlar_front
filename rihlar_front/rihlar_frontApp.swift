@@ -11,7 +11,7 @@ import SwiftUI
 struct rihlar_frontApp: App {
     var body: some Scene {
         WindowGroup {
-            loginDesignView()
+            ProfileView()
         }
     }
 }

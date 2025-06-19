@@ -101,13 +101,13 @@ struct ProfileView: View {
                         // 円
                         Circle()
                             .fill(Color.backgroundColor)
-                            .frame(width: 60, height: 60)
+                            .frame(width: 80, height: 80)
                             .shadow(radius: 2)
                         // カメラ
-                        Image(systemName: "camera")
+                        Image("camera")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 65, height: 65)
                             .foregroundColor(Color.textColor)
                         
                         
@@ -115,8 +115,8 @@ struct ProfileView: View {
                     .offset(y:8)
                     // テキスト
                     Text("カメラ")
-                        .font(.caption)
-                        .offset(y: -2)
+                        .font(.headline)
+                        .offset(y: -4)
                 }
                 
                 // ホーム
@@ -163,20 +163,20 @@ struct ProfileView: View {
                         // 円
                         Circle()
                             .fill(Color.backgroundColor)
-                            .frame(width: 60, height: 60)
+                            .frame(width: 80, height: 80)
                             .shadow(radius: 2)
                         // 設定
-                        Image(systemName: "line.3.horizontal")
+                        Image("line.3.horizontal")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 60, height: 60)
                             .foregroundColor(Color.textColor)
                     }
                     .offset(y:8)
                     // ボタン名
                     Text("メニュー")
-                        .font(.caption)
-                        .offset(y: -2)
+                        .font(.headline)
+                        .offset(y: -4)
                 }
             }
             .padding(.bottom, 30)
