@@ -100,14 +100,14 @@ struct ProfileView: View {
                     ZStack{
                         // 円
                         Circle()
-                            .fill(Color.subDecorationColor)
-                            .frame(width: 50, height: 50)
+                            .fill(Color.backgroundColor)
+                            .frame(width: 60, height: 60)
                             .shadow(radius: 2)
                         // カメラ
                         Image(systemName: "camera")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 40, height: 30)
+                            .frame(width: 40, height: 40)
                             .foregroundColor(Color.textColor)
                         
                         
@@ -124,28 +124,52 @@ struct ProfileView: View {
                     print("ホームに戻る")
                 } label: {
                     Text("ホームに戻る")
-                        .font(.headline)
-                        .foregroundColor(Color.textColor)
-                        .frame(width: 180, height: 50)
-                        .background(Color.buttonColor)
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(Color.black.opacity(0.7))
+                        .shadow(color: Color.white.opacity(0.8), radius: 1, x: 0, y: 1)
+                        .frame(width: 180, height: 80)
+                        .background(
+                            ZStack {
+                                // 内側のボタンカラー（buttonColor）
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.buttonColor)
+                                
+                                // 左から光が当たるグラデーション
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color.white.opacity(0.6),
+                                                Color.white.opacity(0.0)
+                                            ]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                
+                                // 縁の色（buttonFrameColor）
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(Color.buttonFrameColor, lineWidth: 4)
+                                    .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
+                            }
+                        )
                         .cornerRadius(20)
-                        .shadow(radius: 2)
+                        .shadow(radius:5)
                 }
-                
                 // メニュー
                 VStack (spacing:0){
                     
                     ZStack {
                         // 円
                         Circle()
-                            .fill(Color.subDecorationColor)
-                            .frame(width: 50, height: 50)
+                            .fill(Color.backgroundColor)
+                            .frame(width: 60, height: 60)
                             .shadow(radius: 2)
                         // 設定
                         Image(systemName: "line.3.horizontal")
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 35, height: 30)
+                            .frame(width: 40, height: 40)
                             .foregroundColor(Color.textColor)
                     }
                     .offset(y:8)
