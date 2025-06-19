@@ -114,19 +114,50 @@ struct ProfileView: View {
                     }
                     .offset(y:8)
                     // テキスト
-                    Text("カメラ")
-                        .font(.headline)
-                        .offset(y: -4)
+                    ZStack {
+                        // 黒縁を太く（±2までの範囲）
+                            ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
+                                ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
+                                    if x != 0 || y != 0 {
+                                        Text("カメラ")
+                                            .font(.headline)
+                                            .foregroundColor(.textColor)
+                                            .offset(x: CGFloat(x), y: CGFloat(y - 6)) // 上に少しずらす
+                                    }
+                                }
+                            }
+
+                        // メインの白文字
+                        Text("カメラ")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .offset(y: -6)
+                    }
                 }
                 
                 // ホーム
                 Button {
                     print("ホームに戻る")
                 } label: {
-                    Text("ホームに戻る")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(Color.black.opacity(0.7))
-                        .shadow(color: Color.white.opacity(0.8), radius: 1, x: 0, y: 1)
+                    ZStack {
+//                        同じテキストを重ね付けする
+                        // 太めの黒縁（8方向＋中心からちょいズラし）
+                            ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
+                                ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
+                                    if x != 0 || y != 0 {
+                                        Text("ホームに戻る")
+                                            .font(.system(size: 24, weight: .bold))
+                                            .foregroundColor(.black)
+                                            .offset(x: CGFloat(x), y: CGFloat(y))
+                                    }
+                                }
+                            }
+
+                            // 白文字
+                            Text("ホームに戻る")
+                                .font(.system(size: 24, weight: .bold))
+                                .foregroundColor(.white)
+                        }
                         .frame(width: 180, height: 80)
                         .background(
                             ZStack {
@@ -174,9 +205,25 @@ struct ProfileView: View {
                     }
                     .offset(y:8)
                     // ボタン名
-                    Text("メニュー")
-                        .font(.headline)
-                        .offset(y: -4)
+                    ZStack {
+                        // 黒縁を太く（±2までの範囲）
+                            ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
+                                ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
+                                    if x != 0 || y != 0 {
+                                        Text("メニュー")
+                                            .font(.headline)
+                                            .foregroundColor(.textColor)
+                                            .offset(x: CGFloat(x), y: CGFloat(y - 6)) // 上に少しずらす
+                                    }
+                                }
+                            }
+
+                        // メインの白文字
+                        Text("メニュー")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .offset(y: -6)
+                    }
                 }
             }
             .padding(.bottom, 30)
