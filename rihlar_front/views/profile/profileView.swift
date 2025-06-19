@@ -112,6 +112,7 @@ struct ProfileView: View {
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSelectionView()
                 .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
         }
     }
 }
