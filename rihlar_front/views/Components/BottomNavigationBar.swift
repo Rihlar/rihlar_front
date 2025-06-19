@@ -17,7 +17,7 @@ struct BottomNavigationBar: View {
     
     var body: some View {
         HStack(spacing: 20) {
-
+            
             // カメラボタン
             Button {
                 print("カメラが押された")
@@ -40,80 +40,47 @@ struct BottomNavigationBar: View {
                     }
                     .offset(y:8)
                     // テキスト
-                    ZStack {
-                        // 黒縁を太く（±2までの範囲）
-                        ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
-                            ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
-                                if x != 0 || y != 0 {
-                                    Text("カメラ")
-                                        .font(.headline)
-                                        .foregroundColor(.textColor)
-                                        .offset(x: CGFloat(x), y: CGFloat(y - 6)) // 上に少しずらす
-                                }
-                            }
-                        }
-                        
-                        // メインの白文字
-                        Text("カメラ")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .offset(y: -6)
-                    }
+                    ShadowedText("カメラ", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
+                    
                 }
             }
-
+            
             // ホームボタン
             Button {
                 print("ホームが押された")
             } label: {
-                ZStack {
-                    //                        同じテキストを重ね付けする
-                    // 太めの黒縁（8方向＋中心からちょいズラし）
-                    ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
-                        ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
-                            if x != 0 || y != 0 {
-                                Text("ホームに戻る")
-                                    .font(.system(size: 24, weight: .bold))
-                                    .foregroundColor(.black)
-                                    .offset(x: CGFloat(x), y: CGFloat(y))
-                            }
-                        }
-                    }
-                    
-                    // 白文字
-                    Text("ホームに戻る")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white)
-                }
-                .frame(width: 180, height: 80)
-                .background(
-                    ZStack {
-                        // 内側のボタンカラー（buttonColor）
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color.buttonColor)
-                        
-                        // 左から光が当たるグラデーション
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.white.opacity(0.6),
-                                        Color.white.opacity(0.0)
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                        
-                        // 縁の色（buttonFrameColor）
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.buttonFrameColor, lineWidth: 4)
-                            .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
-                    }
-                )
-                .cornerRadius(20)
-                .shadow(radius:5)
+                ShadowedText("ホームに戻る", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
+                
             }
+            .frame(width: 180, height: 80)
+            .background(
+                ZStack {
+                    // 内側のボタンカラー（buttonColor）
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.buttonColor)
+                    
+                    // 左から光が当たるグラデーション
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0.6),
+                                    Color.white.opacity(0.0)
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                    
+                    // 縁の色（buttonFrameColor）
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(Color.buttonFrameColor, lineWidth: 4)
+                        .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
+                }
+            )
+            .cornerRadius(20)
+            .shadow(radius:5)
+            
             // メニューボタン
             Button {
                 print("メニューが押された")
@@ -135,28 +102,12 @@ struct BottomNavigationBar: View {
                     }
                     .offset(y:8)
                     // テキスト
-                    ZStack {
-                        // 黒縁を太く（±2までの範囲）
-                        ForEach([-2, -1, 0, 1, 2], id: \.self) { x in
-                            ForEach([-2, -1, 0, 1, 2], id: \.self) { y in
-                                if x != 0 || y != 0 {
-                                    Text("メニュー")
-                                        .font(.headline)
-                                        .foregroundColor(.textColor)
-                                        .offset(x: CGFloat(x), y: CGFloat(y - 6)) // 上に少しずらす
-                                }
-                            }
-                        }
-                        
-                        // メインの白文字
-                        Text("メニュー")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .offset(y: -6)
-                    }
+                    ShadowedText("メニュー", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
+                    
                 }
             }
         }
     }
-    
 }
+
+
