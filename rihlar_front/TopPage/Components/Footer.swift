@@ -10,6 +10,8 @@ import SwiftUI
 struct Footer: View {
 //    メニューが開いているかどうかを親から受け取る
     let isMenuOpen: Bool
+//    メニューボタンと戻るボタンのどちらかを親から受け取る
+    let isChangeBtn: Bool
 //    カメラアイコンタップ時
     var onCameraTap: () -> Void
 //    メニュー／戻るアイコンタップ時
@@ -29,8 +31,8 @@ struct Footer: View {
             
 //            ─── メニュー⇄戻る 切り替えボタン ───
             FooterBtn(
-                iconName: isMenuOpen ? "backArrowIcon" : "menuIcon",
-                label: isMenuOpen ? "戻る" : "メニュー",
+                iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
+                label: isChangeBtn ? "戻る" : "メニュー",
                 action: onMenuTap,
                 padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
             )

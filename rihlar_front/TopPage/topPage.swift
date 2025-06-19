@@ -17,6 +17,8 @@ struct topPage: View {
     @State private var isShowCamera = false
 //    メニューの表示非表示を制御
     @State private var isShowMenu = false
+//    メニューボタンと戻るボタンの制御
+    @State private var isChangeBtn = false
     
     var body: some View {
         ZStack {
@@ -41,7 +43,12 @@ struct topPage: View {
                 Color.white.opacity(0.1)
                     .ignoresSafeArea()
                     .transition(.opacity)
+                
                 Menu()
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
             }
             
             VStack(spacing: 0) {
@@ -71,23 +78,30 @@ struct topPage: View {
                 }
                 Footer (
                     isMenuOpen: isShowMenu,
+                    isChangeBtn: isChangeBtn,
 //                            カメラ画面を表示するためのflag
                     onCameraTap: {
                         isShowCamera = true
                     },
 //                            メニューを表示するためのflag
                     onMenuTap: {
-                        isShowMenu.toggle()
+//                        ボタンの見た目切り替えは即時（アニメなし）
+                        isChangeBtn.toggle()
+
+//                        メニュー本体の表示はアニメーション付き
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                          isShowMenu.toggle()
+                        }
                     }
                 )
             }
             .zIndex(1)
         }
         .sheet(isPresented: $isShowCamera) {
-//            test()をカメラのページに変更するとトップページとカメラが繋がる
-//            test()を書き換えたらコメントアウトは消してください
-                    test()
-                }
+//          test()をカメラのページに変更するとトップページとカメラが繋がる
+//          test()を書き換えたらコメントアウトは消してください
+            test()
+        }
     }
     
 // テストデータなのでバックエンドと繋がったらこれは削除
