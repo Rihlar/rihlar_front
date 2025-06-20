@@ -17,6 +17,16 @@ struct Menu: View {
                 Spacer()
                 
                 VStack(spacing: -16) {
+//                  ZStack
+                    RoundedRectangle(cornerRadius: 0)
+                        .fill(Color("BtnColor"))
+                        .frame(width: 340, height: 90)
+                        .clipShape(
+    //                        角丸を別ファイルで作成
+                            RoundedCornerShape(corners: [.topLeft, .bottomLeft], radius: 50)
+                        )
+                        .shadow(color: Color.black.opacity(0.25), radius: 5)
+                        .zIndex(10)
                     ProfileMenuItem{
                         print("プロフィールをタップ")
                     }
