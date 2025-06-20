@@ -10,6 +10,8 @@ import SwiftUI
 struct ProfileView: View {
     // 仮データ
     let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon", "googleIcon", "googleIcon", "googleIcon"]
+    // タップされた画像のインデックスを管理するState（Optional）
+    @State private var selectedImageIndex: ImageIndex? = nil
     
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
@@ -90,10 +92,21 @@ struct ProfileView: View {
                 // 写真一覧（下にスペース追加）
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-                        ForEach(images.indices, id: \.self) { _ in
+                        ForEach(images.indices, id: \.self) { index in
                             RoundedRectangle(cornerRadius: 10)
                                 .fill(Color.gray.opacity(0.3))
                                 .frame(height: 160)
+                                .overlay(
+                                    Image(images[index])
+                                        .resizable()
+                                        .scaledToFill()
+                                        .clipped()
+                                )
+                                .onTapGesture {
+                                    //画像をタップしたら、その画像のインデックスをselectedImageIndexにセットして
+                                    //PhotoViewerViewをsheetで表示するトリガーにする
+                                    selectedImageIndex = ImageIndex(id: index)
+                                }
                         }
                     }
                     .padding(.horizontal)
@@ -109,13 +122,24 @@ struct ProfileView: View {
             )
             .padding(.bottom, 30)
         }
+        //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
+        .sheet(item: $selectedImageIndex) { imageIndex in
+            PhotoViewerView(images: images, startIndex: imageIndex.id)
+                .presentationDragIndicator(.hidden)
+        }
+        
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSelectionView()
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
     }
+    
 }
 #Preview {
     ProfileView()
+}
+// ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
+struct ImageIndex: Identifiable {
+    let id: Int
 }
