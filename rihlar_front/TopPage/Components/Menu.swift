@@ -27,10 +27,14 @@ struct Menu: View {
                         )
                         .shadow(color: Color.black.opacity(0.25), radius: 5)
                         .zIndex(10)
+                    ProfileMenuItem{
+                        print("プロフィールをタップ")
+                    }
+                    .zIndex(10)
                         
-                        MenuList()
-                            .zIndex(1)
-                            .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
+                    MenuList()
+                        .zIndex(1)
+                        .padding(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 0))
                 
                 }
             }
