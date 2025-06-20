@@ -26,10 +26,10 @@ extension Color {
     }
     
     // カラーの定義
-    static let buttonColor = Color(hex: "#A8EAF0")          // ボタン
-    static let mainDecorationColor = Color(hex: "#98BA87") // メイン装飾
-    static let subDecorationColor = Color(hex: "#FEE075")  // サブ装飾
     static let textColor = Color(hex: "#4F4936")            // 文字
+    static let buttonColor = Color(hex: "#A8EAF0")          // ボタン
+    static let subDecorationColor = Color(hex: "#87B6BA")  // サブ装飾
+    static let mainDecorationColor = Color(hex: "#98BA87") // メイン装飾
     static let mainShadowColor = Color(hex: "#87A578")      // メイン装飾影
     static let buttonFrameColor = Color(hex: "#89A77A")     // ボタンの枠
     static let backgroundColor = Color(hex: "#EEEBE1")      // 背景
