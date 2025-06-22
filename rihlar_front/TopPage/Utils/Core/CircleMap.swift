@@ -8,62 +8,107 @@
 import SwiftUI
 import MapKit
 
+/// UIViewRepresentable で MKMapView を利用し、
+/// JSON から取得したデータに基づく円オーバーレイを
+/// アニメーション付きで表示するコンポーネント
 struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
-    /// JSON からデコードしたデータをそのまま渡す
     let circles: [CircleData]
 
+    /// UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
+        mapView.showsUserLocation = true                  // 現在地マーカー
+        mapView.userTrackingMode = .follow                // 現在地追従
 
-        // 現在地マーカー＆追従
-        mapView.showsUserLocation = true
-        mapView.userTrackingMode = .follow
-
-        // 初期表示は LocationManager.region の中心
+        // 初期表示領域：LocationManager.region の中心を設定
         context.coordinator.isSettingRegionProgrammatically = true
         let center = playerPosition.region.center
         let initialRegion = MKCoordinateRegion(
             center: center,
-            latitudinalMeters: 500,    // 適当な初期ズーム
+            latitudinalMeters: 500,
             longitudinalMeters: 500
         )
         mapView.setRegion(initialRegion, animated: false)
 
-        // JSONデータに基づく円を追加
-        addCircles(to: mapView)
-
         return mapView
     }
 
+    /// SwiftUI から呼ばれる更新メソッド
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        // 自動追従モード中だけ現在地へ移動
+        // 追従モード中は再センタリング
         if playerPosition.isFollowing {
             context.coordinator.isSettingRegionProgrammatically = true
             let center = playerPosition.region.center
-            let region = MKCoordinateRegion(
-                center: center,
-                latitudinalMeters: 500,
-                longitudinalMeters: 500
+            uiView.setRegion(
+                MKCoordinateRegion(
+                    center: center,
+                    latitudinalMeters: 500,
+                    longitudinalMeters: 500
+                ),
+                animated: true
             )
-            uiView.setRegion(region, animated: true)
         }
 
-        // 毎回オーバーレイを更新
-        uiView.removeOverlays(uiView.overlays)
-        addCircles(to: uiView)
-    }
-
-    private func addCircles(to mapView: MKMapView) {
-        for circleData in circles {
-            let radius = computedRadius(for: circleData.size)
-            let overlay = MKCircle(center: circleData.coordinate, radius: radius)
-            mapView.addOverlay(overlay)
+        // 初回ロード完了フラグ && アニメーション中でなければオーバーレイを更新
+        if context.coordinator.isFirstLoadFlag && !context.coordinator.isAnimatingCircles {
+            // 既存のオーバーレイを削除
+            uiView.removeOverlays(uiView.overlays)
+            // JSON データに基づく円を追加
+            addCircles(to: uiView, context: context)
         }
     }
 
-    /// JSON の "size"（歩数など）から、円の半径をメートルで返すロジック
+    /// coordinator を生成
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    // MARK: - 円追加ロジック（旧コードを変更せずコメント追加）
+    private func addCircles(to mapView: MKMapView, context: Context) {
+        let coordinator = context.coordinator
+
+        // アニメーション中は再実行を抑制
+        coordinator.isAnimatingCircles = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            coordinator.isAnimatingCircles = false
+        }
+
+        // 初回のみアニメーション付きオーバーレイ追加
+        if !coordinator.hasAnimatedCircles && !circles.isEmpty {
+            for circleData in circles {
+                let radius = computedRadius(for: circleData.size)
+                print("▶️ [CircleMap] 初回アニメーション: \(circleData.coordinate), radius: \(radius)")
+
+                // 円オーバーレイを追加
+                let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                mapView.addOverlay(overlay)
+
+                // レンダラー取得後にフェードインさせる
+                DispatchQueue.main.async {
+                    if let renderer = mapView.renderer(for: overlay) as? MKCircleRenderer {
+                        renderer.alpha = 0
+                        UIView.animate(withDuration: 2.0) {
+                            renderer.alpha = 1.0
+                        }
+                    }
+                }
+            }
+            coordinator.hasAnimatedCircles = true
+
+        } else {
+            // 2回目以降は静的オーバーレイのみ
+            for circleData in circles {
+                let radius = computedRadius(for: circleData.size)
+                print("▶️ [CircleMap] 静的オーバーレイ: \(circleData.coordinate), radius: \(radius)")
+                let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                mapView.addOverlay(overlay)
+            }
+        }
+    }
+
+    /// size（歩数等）からメートル半径を返す
     private func computedRadius(for size: Int) -> CLLocationDistance {
         switch size {
         case 0..<1000:      return 50
@@ -74,39 +119,46 @@ struct CircleMap: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
+    // MARK: - Coordinator
     class Coordinator: NSObject, MKMapViewDelegate {
-        var parent: CircleMap
-        var isSettingRegionProgrammatically = false
+        let parent: CircleMap
+        var isSettingRegionProgrammatically = false   // プログラム移動制御
+        var hasAnimatedCircles = false              // 初回アニメーション済みフラグ
+        var isFirstLoadFlag = false                  // 初回ロード完了フラグ
+        var isAnimatingCircles = false               // アニメーション中フラグ
 
         init(_ parent: CircleMap) {
             self.parent = parent
         }
 
+        // 地図タイル読み込み完了でフラグを立てる
+        func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
+            print("▶️ [Coordinator] didFinishLoadingMap – 初回ロードフラグ ON")
+            isFirstLoadFlag = true
+        }
+
+        // MKOverlay の描画設定
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let circle = overlay as? MKCircle {
-                let r = MKCircleRenderer(circle: circle)
-                r.strokeColor = UIColor.blue.withAlphaComponent(0.6)
-                r.fillColor   = UIColor.blue.withAlphaComponent(0.2)
-                r.lineWidth   = 2
-                return r
+                let renderer = MKCircleRenderer(circle: circle)
+                renderer.strokeColor = UIColor.blue.withAlphaComponent(0.6)
+                renderer.fillColor   = UIColor.blue.withAlphaComponent(0.2)
+                renderer.lineWidth   = 2
+                return renderer
             }
             return MKOverlayRenderer(overlay: overlay)
         }
 
+        // ユーザー操作かプログラム移動かを判定
         func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
-            // プログラム的な移動中なら無視
             if isSettingRegionProgrammatically {
                 isSettingRegionProgrammatically = false
                 return
             }
-            // ユーザー操作 → 自由モード
             DispatchQueue.main.async {
                 self.parent.playerPosition.isFollowing = false
             }
         }
     }
 }
+
