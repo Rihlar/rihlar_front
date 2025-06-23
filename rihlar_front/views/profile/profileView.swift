@@ -10,10 +10,12 @@ import SwiftUI
 struct ProfileView: View {
     // 仮データ
     let images = ["tennpure1", "tennpure2", "tennpure3", "tennpure1", "tennpure2", "tennpure3", "tennpure1", "tennpure2", "tennpure3"]
-    let playerName = "Christopherあいうえお山田"
+    @State private var playerName = "Christopherあいうえお山田"
+    @State private var isEditing = false
+    @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
+    
     // タップされた画像のインデックスを管理するState（Optional）
     @State private var selectedImageIndex: ImageIndex? = nil
-    
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
     
@@ -40,22 +42,48 @@ struct ProfileView: View {
                 HStack(alignment: .center, spacing: 10) {
                     VStack(spacing: 5) {
                         HStack{
-                            Text(limitTextWithVisualWeight(playerName))
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(Color.textColor)
-                            
-                            
+                            // 入力時と表示時で変化
+                            if isEditing{
+                                TextField("名前を入力",text: $playerName)
+                                    .padding(8)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(8)
+                                    .focused($isNameFieldFocused)
+                                    .frame(width:150)
+                                    .onAppear {
+                                        isNameFieldFocused = true
+                                    }
+                                //                                文字数が１０文字以上になった場合点線をリアルタイムで入れる？
+                                //                                    .onChange(of: playerName) { newValue in
+                                //                                        // 入力制限（10文字相当）をリアルタイムで反映
+                                //                                        let limited = limitTextWithVisualWeight(newValue)
+                                //                                        if limited != newValue {
+                                //                                            playerName = limited
+                                //                                        }
+                                //                                    }
+                                
+                                
+                            }else{
+                                Text(limitTextWithVisualWeight(playerName))
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color.textColor)
+                                    .frame(width:150)
+                            }
                             
                             Button {
-                                print("名前変更処理")
+                                if isEditing {
+                                    // フォーカスを外して編集終了
+                                    isNameFieldFocused = false
+                                }
+                                isEditing.toggle()
                             } label: {
-                                Text("編集")
+                                Text(isEditing ? "保存" : "編集")
                                     .font(.system(size: 14))
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 12)
                                     .foregroundColor(Color.textColor)
-                                    .background(Color.buttonColor)
+                                    .background(isEditing ? Color.gray :Color.buttonColor)
                                     .cornerRadius(8)
                                     .shadow(radius: 4)
                             }
@@ -157,10 +185,10 @@ struct ImageIndex: Identifiable {
 func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
     var visualLength: Double = 0.0
     var result = ""
-
+    
     for char in text {
         let weight: Double
-
+        
         if ("\u{3040}"..."\u{309F}").contains(char) {
             weight = 1.5 // ひらがな
         } else if ("a"..."z").contains(char.lowercased()) {
@@ -170,16 +198,16 @@ func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -
         } else {
             weight = 2.0 // 漢字や記号など
         }
-
+        
         if visualLength + weight > maxVisualLength {
             result += "…"
             break
         }
-
+        
         visualLength += weight
         result.append(char)
     }
-
+    
     return result
 }
 
