@@ -89,8 +89,11 @@ struct BackgroundBubblesView: View {
 }
 
 struct loginDesignView: View {
-    // 状態管理用の変数 code を宣言。ログイン時に取得するトークンを格納するため
+    // 認証コード（トークン）
     @State private var code: String?
+    // ログイン成功時に呼ばれる外部クロージャ
+    var onLoginSuccess: () -> Void
+    
     //    グラデーションカラーの定義
     let gradient = Gradient(stops: [.init(color:  Color(red: 254/255, green: 224/255, blue: 117/255),  location: 0.2), .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)])
     var body: some View {
@@ -112,9 +115,13 @@ struct loginDesignView: View {
                     
                     
                     NavigationLink {
-                        
                         if let code = self.code{
-                            LoginView(code: code)
+                            // topページに行きたい
+                            EmptyView()
+                            // トークンを取得済みならログイン成功として処理
+                                        .onAppear {
+                                            onLoginSuccess()
+                                        }
                         }else {
                             
                             // カスタムビュー AuthSessionView を呼び出して、ログイン処理
@@ -195,5 +202,7 @@ func getCode(callbackURL: URL) -> String? {
 }
 
 #Preview {
-    loginDesignView()
+    loginDesignView{
+        
+    }
 }

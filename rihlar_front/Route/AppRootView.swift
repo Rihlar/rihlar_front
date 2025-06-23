@@ -13,8 +13,9 @@ struct AppRootView: View {
     @State private var isLoggedIn = false
     
     var body: some View {
-        Text("0") // エラーが出るため仮おき
-//        if isLoggedIn{
+       
+        if isLoggedIn{
+            Text("0") // エラーが出るため仮おき
 //            NavigationStack(path: $router.path) {
 //                // top画面
 ////                HomeView(router: router)
@@ -40,12 +41,12 @@ struct AppRootView: View {
 ////                        }
 //                    }
 //            }
-//        } else {
-//            LoginView {
-//                isLoggedIn = true
-//            }
-//            
-//        }
+        } else {
+            loginDesignView {
+                isLoggedIn = true
+            }
+            
+        }
     }
     
 }
