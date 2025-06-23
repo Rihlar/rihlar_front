@@ -31,6 +31,17 @@ struct PhotoViewerView: View {
             ZStack{
                 // 背景色
                 Color.mainDecorationColor.ignoresSafeArea()
+//                あとでやります
+//                // ドラッグインジケーター
+//                RoundedRectangle(cornerRadius: 3)
+//                    .fill(Color.backgroundColor)
+//                    .frame(width:80,height: 5)
+//                    .padding(.top, 12)
+//                // 緑の区切り線
+//                Rectangle()
+//                    .fill(Color.buttonFrameColor)
+//                    .frame(height: 2)
+//                    .padding(.top,12)
                 // 横須ワイプで画面切り替えする
                 TabView(selection: $currentIndex) {
                     ForEach(images.indices,id: \.self) { index in
