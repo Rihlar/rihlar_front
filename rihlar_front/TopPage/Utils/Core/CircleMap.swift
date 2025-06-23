@@ -15,14 +15,14 @@ struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
     let circles: [CircleData]
 
-    /// UIKit の MKMapView を生成し、初期設定を行う
+///     UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true                  // 現在地マーカー
         mapView.userTrackingMode = .follow                // 現在地追従
 
-        // 初期表示領域：LocationManager.region の中心を設定
+//         初期表示領域：LocationManager.region の中心を設定
         context.coordinator.isSettingRegionProgrammatically = true
         let center = playerPosition.region.center
         let initialRegion = MKCoordinateRegion(
@@ -35,9 +35,9 @@ struct CircleMap: UIViewRepresentable {
         return mapView
     }
 
-    /// SwiftUI から呼ばれる更新メソッド
+///    SwiftUI から呼ばれる更新メソッド
     func updateUIView(_ uiView: MKMapView, context: Context) {
-        // 追従モード中は再センタリング
+//         追従モード中は再センタリング
         if playerPosition.isFollowing {
             context.coordinator.isSettingRegionProgrammatically = true
             let center = playerPosition.region.center
@@ -51,41 +51,53 @@ struct CircleMap: UIViewRepresentable {
             )
         }
 
-        // 初回ロード完了フラグ && アニメーション中でなければオーバーレイを更新
+//         初回ロード完了フラグ && アニメーション中でなければオーバーレイを更新
         if context.coordinator.isFirstLoadFlag && !context.coordinator.isAnimatingCircles {
             // 既存のオーバーレイを削除
             uiView.removeOverlays(uiView.overlays)
-            // JSON データに基づく円を追加
-            addCircles(to: uiView, context: context)
+            
+//             通過地点をつなぐ線を追加
+            let coords = playerPosition.track
+            if coords.count >= 2 {
+                let polyline = MKPolyline(coordinates: coords, count: coords.count)
+                uiView.addOverlay(polyline)
+            }
+//             JSON データに基づく円を追加
+            addOverlays(to: uiView, using: context.coordinator)
         }
     }
 
-    /// coordinator を生成
+///    coordinator を生成
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
-    // MARK: - 円追加ロジック（旧コードを変更せずコメント追加）
-    private func addCircles(to mapView: MKMapView, context: Context) {
-        let coordinator = context.coordinator
+//     MARK: - 円追加ロジック
+    private func addOverlays(to mapView: MKMapView, using coordinator: Coordinator) {
+//        通過地点をつなぐ線を追加
+        let coords = playerPosition.track
+        if coords.count >= 2 {
+            let polyline = MKPolyline(coordinates: coords, count: coords.count)
+            mapView.addOverlay(polyline)
+        }
 
-        // アニメーション中は再実行を抑制
+//         アニメーション中は再実行を抑制
         coordinator.isAnimatingCircles = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             coordinator.isAnimatingCircles = false
         }
 
-        // 初回のみアニメーション付きオーバーレイ追加
+//         初回のみアニメーション付きオーバーレイ追加
         if !coordinator.hasAnimatedCircles && !circles.isEmpty {
             for circleData in circles {
                 let radius = computedRadius(for: circleData.size)
                 print("▶️ [CircleMap] 初回アニメーション: \(circleData.coordinate), radius: \(radius)")
 
-                // 円オーバーレイを追加
+//                 円オーバーレイを追加
                 let overlay = MKCircle(center: circleData.coordinate, radius: radius)
                 mapView.addOverlay(overlay)
 
-                // レンダラー取得後にフェードインさせる
+//                 レンダラー取得後にフェードインさせる
                 DispatchQueue.main.async {
                     if let renderer = mapView.renderer(for: overlay) as? MKCircleRenderer {
                         renderer.alpha = 0
@@ -98,7 +110,7 @@ struct CircleMap: UIViewRepresentable {
             coordinator.hasAnimatedCircles = true
 
         } else {
-            // 2回目以降は静的オーバーレイのみ
+//             2回目以降は静的オーバーレイのみ
             for circleData in circles {
                 let radius = computedRadius(for: circleData.size)
                 print("▶️ [CircleMap] 静的オーバーレイ: \(circleData.coordinate), radius: \(radius)")
@@ -108,7 +120,7 @@ struct CircleMap: UIViewRepresentable {
         }
     }
 
-    /// size（歩数等）からメートル半径を返す
+///    size（歩数等）からメートル半径を返す
     private func computedRadius(for size: Int) -> CLLocationDistance {
         switch size {
         case 0..<1000:      return 50
@@ -119,7 +131,7 @@ struct CircleMap: UIViewRepresentable {
         }
     }
 
-    // MARK: - Coordinator
+//     MARK: - Coordinator
     class Coordinator: NSObject, MKMapViewDelegate {
         let parent: CircleMap
         var isSettingRegionProgrammatically = false   // プログラム移動制御
@@ -131,25 +143,33 @@ struct CircleMap: UIViewRepresentable {
             self.parent = parent
         }
 
-        // 地図タイル読み込み完了でフラグを立てる
+//         地図タイル読み込み完了でフラグを立てる
         func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
             print("▶️ [Coordinator] didFinishLoadingMap – 初回ロードフラグ ON")
             isFirstLoadFlag = true
+            parent.addOverlays(to: mapView, using: self)
         }
 
-        // MKOverlay の描画設定
+///         MKOverlay の描画設定
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let circle = overlay as? MKCircle {
+//                円描画設定
                 let renderer = MKCircleRenderer(circle: circle)
                 renderer.strokeColor = UIColor.blue.withAlphaComponent(0.6)
                 renderer.fillColor   = UIColor.blue.withAlphaComponent(0.2)
                 renderer.lineWidth   = 2
                 return renderer
+            } else if let line = overlay as? MKPolyline {
+//                通過ルートを描くポリライン
+                let renderer = MKPolylineRenderer(polyline: line)
+                renderer.strokeColor = UIColor.systemBlue
+                renderer.lineWidth   = 4
+                return renderer
             }
             return MKOverlayRenderer(overlay: overlay)
         }
 
-        // ユーザー操作かプログラム移動かを判定
+///         ユーザー操作かプログラム移動かを判定
         func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
             if isSettingRegionProgrammatically {
                 isSettingRegionProgrammatically = false
