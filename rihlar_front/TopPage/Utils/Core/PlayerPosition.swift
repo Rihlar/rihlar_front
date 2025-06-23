@@ -1,5 +1,5 @@
 //
-//  LocationManager.swift
+//  PlayerPosition.swift
 //  rihlar_front
 //
 //  Created by Kodai Hirata on 2025/06/09.
@@ -9,64 +9,83 @@ import Foundation
 import CoreLocation
 import MapKit
 
+/// プレイヤーの位置情報を監視し、地図の表示範囲を更新／移動経路をトラッキングする
 class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
+//     MARK: - 位置情報管理
+//     CLLocationManager のインスタンス。権限要求と更新開始に使用
     private let manager = CLLocationManager()
     
-    // 地図の表示領域 (中心＋ズーム) を保持
+//     MARK: - 地図表示関連
+//    現在の地図表示領域（中心座標＋ズーム度合）を保持
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
         span: MKCoordinateSpan(latitudeDelta: 180, longitudeDelta: 360)
     )
-    
-    /// 起動直後に一度だけ region を現在地で更新したかどうか
-    private var didSetInitialRegion:Bool = false
-    
-    /// これが true のときだけ、位置情報更新で region を書き換える
+//     起動直後に一度だけ region を現在地で設定したかどうかを判定
+    private var didSetInitialRegion: Bool = false
+//     追従モード：true のとき、位置更新に応じて region を自動的に書き換える
     @Published var isFollowing: Bool = true
     
+//     MARK: - トラッキング関連
+//     アプリ起動後からの通過座標を時系列で保持
+    @Published private(set) var track: [CLLocationCoordinate2D] = []
+//     前回取得した位置を保持し、移動距離判定に使用
     private var lastLocation: CLLocation?
-    private let distanceThreshold: CLLocationDistance = 5.0
+//     移動判定の閾値（メートル）: この距離未満の更新はスキップ
+    private let distanceThreshold: CLLocationDistance = 3.0
 
+//     MARK: - 初期化
     override init() {
         super.init()
+//         デリゲート設定
         manager.delegate = self
+//         精度設定
         manager.desiredAccuracy = kCLLocationAccuracyBest
+//         権限要求ダイアログを表示
         manager.requestWhenInUseAuthorization()
+//         位置情報の更新を開始
         manager.startUpdatingLocation()
     }
 
+//     MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//         最新の位置情報を取得
         guard let newLocation = locations.last else { return }
-        
-        // ── ①「初回」だけ現在地で region を更新する ──
+
+//         --- (1) 初回更新時のみ region を現在地に設定 ---
         if !didSetInitialRegion {
-            // 「初回更新前」であるため、現在地の region に書き換えておく
             didSetInitialRegion = true
+//             地図の表示範囲を現在地に更新
             updateRegion(to: newLocation)
-            // 初回は距離判定も追従判定もスキップし、そのまま return
+//             最初の位置を lastLocation として保持
             lastLocation = newLocation
+//             トラック配列に最初の座標を追加
+            track.append(newLocation.coordinate)
             return
         }
-        
-        // 位置が変わっていなかったら無視
+
+//         --- (2) 閾値以下の移動はスキップ ---
         if let prev = lastLocation {
             let movedDistance = newLocation.distance(from: prev)
-            // 閾値未満の移動なら、書き換えせず return
             if movedDistance < distanceThreshold {
+//                 小さい移動なら更新せずに lastLocation を更新して終了
                 lastLocation = newLocation
                 return
             }
         }
-        // (2) ここまでくる = 「距離閾値を超えて移動」 or 「初回以外の更新」
+
+//         --- (3) 有効な移動として処理 ---
         lastLocation = newLocation
+//         移動座標をトラックに追加
+        track.append(newLocation.coordinate)
         
-        // (3) 追従モードが ON のときだけ region を更新
-        // isFollowing が true のときだけ、region を更新する
+//         --- (4) 追従モード中なら地図中心を更新 ---
         if isFollowing {
             updateRegion(to: newLocation)
         }
     }
 
+//     MARK: - 地図範囲更新ヘルパー
     private func updateRegion(to location: CLLocation) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -76,8 +95,9 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
             )
         }
     }
-    
-    /// 外部から「追従モードに戻したい」ときに呼ぶ
+
+//     MARK: - 追従モード再開
+//   　外部から呼び出し、追従モードを ON に戻す
     func resumeFollow() {
         isFollowing = true
     }
