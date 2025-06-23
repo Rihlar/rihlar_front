@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ProfileView: View {
     // 仮データ
-    let images = ["tennpure1", "tennpure2", "tennpure3", "user", "king", "googleIcon", "googleIcon", "googleIcon", "googleIcon"]
+    let images = ["tennpure1", "tennpure2", "tennpure3", "tennpure1", "tennpure2", "tennpure3", "tennpure1", "tennpure2", "tennpure3"]
+    let playerName = "Christopherあいうえお山田"
     // タップされた画像のインデックスを管理するState（Optional）
     @State private var selectedImageIndex: ImageIndex? = nil
     
@@ -38,26 +39,33 @@ struct ProfileView: View {
                 // ユーザーネーム＋編集ボタン
                 HStack(alignment: .center, spacing: 10) {
                     VStack(spacing: 5) {
-                        Text("prayer name")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.textColor)
+                        HStack{
+                            Text(limitTextWithVisualWeight(playerName))
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(Color.textColor)
+                            
+                            
+                            
+                            Button {
+                                print("名前変更処理")
+                            } label: {
+                                Text("編集")
+                                    .font(.system(size: 14))
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 12)
+                                    .foregroundColor(Color.textColor)
+                                    .background(Color.buttonColor)
+                                    .cornerRadius(8)
+                                    .shadow(radius: 4)
+                            }
+                        }
+                        
                         Rectangle()
-                            .frame(width: 180, height: 1)
+                            .frame(width: 200, height: 1)
                             .foregroundColor(.gray)
                     }
-                    Button {
-                        print("名前変更処理")
-                    } label: {
-                        Text("編集")
-                            .font(.system(size: 14))
-                            .padding(.vertical, 4)
-                            .padding(.horizontal, 12)
-                            .foregroundColor(Color.textColor)
-                            .background(Color.buttonColor)
-                            .cornerRadius(12)
-                            .shadow(radius: 2)
-                    }
+                    
                 }
                 
                 // 実績バッジ
@@ -143,3 +151,35 @@ struct ProfileView: View {
 struct ImageIndex: Identifiable {
     let id: Int
 }
+
+
+// 文字数を計算して重みの合計が10以下
+func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+    var visualLength: Double = 0.0
+    var result = ""
+
+    for char in text {
+        let weight: Double
+
+        if ("\u{3040}"..."\u{309F}").contains(char) {
+            weight = 1.5 // ひらがな
+        } else if ("a"..."z").contains(char.lowercased()) {
+            weight = 1.0 // アルファベット
+        } else if char.isNumber {
+            weight = 1.2 // 数字は中間くらい
+        } else {
+            weight = 2.0 // 漢字や記号など
+        }
+
+        if visualLength + weight > maxVisualLength {
+            result += "…"
+            break
+        }
+
+        visualLength += weight
+        result.append(char)
+    }
+
+    return result
+}
+
