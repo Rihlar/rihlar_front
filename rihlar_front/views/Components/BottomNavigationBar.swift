@@ -46,11 +46,14 @@ struct BottomNavigationBar: View {
             }
             
             // ホームボタン
-            ReturnBtn(
+            BlueBtn(
                 label: "ホームに戻る",
+                width: 160,
+                height: 60,
                 action: {
                     print("ホームへ戻る")
-                }
+                },
+                isBigBtn: false
             )
             
             // メニューボタン
