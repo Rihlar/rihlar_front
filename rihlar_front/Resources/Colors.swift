@@ -37,4 +37,5 @@ extension Color {
     static let soloModeLine = Color(hex: "#5F874B")       // 個人戦モード選択のボタンの線
     static let mulchModeColor = Color(hex: "#F2E6B8")     // チーム戦モード選択のボタンの背景
     static let mulchModeLine = Color(hex: "#D9C377")      // チーム戦モード選択のボタンの線
+    static let separatorLine = Color(hex: "#B2AFA5")      // 線、区切り線
 }
