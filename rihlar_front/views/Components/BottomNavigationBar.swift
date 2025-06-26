@@ -44,13 +44,23 @@ struct BottomNavigationBar: View {
                     
                 }
             }
+//           MARK: トップページで使っているカメラコンポーネント
+//            FooterBtn(
+//                iconName: "cameraIcon",
+//                label: "カメラ",
+//                action: onCameraTap,
+//                padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
+//            )
             
             // ホームボタン
-            ReturnBtn(
+            BlueBtn(
                 label: "ホームに戻る",
+                width: 160,
+                height: 60,
                 action: {
                     print("ホームへ戻る")
-                }
+                },
+                isBigBtn: false
             )
             
             // メニューボタン
@@ -78,6 +88,15 @@ struct BottomNavigationBar: View {
                     
                 }
             }
+            
+//            MARK: トップページで使っているメニューコンポーネント
+//            これを使う時は、let isChangeBtn: Boolが必要
+//            FooterBtn(
+//                iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
+//                label: isChangeBtn ? "戻る" : "メニュー",
+//                action: onMenuTap,
+//                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
+//            )
         }
     }
 }
