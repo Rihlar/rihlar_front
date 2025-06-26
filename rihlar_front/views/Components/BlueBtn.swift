@@ -71,3 +71,33 @@ struct BlueBtn: View {
 //        },
 //        isBigBtn: false       // デカいボタンかどうか
 //    )
+
+#Preview {
+    BlueBtn(
+        label: "ホームに戻る",  // 表示するテキスト
+        width: 160,           // 横幅
+        height: 60,           // 縦幅
+        action: {
+            print("ホームへ戻る") // 何をするか
+        },
+        isBigBtn: false       // デカいボタンかどうか
+    )
+    BlueBtn(
+        label: "ルーム作成",  // 表示するテキスト
+        width: 250,           // 横幅
+        height: 150,           // 縦幅
+        action: {
+            print("ルーム作成") // 何をするか
+        },
+        isBigBtn: true       // デカいボタンかどうか
+    )
+    BlueBtn(
+        label: "プレイ",  // 表示するテキスト
+        width: 160,           // 横幅
+        height: 100,           // 縦幅
+        action: {
+            print("プレイ") // 何をするか
+        },
+        isBigBtn: true       // デカいボタンかどうか
+    )
+}

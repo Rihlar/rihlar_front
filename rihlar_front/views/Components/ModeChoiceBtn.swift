@@ -48,6 +48,18 @@ struct ModeChoiceBtn: View {
                     angle: .degrees(77)
                 )
                 .blur(radius: 10)
+                
+///                ボタンの要素
+                VStack {
+                    Image("soloBtnImg")
+                        .shadow(color: Color.black.opacity(0.25), radius: 4)
+                    
+                    Text("個人戦")
+                        .font(.system(size: 32,weight: .bold))
+                        .foregroundColor(.white)
+                        .stroke(color: Color.textColor, width: 2)
+                        .shadow(color: Color.black.opacity(0.25), radius: 4)
+                }
             } else {
 //            一番外側にある線を表現
             RoundedRectangle(cornerRadius: 0)
@@ -82,6 +94,18 @@ struct ModeChoiceBtn: View {
                     angle: .degrees(77)
                 )
                 .blur(radius: 10)
+                
+///                ボタンの要素
+                VStack {
+                    Image("mulchBtnImg")
+                        .shadow(color: Color.black.opacity(0.25), radius: 4)
+                    
+                    Text("チーム戦")
+                        .font(.system(size: 32,weight: .bold))
+                        .foregroundColor(.white)
+                        .stroke(color: Color.textColor, width: 2)
+                        .shadow(color: Color.black.opacity(0.25), radius: 4)
+                }
             }
         }
     }
