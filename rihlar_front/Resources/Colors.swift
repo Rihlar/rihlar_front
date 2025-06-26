@@ -34,4 +34,7 @@ extension Color {
     static let buttonFrameColor = Color(hex: "#89A77A")     // ボタンの枠
     static let backgroundColor = Color(hex: "#EEEBE1")      // 背景
     static let linkColor = Color(hex: "#3D8BFF")            // リンク
+    static let soloModeLine = Color(hex: "#5F874B")       // 個人戦モード選択のボタンの線
+    static let mulchModeColor = Color(hex: "#F2E6B8")     // チーム戦モード選択のボタンの背景
+    static let mulchModeLine = Color(hex: "#D9C377")      // チーム戦モード選択のボタンの線
 }
