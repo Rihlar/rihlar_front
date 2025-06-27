@@ -89,57 +89,39 @@ struct BackgroundBubblesView: View {
 }
 
 struct loginDesignView: View {
-    // 認証コード（トークン）
-    @State private var code: String?
-    // ログイン成功時に呼ばれる外部クロージャ
+    @State private var code: String? {
+        didSet {
+            if code != nil {
+                onLoginSuccess() // ← コードがセットされたら即呼ぶ
+            }
+        }
+    }
+    
     var onLoginSuccess: () -> Void
     
-    //    グラデーションカラーの定義
-    let gradient = Gradient(stops: [.init(color:  Color(red: 254/255, green: 224/255, blue: 117/255),  location: 0.2), .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)])
+    let gradient = Gradient(stops: [
+        .init(color: Color(red: 254/255, green: 224/255, blue: 117/255), location: 0.2),
+        .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)
+    ])
+    
     var body: some View {
         NavigationStack {
             ZStack {
-                // グラデーション
                 LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
-                // バブル
                 BackgroundBubblesView()
                 
                 VStack {
-                    
-                    
                     Text("ロゴ")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.black)
                     
-                    
-                    
                     NavigationLink {
-                        if let code = self.code{
-                            // topページに行きたい
-                            EmptyView()
-                            // トークンを取得済みならログイン成功として処理
-                                        .onAppear {
-                                            onLoginSuccess()
-                                        }
-                        }else {
-                            
-                            // カスタムビュー AuthSessionView を呼び出して、ログイン処理
-                            AuthSessionView{
-                                // クロージャとして callbackURL を受け取っています（おそらくOAuthやURLスキームによる認証結果）
-                                callbackURL in
-                                
-                                self.code = getCode(callbackURL: callbackURL)
-                                // self は、今の構造体やクラスの中で使っている自分自身
-                                //                         self.code = 状態変数 code（@State）の中身
-                                // 認証後に受け取ったURLからトークンを抽出して、code にセット
-                            }
-                            
+                        // ログイン画面用
+                        AuthSessionView { callbackURL in
+                            self.code = getCode(callbackURL: callbackURL)
                         }
-                        
-                        
                     } label: {
-                        // googleボタン
                         HStack {
                             Image("googleIcon")
                                 .resizable()
@@ -149,7 +131,6 @@ struct loginDesignView: View {
                                 .font(.headline)
                                 .foregroundColor(.black)
                         }
-                        // ボタンデザイン
                         .padding()
                         .background(Color.white)
                         .cornerRadius(12)
@@ -158,17 +139,102 @@ struct loginDesignView: View {
                                 .stroke(Color.green, lineWidth: 2)
                         )
                     }
-                    
-                }.task {
+                }
+                .task {
                     do {
                         print("fetch info")
                         print(await try fetchInfo())
                     } catch {
+                        print("fetch error: \(error)")
                     }
                 }
             }
         }
-    }}
+    }
+}
+
+//struct loginDesignView: View {
+//    // 認証コード（トークン）
+//    @State private var code: String?
+//    // ログイン成功時に呼ばれる外部クロージャ
+//    var onLoginSuccess: () -> Void
+//    
+//    //    グラデーションカラーの定義
+//    let gradient = Gradient(stops: [.init(color:  Color(red: 254/255, green: 224/255, blue: 117/255),  location: 0.2), .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)])
+//    var body: some View {
+//        NavigationStack {
+//            ZStack {
+//                // グラデーション
+//                LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
+//                    .ignoresSafeArea()
+//                // バブル
+//                BackgroundBubblesView()
+//                
+//                VStack {
+//                    
+//                    
+//                    Text("ロゴ")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(.black)
+//                    
+//                    
+//                    
+//                    NavigationLink {
+//                        if let code = self.code{
+//                            // topページに行きたい
+//                            EmptyView()
+//                            // トークンを取得済みならログイン成功として処理
+//                                .onAppear {
+//                                    onLoginSuccess()
+//                                }
+//                        }else {
+//                            
+//                            // カスタムビュー AuthSessionView を呼び出して、ログイン処理
+//                            AuthSessionView{
+//                                // クロージャとして callbackURL を受け取っています（おそらくOAuthやURLスキームによる認証結果）
+//                                callbackURL in
+//                                
+//                                self.code = getCode(callbackURL: callbackURL)
+//                                // self は、今の構造体やクラスの中で使っている自分自身
+//                                //                         self.code = 状態変数 code（@State）の中身
+//                                // 認証後に受け取ったURLからトークンを抽出して、code にセット
+//                            }
+//                            
+//                        }
+//                        
+//                        
+//                    } label: {
+//                        // googleボタン
+//                        HStack {
+//                            Image("googleIcon")
+//                                .resizable()
+//                                .frame(width: 24, height: 24)
+//                            
+//                            Text("Googleアカウントでログイン")
+//                                .font(.headline)
+//                                .foregroundColor(.black)
+//                        }
+//                        // ボタンデザイン
+//                        .padding()
+//                        .background(Color.white)
+//                        .cornerRadius(12)
+//                        .overlay(
+//                            RoundedRectangle(cornerRadius: 12)
+//                                .stroke(Color.green, lineWidth: 2)
+//                        )
+//                    }
+//                    
+//                }.task {
+//                    do {
+//                        print("fetch info")
+//                        print(await try fetchInfo())
+//                    } catch {
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 
 // 認証結果で受け取ったURLから トークン（token）を抽出 する関数

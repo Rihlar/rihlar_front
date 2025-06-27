@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct topPage: View {
+    @ObservedObject var router: Router
 //    プレイヤーに追従モードか自由に移動できるかなどの処理をしている関数
     @StateObject private var playerPosition = PlayerPosition()
 //    地図上に表示する円の座標を表示するためのから配列
@@ -44,7 +45,7 @@ struct topPage: View {
                     .ignoresSafeArea()
                     .transition(.opacity)
                 
-                Menu()
+                Menu(router: router)
                     .transition(
                         .move(edge: .trailing)
                         .combined(with: .opacity)
@@ -81,7 +82,7 @@ struct topPage: View {
                     isChangeBtn: isChangeBtn,
 //                            カメラ画面を表示するためのflag
                     onCameraTap: {
-                        isShowCamera = true
+                        router.push(.camera)
                     },
 //                            メニューを表示するためのflag
                     onMenuTap: {
