@@ -49,6 +49,7 @@ struct AppRootView: View {
             } else {
                 loginDesignView {
                     print("ログイン成功！")
+                    
                     isLoggedIn = true
                 }
             }
