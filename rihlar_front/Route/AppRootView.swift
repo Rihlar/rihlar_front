@@ -13,39 +13,45 @@ struct AppRootView: View {
     @State private var isLoggedIn = false
     
     var body: some View {
-       
-        if isLoggedIn{
-            Text("0") // エラーが出るため仮おき
-//            NavigationStack(path: $router.path) {
-//                // top画面
-////                HomeView(router: router)
-////                    .navigationBarTitle(for: Route.self){
-////                        route in
-////                        switch route{
-////                        case .camera:
-////                            // カメラ画面の遷移
-////                        case .profile:
-////                            ProfileView()
-////                        case .friend:
-////                            // フレンド画面の遷移
-////                        case .gacha:
-////                            // ガチャ画面の遷移
-////                        case .items:
-////                            // アイテム画面の遷移
-////                        case .record:
-////                            // 戦績画面の遷移
-////                        case .setting:
-////                            // 設定画面の遷移
-////                        default:
-////                            EmptyView()
-////                        }
-//                    }
-//            }
-        } else {
-            loginDesignView {
-                isLoggedIn = true
+        contentView
+    }
+    
+    @ViewBuilder
+    private var contentView: some View  {
+        Group {
+            if isLoggedIn{
+                NavigationStack(path: $router.path) {
+                    // top画面
+                    topPage(router: router)
+                        .navigationDestination(for: Route.self){
+                            route in
+                            switch route{
+                            case .camera:
+                                // カメラ画面の遷移
+                                Camera()
+                            case .profile:
+                                ProfileView()
+//                        case .friend:
+                                // フレンド画面の遷移
+//                        case .gacha:
+                                // ガチャ画面の遷移
+//                        case .items:
+                                // アイテム画面の遷移
+//                        case .record:
+                                // 戦績画面の遷移
+//                        case .setting:
+                                // 設定画面の遷移
+                            default:
+                                EmptyView()
+                            }
+                        }
+                }
+            } else {
+                loginDesignView {
+                    print("ログイン成功！")
+                    isLoggedIn = true
+                }
             }
-            
         }
     }
     
