@@ -18,16 +18,20 @@ struct ItemView: View {
             VStack{
                 Spacer()
                 Text("アイテム")
-                    .font(.title)
-                    .padding()
+                    .font(.title2)
+                    .foregroundStyle(Color.textColor)
                 
                 // アイテム一覧を表示するList
                 List(viewModel.items) { item in
-                    ItemRowView(item: item) // カスタムビューで1行ずつ表示
+                    ItemRowView(item: item)             // カスタムビューで1行ずつ表示
+                        .listRowSeparator(.hidden)      // 区切り線を消す
+                        .listRowBackground(Color.clear) // デフォ背景を消す
+                        .padding(.vertical, 4)          // 行間を少し空ける
+                        
                 }
                 .listStyle(PlainListStyle()) // 枠線などを省いたシンプルなスタイル
-                
             }
+            .padding(.horizontal)
         }
     }
 }

@@ -15,18 +15,40 @@ struct ItemRowView: View {
         
         HStack{
             // アイコン
-            Image(item.iconName)
-                .foregroundColor(.accentColor)
+            ZStack{
+                Circle()
+                    .fill(Color.itemBackgroundColor)
+                    .frame(width: 70, height: 70)
+                Image(item.iconName)
+                    .resizable()
+                    .interpolation(.none)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width:60,height: 60)
+            }
+            
             // アイテム名
             Text(item.name)
+                .font(.title3)
+                .bold(true)
+                .foregroundStyle(Color.textColor)
             Spacer()
             // 所持数
             Text("×\(item.count)")
-                .foregroundColor(.gray)
+                .foregroundColor(Color.textColor)
+                .padding(.horizontal, 8)
+                .font(.headline)
         }
         .padding(.vertical, 4)
+        .padding(.horizontal, 8)
+        .background(
+                    RoundedRectangle(cornerRadius: 50)
+                        .fill(Color.white) 
+                )
+        
     }
 }
+
+// 表示内容
 #Preview {
     ItemRowView(item: Item(id: 1, name: "かまちゃん", count: 3, iconName: "kama"))
 }
