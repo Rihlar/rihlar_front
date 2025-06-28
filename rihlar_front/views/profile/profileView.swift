@@ -151,12 +151,12 @@ struct ProfileView: View {
             }
             
             // ZStack内で最前面に置くナビゲーション
-            BottomNavigationBar(
-                onCameraTap: { print("カメラタップ") },
-                onHomeTap: { print("ホームタップ") },
-                onMenuTap: { print("メニュータップ") }
-            )
-            .padding(.bottom, 30)
+//            BottomNavigationBar(
+//                onCameraTap: { print("カメラタップ") },
+//                onHomeTap: { print("ホームタップ") },
+//                onMenuTap: { print("メニュータップ") }
+//            )
+//            .padding(.bottom, 30)
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in

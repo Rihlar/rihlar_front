@@ -27,10 +27,16 @@ struct AppRootView: View {
                             route in
                             switch route{
                             case .camera:
-                                // カメラ画面の遷移
+//                              　カメラ画面の遷移
                                 Camera()
                             case .profile:
                                 ProfileView()
+                            case .mode:
+                                ModeSelection(router: router)
+                            case .teamMatch:
+                                TeamMatch()
+                            case .loading:
+                                LoadingView(router: router)
 //                        case .friend:
                                 // フレンド画面の遷移
 //                        case .gacha:
