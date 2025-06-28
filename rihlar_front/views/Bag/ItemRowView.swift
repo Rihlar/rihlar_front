@@ -50,5 +50,5 @@ struct ItemRowView: View {
 
 // 表示内容
 #Preview {
-    ItemRowView(item: Item(id: 1, name: "かまちゃん", count: 3, iconName: "kama"))
+    ItemRowView(item: Item(id: 1, name: "かまちゃん", count: 3, iconName: "kama",description: "カマー"))
 }

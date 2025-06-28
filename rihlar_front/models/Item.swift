@@ -10,5 +10,7 @@ struct Item: Identifiable {
     var id: Int             // アイテムID
     var name: String        // アイテム名
     var count: Int          // 所持数
-    let iconName: String    // アイテムのアイコン
+    var iconName: String    // アイテムのアイコン
+    var description: String // アイテムの説明
+    
 }
