@@ -101,7 +101,7 @@ struct topPage: View {
         .sheet(isPresented: $isShowCamera) {
 //          test()をカメラのページに変更するとトップページとカメラが繋がる
 //          test()を書き換えたらコメントアウトは消してください
-            test()
+//            test()
         }
     }
     
