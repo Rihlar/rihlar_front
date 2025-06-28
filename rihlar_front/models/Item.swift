@@ -6,7 +6,7 @@
 //
 
 // アイテムの情報を表す構造体。将来的にCodableにすればAPIレスポンスと連携できる。
-struct Item {
+struct Item: Identifiable {
     var id: Int             // アイテムID
     var name: String        // アイテム名
     var count: Int          // 所持数

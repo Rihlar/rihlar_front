@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ItemView: View {
+    // ViewModelを状態として保持（画面に紐づく）
+    @StateObject private var viewModel = ItemViewModel()
+    
     var body: some View {
         ZStack{
             Color.backgroundColor
@@ -15,10 +18,14 @@ struct ItemView: View {
             VStack{
                 Spacer()
                 Text("アイテム")
-                    
-                List{
-                    Text("aaaa")
+                    .font(.title)
+                    .padding()
+                
+                // アイテム一覧を表示するList
+                List(viewModel.items) { item in
+                    ItemRowView(item: item) // カスタムビューで1行ずつ表示
                 }
+                .listStyle(PlainListStyle()) // 枠線などを省いたシンプルなスタイル
                 
             }
         }
@@ -27,10 +34,5 @@ struct ItemView: View {
 
 #Preview {
     ItemView()
-}
-
-// アイテムの一個の表示デザイン(アイコン、名前、数)
-func ItemList() -> some View {
-    Text("アイテム")
 }
 
