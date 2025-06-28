@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 // 一つのバブルの定義
 struct Bubble: Identifiable {
     let id = UUID()
@@ -18,40 +17,39 @@ struct Bubble: Identifiable {
     let color: Color
 }
 
-
 // 単体バブルのビュー
 struct BubbleView: View {
     @State private var animate = false
+
     let bubble: Bubble
-    
+
     var body: some View {
         Circle()
-        // 円の中身は透過（透明）にする
+            // 円の中身は透過（透明）
             .fill(Color.clear)
             .frame(width: bubble.size, height: bubble.size)
-        // 縁（Stroke）だけをオーバーレイとして表示し、
-        // 縁の不透明度とスケールをアニメーションで変化させる
+            // 縁（Stroke）だけをオーバーレイ表示し、縁の不透明度とスケールをアニメーション
             .overlay(
                 Circle()
-                    .stroke(Color.white.opacity(animate ? 1 : 0), lineWidth: 3)  // 白の縁の線幅3pt
-                    .scaleEffect(animate ? 1.0 : 0.5)  // 縁のスケール変化（小→大）
+                    .stroke(Color.white.opacity(animate ? 1 : 0), lineWidth: 3) // 白縁3pt
+                    .scaleEffect(animate ? 1.0 : 0.5) // スケール変化 小→大
                     .animation(
-                        .easeOut(duration: 1.5)  // イージングとアニメーション時間
-                            .delay(bubble.delay),    // 各バブルにランダムな遅延を付与
+                        .easeOut(duration: 1.5)
+                            .delay(bubble.delay),
                         value: animate
                     )
             )
-        // バブルの画面上の表示位置をランダム指定
+            // 画面上のランダム位置指定
             .position(x: bubble.x, y: bubble.y)
-        // バブル全体のスケールも同様にアニメーションさせている（重複してるかも）
+            // バブル全体のスケールと不透明度もアニメーション
             .scaleEffect(animate ? 1.0 : 0.5)
             .opacity(animate ? 1.0 : 0.8)
             .animation(
                 .easeOut(duration: 1.5)
-                .delay(bubble.delay),
+                    .delay(bubble.delay),
                 value: animate
             )
-        // View表示時にアニメーション開始
+            // View表示時にアニメーション開始
             .onAppear {
                 animate = true
             }
@@ -60,27 +58,27 @@ struct BubbleView: View {
 
 // バブルをランダムに背景に表示
 struct BackgroundBubblesView: View {
-    // バブルの色候補（使ってないが保持）
+
+    // バブルの色候補（未使用だが保持）
     let colors = [
         Color.red.opacity(0.5),
         Color.blue.opacity(0.5),
         Color.green.opacity(0.5)
     ]
-    
+
     // 12個のバブルをランダム生成
     let bubbles: [Bubble] = (0..<12).map { _ in
         Bubble(
-            size: CGFloat.random(in: 50...150),            // バブルの大きさランダム
-            x: CGFloat.random(in: 0...UIScreen.main.bounds.width),  // x座標ランダム
-            y: CGFloat.random(in: 0...UIScreen.main.bounds.height), // y座標ランダム
-            delay: Double.random(in: 0...2),                // アニメーション開始遅延ランダム
-            color: [Color.red.opacity(0.5), Color.blue.opacity(0.5), Color.green.opacity(0.5)].randomElement()! // カラーランダム（今は未使用）
+            size: CGFloat.random(in: 50...150),
+            x: CGFloat.random(in: 0...UIScreen.main.bounds.width),
+            y: CGFloat.random(in: 0...UIScreen.main.bounds.height),
+            delay: Double.random(in: 0...2),
+            color: [Color.red.opacity(0.5), Color.blue.opacity(0.5), Color.green.opacity(0.5)].randomElement()!
         )
     }
-    
+
     var body: some View {
         ZStack {
-            // バブル配列の全てのバブルをBubbleViewで描画
             ForEach(bubbles) { bubble in
                 BubbleView(bubble: bubble)
             }
@@ -89,45 +87,40 @@ struct BackgroundBubblesView: View {
 }
 
 struct loginDesignView: View {
-    @State private var code: String? {
-        didSet {
-            if code != nil {
-                onLoginSuccess() // ← コードがセットされたら即呼ぶ
-            }
-        }
-    }
+    @Binding var didReceiveToken: Bool
+    @State private var code: String?
+    
+    // AuthManagerを監視
+    @StateObject private var authManager = AuthManager.shared
     
     var onLoginSuccess: () -> Void
-    
+
     let gradient = Gradient(stops: [
         .init(color: Color(red: 254/255, green: 224/255, blue: 117/255), location: 0.2),
         .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)
     ])
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
                 BackgroundBubblesView()
-                
+
                 VStack {
                     Text("ロゴ")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.black)
-                    
-                    NavigationLink {
-                        // ログイン画面用
-                        AuthSessionView { callbackURL in
-                            self.code = getCode(callbackURL: callbackURL)
-                        }
-                    } label: {
+
+                    Button(action: {
+                        print("ログインボタン押された")
+                        startAuthentication()
+                    }) {
                         HStack {
                             Image("googleIcon")
                                 .resizable()
                                 .frame(width: 24, height: 24)
-                            
-                            Text("Googleアカウントでログイン")
+                            Text(authManager.isAuthenticating ? "認証中..." : "Googleアカウントでログイン")
                                 .font(.headline)
                                 .foregroundColor(.black)
                         }
@@ -139,136 +132,79 @@ struct loginDesignView: View {
                                 .stroke(Color.green, lineWidth: 2)
                         )
                     }
+                    .disabled(authManager.isAuthenticating || didReceiveToken || authManager.hasCompletedAuth)
+                    .opacity((authManager.isAuthenticating || didReceiveToken || authManager.hasCompletedAuth) ? 0.6 : 1.0)
                 }
-                .task {
-                    do {
-                        print("fetch info")
-                        print(await try fetchInfo())
-                    } catch {
-                        print("fetch error: \(error)")
-                    }
-                }
+            }
+        }
+        .onAppear {
+            // 画面表示時に認証状態をリセット（必要に応じて）
+            if !didReceiveToken {
+                authManager.reset()
+            }
+        }
+    }
+    
+    private func startAuthentication() {
+        guard !didReceiveToken && !authManager.hasCompletedAuth && !authManager.isAuthenticating else {
+            print("認証中または受信済み。中断")
+            return
+        }
+        
+        let success = authManager.startAuthentication { callbackURL in
+            handleAuthCallback(callbackURL)
+        }
+        
+        if !success {
+            print("認証を開始できませんでした")
+        }
+    }
+    
+    private func handleAuthCallback(_ callbackURL: URL) {
+        print("AuthCallback 発火")
+        
+        guard !didReceiveToken else {
+            print("トークン既受信、処理スキップ")
+            return
+        }
+        
+        didReceiveToken = true
+        
+        if let token = getCode(callbackURL: callbackURL) {
+            print("トークン取得成功 → onLoginSuccess()")
+            self.code = token
+            DispatchQueue.main.async {
+                onLoginSuccess()
+            }
+        } else {
+            print("トークン取得失敗")
+            DispatchQueue.main.async {
+                didReceiveToken = false
+                authManager.reset()
             }
         }
     }
 }
-
-//struct loginDesignView: View {
-//    // 認証コード（トークン）
-//    @State private var code: String?
-//    // ログイン成功時に呼ばれる外部クロージャ
-//    var onLoginSuccess: () -> Void
-//    
-//    //    グラデーションカラーの定義
-//    let gradient = Gradient(stops: [.init(color:  Color(red: 254/255, green: 224/255, blue: 117/255),  location: 0.2), .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)])
-//    var body: some View {
-//        NavigationStack {
-//            ZStack {
-//                // グラデーション
-//                LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
-//                    .ignoresSafeArea()
-//                // バブル
-//                BackgroundBubblesView()
-//                
-//                VStack {
-//                    
-//                    
-//                    Text("ロゴ")
-//                        .font(.system(size: 32, weight: .bold))
-//                        .foregroundColor(.black)
-//                    
-//                    
-//                    
-//                    NavigationLink {
-//                        if let code = self.code{
-//                            // topページに行きたい
-//                            EmptyView()
-//                            // トークンを取得済みならログイン成功として処理
-//                                .onAppear {
-//                                    onLoginSuccess()
-//                                }
-//                        }else {
-//                            
-//                            // カスタムビュー AuthSessionView を呼び出して、ログイン処理
-//                            AuthSessionView{
-//                                // クロージャとして callbackURL を受け取っています（おそらくOAuthやURLスキームによる認証結果）
-//                                callbackURL in
-//                                
-//                                self.code = getCode(callbackURL: callbackURL)
-//                                // self は、今の構造体やクラスの中で使っている自分自身
-//                                //                         self.code = 状態変数 code（@State）の中身
-//                                // 認証後に受け取ったURLからトークンを抽出して、code にセット
-//                            }
-//                            
-//                        }
-//                        
-//                        
-//                    } label: {
-//                        // googleボタン
-//                        HStack {
-//                            Image("googleIcon")
-//                                .resizable()
-//                                .frame(width: 24, height: 24)
-//                            
-//                            Text("Googleアカウントでログイン")
-//                                .font(.headline)
-//                                .foregroundColor(.black)
-//                        }
-//                        // ボタンデザイン
-//                        .padding()
-//                        .background(Color.white)
-//                        .cornerRadius(12)
-//                        .overlay(
-//                            RoundedRectangle(cornerRadius: 12)
-//                                .stroke(Color.green, lineWidth: 2)
-//                        )
-//                    }
-//                    
-//                }.task {
-//                    do {
-//                        print("fetch info")
-//                        print(await try fetchInfo())
-//                    } catch {
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
-
-
-// 認証結果で受け取ったURLから トークン（token）を抽出 する関数
+// 認証結果のURLからトークンを抽出する関数
 func getCode(callbackURL: URL) -> String? {
-    // デバッグ用にURLを出力
     print(callbackURL)
-    
-    // URLを構造的に解析し、クエリパラメータを取り出す
-    // callbackURL は、ログイン後などにアプリが受け取る URL
-    // guard＝早期リターンに使われる
+
     guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
-          // queryItems は、URLの「?以降のパラメータ一覧」を [URLQueryItem] で取り出すプロパティ
           let queryItems = components.queryItems else {
-        // 失敗したら nil を返すことでアプリがクラッシュしないように
         return nil
     }
-    if let codeValue = queryItems.first(where: { $0.name == "token" })?.value{
-        print("Code value:\(codeValue)")
-        
-        //　KeyChain（キーチェーン）は、Appleの提供する安全なデータ保存領域で、ログイントークンやパスワードなどの機密情報を保存する
+
+    if let codeValue = queryItems.first(where: { $0.name == "token" })?.value {
+        print("Code value: \(codeValue)")
         saveKeyChain(tag: "authToken", value: codeValue)
-        // 取得したトークンを返す
         return codeValue
-        
-    }else{
-        // token が見つからない場合は nil
+    } else {
         return nil
     }
-    
-    
 }
 
 #Preview {
-    loginDesignView{
-        
+    loginDesignView(didReceiveToken: .constant(false)) {
+        print("プレビュー内ログイン成功コールバック")
     }
 }
