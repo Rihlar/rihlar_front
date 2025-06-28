@@ -29,7 +29,7 @@ struct ItemRowView: View {
             // アイテム名
             Text(item.name)
                 .font(.title3)
-                .bold(true)
+                .fontWeight(.heavy)
                 .foregroundStyle(Color.textColor)
             Spacer()
             // 所持数
@@ -37,6 +37,7 @@ struct ItemRowView: View {
                 .foregroundColor(Color.textColor)
                 .padding(.horizontal, 8)
                 .font(.headline)
+                .fontWeight(.heavy)
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
@@ -48,7 +49,7 @@ struct ItemRowView: View {
     }
 }
 
-// 表示内容
+// 表示内容(テスト用)
 #Preview {
     ItemRowView(item: Item(id: 1, name: "かまちゃん", count: 3, iconName: "kama",description: "カマー"))
 }

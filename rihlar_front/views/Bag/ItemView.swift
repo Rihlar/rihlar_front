@@ -33,7 +33,9 @@ struct ItemView: View {
                     } label: {
                         ItemRowView(item: item)             // カスタムビューで1行ずつ表示
                         
-                    }.listRowSeparator(.hidden)      // 区切り線を消す
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .listRowSeparator(.hidden)      // 区切り線を消す
                         .listRowBackground(Color.clear) // デフォ背景を消す
                         .padding(.vertical, 4)          // 行間を少し空ける
                     
@@ -43,6 +45,21 @@ struct ItemView: View {
                 .listStyle(PlainListStyle()) // 枠線などを省いたシンプルなスタイル
             }
             .padding(.horizontal)
+            // ポップアップ表示
+                        if let item = selectedItem, showPopup {
+                            ZStack {
+                                    Color.black.opacity(0.3)
+                                        .ignoresSafeArea()
+                                        .onTapGesture {
+                                            showPopup = false
+                                        }
+
+                                    ItemDetailPopup(item: item, isPresented: $showPopup)
+                                        .transition(.scale)
+                                        .animation(.easeInOut, value: showPopup)
+                                        .zIndex(1)
+                                }
+                        }
         }
     }
 }
