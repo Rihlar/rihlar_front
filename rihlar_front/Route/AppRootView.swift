@@ -10,7 +10,8 @@ import SwiftUI
 // NavigationStackと連携
 struct AppRootView: View {
     @StateObject private var router = Router()
-    @State private var isLoggedIn = true
+    @State private var isLoggedIn = false
+    @State private var didReceiveToken = false
     
     var body: some View {
         contentView
@@ -53,7 +54,7 @@ struct AppRootView: View {
                         }
                 }
             } else {
-                loginDesignView {
+                loginDesignView (didReceiveToken: $didReceiveToken){
                     print("ログイン成功！")
                     
                     isLoggedIn = true
