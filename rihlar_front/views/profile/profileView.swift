@@ -66,22 +66,22 @@ struct ProfileView: View {
                     VStack(spacing: 5) {
                         HStack{
                             // 入力時と表示時で変化
-                            if isEditing {
-                                TextField("名前を入力", text: $editableName)
+                            if isEditing{
+                                TextField("名前を入力",text: $editableName)
                                     .padding(8)
                                     .background(Color.gray.opacity(0.2))
                                     .cornerRadius(8)
                                     .focused($isNameFieldFocused)
-                                    .frame(width: 150)
+                                    .frame(width:150)
                                     .onAppear {
                                         isNameFieldFocused = true
                                     }
-                            } else {
+                            }else{
                                 Text(limitTextWithVisualWeight(editableName))
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(Color.textColor)
-                                    .frame(width: 150)
+                                    .frame(width:150)
                             }
                             
                             Button {
@@ -96,7 +96,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 12)
                                     .foregroundColor(Color.textColor)
-                                    .background(isEditing ? Color.gray : Color.buttonColor)
+                                    .background(isEditing ? Color.gray :Color.buttonColor)
                                     .cornerRadius(8)
                                     .shadow(radius: 4)
                             }
@@ -106,6 +106,7 @@ struct ProfileView: View {
                             .frame(width: 236, height: 1)
                             .foregroundColor(Color.separatorLine)
                     }
+                    
                 }
                 
                 // 実績バッジ
@@ -157,6 +158,7 @@ struct ProfileView: View {
                     .cornerRadius(20)
                 }
                 
+                
                 // 記録した写真
                 Text("記録した写真")
                     .font(.title3)
@@ -195,44 +197,8 @@ struct ProfileView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 120)
                 }
-
-
-            }   
-            
-            // メニュー表示
-            if isShowMenu {
-                Color.white.opacity(0.5)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                
-                Menu(router: router)
-                    .transition(
-                        .move(edge: .trailing)
-                        .combined(with: .opacity)
-                    )
             }
             
-            // 最前面に置くナビゲーションバー
-            BottomNavigationBar(
-                router: router,
-                isChangeBtn: isChangeBtn,
-                onCameraTap: {
-                    router.push(.camera)
-                },
-                onMenuTap: {
-                    // ボタンの見た目切り替えは即時（アニメなし）
-                    isChangeBtn.toggle()
-                    
-                    // メニュー本体の表示はアニメーション付き
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isShowMenu.toggle()
-                    }
-                }
-            )
-        }
-
-
-            }
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
@@ -290,4 +256,3 @@ func limitTextWithVisualWeight(_ text: String,
     
     return result
 }
-
