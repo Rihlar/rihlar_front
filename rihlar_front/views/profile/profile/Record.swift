@@ -13,3 +13,4 @@ struct Record: Codable, Identifiable {
     let imageUrl: String        // 実績アイコン
     
 }
+

@@ -18,21 +18,21 @@ let mockRecord = Record(
     id: 1,
     title: "100スポット達成！",
     description: "100か所のスポットに訪問しました！",
-    imageUrl:"aa"
+    imageUrl:"king"
 )
 
 // Photo モック
 let mockPhotos: [Photo] = [
     Photo(
         id: "img1",
-        url: "aa",
-        theme: "カフェ巡り",
+        url: "tennpure1",
+        theme: "猫",
         createdAt: Date()
     ),
     Photo(
         id: "img2",
-        url: "aa",
-        theme: "桜並木",
+        url: "tennpure2",
+        theme: "いちご",
         createdAt: Date().addingTimeInterval(-86400)
     )
 ]
@@ -40,7 +40,7 @@ let mockPhotos: [Photo] = [
 // UserProfileViewData モック
 let mockUserProfile = UserProfileViewData(
     user: mockUser,
-    record: mockRecord,
+    records:[mockRecord],
     photos: mockPhotos
 )
 

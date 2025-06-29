@@ -30,7 +30,7 @@ struct AppRootView: View {
                                 // カメラ画面の遷移
                                 Camera()
                             case .profile:
-                                ProfileView()
+                                ProfileView(viewData: mockUserProfile)
 //                        case .friend:
                                 // フレンド画面の遷移
 //                        case .gacha:
