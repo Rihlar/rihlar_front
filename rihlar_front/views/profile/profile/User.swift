@@ -8,7 +8,7 @@ import Foundation
 // ユーザー情報のモデル定義
 struct User:Codable, Identifiable{
     let id:Int      // ユーザーid
-    let name:String // ユーザー名
+    var name:String // ユーザー名
     
     // ユーザーのアイコン
     var iconUrl:URL?{
