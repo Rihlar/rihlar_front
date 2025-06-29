@@ -35,8 +35,8 @@ struct LoadingView : View {
                     frameindex = (frameindex + 1) % frames.count
                     
                     // 四周目で画面遷移
-                    if frameindex == 3{
-//                        isNavigate.toggle()
+                    if frameindex == frames.count - 1{
+                        router.didStartFromLoading = true
                         router.path.removeAll()
                     }
                 }
