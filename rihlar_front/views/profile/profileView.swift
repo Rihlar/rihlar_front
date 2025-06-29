@@ -18,10 +18,17 @@ struct ProfileView: View {
     @State private var selectedImageIndex: ImageIndex? = nil
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
+    // 実績を選択式に
+    @State private var records: [Record]
+    // 選択された実績だけ取り出して最大3つに制限
+    var selectedRecords: [Record] {
+        Array(records.filter { $0.isSelected }.prefix(3))
+    }
     
     init(viewData: UserProfileViewData) {
         self.viewData = viewData
         _editableName = State(initialValue: viewData.user.name)
+        _records = State(initialValue: viewData.records)
     }
     
     var body: some View {
@@ -101,24 +108,26 @@ struct ProfileView: View {
                     showAchievementSheet = true
                 } label: {
                     HStack(spacing: 20) {
+                        // 選択済みレコードを3件まで取得（最大3件）
+                        let selectedRecords = Array(records.filter { $0.isSelected }.prefix(3))
+                        
                         ForEach(0..<3, id: \.self) { index in
                             ZStack {
-                                // ベースの白丸
+                                // 常に白丸の枠だけは表示
                                 Circle()
                                     .fill(Color.white)
                                     .frame(width: 70, height: 70)
                                     .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
 
-                                if index < viewData.records.count {
-                                    let record = viewData.records[index]
+                                // 選択済みの実績があれば画像を表示
+                                if index < selectedRecords.count {
+                                    let record = selectedRecords[index]
                                     
                                     Group {
                                         if record.imageUrl.contains("http"),
                                            let url = URL(string: record.imageUrl) {
                                             AsyncImage(url: url) { image in
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
+                                                image.resizable().scaledToFill()
                                             } placeholder: {
                                                 Color.white
                                             }
@@ -134,6 +143,8 @@ struct ProfileView: View {
                             }
                         }
                     }
+
+
 
                     .padding()
                     .background(Color.recordBackgroundColor)
@@ -200,7 +211,7 @@ struct ProfileView: View {
         }
         
         .sheet(isPresented: $showAchievementSheet) {
-            AchievementSelectionView()
+            AchievementSelectionView(records: $records)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
