@@ -108,10 +108,10 @@ struct loginDesignView: View {
                 BackgroundBubblesView()
                 
                 VStack {
-                    Text("ロゴ")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.black)
-                    
+                    Image("rogo")
+                        .resizable()
+                        .frame(width: 200,height: 140)
+                 
                     Button(action: {
                         print("ログインボタン押された")
                         startAuthentication()
