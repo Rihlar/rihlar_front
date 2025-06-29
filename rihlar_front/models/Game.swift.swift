@@ -14,9 +14,9 @@ struct Game: Codable {
     let startTime: Date
     let endTime: Date
     let flag: Int
-    let type: Int
+    var type: Int
     let teams: [String]
-    let statusRaw: Int
+    var statusRaw: Int
     let regionID: String
 
     /// 生の Int → enum への変換

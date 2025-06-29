@@ -16,10 +16,10 @@ class MockGameService: GameServiceProtocol {
         let sample = Game(
             gameID: id,
             startTime: Date().addingTimeInterval(-60),
-            endTime: Date().addingTimeInterval(300),
+            endTime: Date().addingTimeInterval(3000),
             flag: 0, type: 0,
             teams: ["Red","Blue"],
-            statusRaw: 1,
+            statusRaw: 0,
             regionID: "tokyo"
         )
         return Just(sample)

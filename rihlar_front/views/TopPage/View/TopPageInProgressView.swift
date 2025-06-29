@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct TopPageInProgressView: View {
+    @ObservedObject var vm: GameViewModel
     @ObservedObject var router: Router
 //    プレイヤーに追従モードか自由に移動できるかなどの処理をしている関数
     @StateObject private var playerPosition = PlayerPosition()
@@ -20,22 +21,26 @@ struct TopPageInProgressView: View {
     @State private var isShowMenu = false
 //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
+    let game: Game
     
     var body: some View {
         ZStack {
-            Group {
-                // mapkitを使用した地図表示
-                CircleMap(playerPosition: playerPosition, circles: circles)
-                    .ignoresSafeArea()
-                    .onAppear {
-                        loadSampleJSON()
-                    }
-                
-                VStack {
-                    Header()
-                    
-                    Spacer()
+            // mapkitを使用した地図表示
+            CircleMap(playerPosition: playerPosition, circles: circles)
+                .ignoresSafeArea()
+                .onAppear {
+                    loadSampleJSON()
                 }
+                .blur(radius: isShowMenu ? 10 : 0)
+                .animation(.easeInOut, value: isShowMenu)
+            
+            VStack {
+                Header(
+                    vm: vm,
+                    game: game
+                )
+                
+                Spacer()
             }
             .blur(radius: isShowMenu ? 10 : 0)
             .animation(.easeInOut, value: isShowMenu)
@@ -110,7 +115,9 @@ struct TopPageInProgressView: View {
                         withAnimation(.easeInOut(duration: 0.3)) {
                           isShowMenu.toggle()
                         }
-                    }
+                    },
+                    
+                    gameStatus: game.status.rawValue
                 )
             }
             .zIndex(1)

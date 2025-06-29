@@ -37,25 +37,25 @@ struct ScoreStatusPanel: View {
             VStack {
                 HStack {
                     Text("現在")
-                        .font(.system(size: 10,weight: .bold))
+                        .font(.system(size: 12,weight: .bold))
                         .foregroundColor(.textColor)
                     
                     Text("\(rank)位")
-                        .font(.system(size: 14,weight: .bold))
+                        .font(.system(size: 16,weight: .bold))
                         .foregroundColor(.textColor)
                     
                     Text("\(currentScore)点")
-                        .font(.system(size: 14,weight: .bold))
+                        .font(.system(size: 16,weight: .bold))
                         .foregroundColor(.textColor)
                 }
                 
                 HStack {
                     Text("1位まであと")
-                        .font(.system(size: 10,weight: .bold))
+                        .font(.system(size: 12,weight: .bold))
                         .foregroundColor(.textColor)
                     
-                    Text("\(scoreToTop)位")
-                        .font(.system(size: 14,weight: .bold))
+                    Text("\(scoreToTop)点")
+                        .font(.system(size: 18,weight: .bold))
                         .foregroundColor(.textColor)
                 }
             }

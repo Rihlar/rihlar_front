@@ -15,6 +15,8 @@ struct Footer: View {
     var onCameraTap: () -> Void
 //    メニュー／戻るアイコンタップ時
     var onMenuTap: () -> Void
+
+    let gameStatus: Int
     
     var body: some View {
         HStack {
@@ -25,18 +27,20 @@ struct Footer: View {
                 action: onCameraTap,
                 padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
             )
-            
-//            Spacer()
-            BlueBtn(
-                label: "プレイ",
-                width: 160,
-                height: 100,
-                action: {
-                    router.push(.mode)
-                },
-                isBigBtn: true
-            )
-            .padding( EdgeInsets(top: -100, leading: 0, bottom: 0, trailing: 0))
+            if gameStatus == 1 && gameStatus == 2 {
+                Spacer()
+            } else {
+                BlueBtn(
+                    label: "プレイ",
+                    width: 160,
+                    height: 100,
+                    action: {
+                        router.push(.mode)
+                    },
+                    isBigBtn: true
+                )
+                .padding( EdgeInsets(top: -100, leading: 0, bottom: 0, trailing: 0))
+            }
             
 //            ─── メニュー⇄戻る 切り替えボタン ───
             FooterBtn(

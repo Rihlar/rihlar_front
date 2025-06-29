@@ -8,113 +8,139 @@
 import SwiftUI
 
 struct Header: View {
-    enum GameMode {
-    case solo, match
-    }
-
-    @State private var gameMode: GameMode = .solo
+    @ObservedObject var vm: GameViewModel
+    let game: Game
     
     var body: some View {
-        if gameMode == .match {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .stroke(color: Color("collection"), width: 2)
-                    
-                    VStack(spacing: -8) {
-                        Text("コレクション")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color("TextColor"))
+        let mode = vm.game?.type ?? 0
+        
+        if mode == 1 {
+            VStack {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 50, height: 50)
+                            .stroke(color: Color("collection"), width: 2)
                         
-                        Text("モード")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
+                        VStack(spacing: -8) {
+                            Text("コレクション")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                            
+                            Text("モード")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                        }
+                    }
+                    .opacity(0)
+                    
+                    Image("matchHeader")
+                        .overlay(Text("対戦モード")
                             .foregroundColor(Color("TextColor"))
+                            .font(.system(size: 16, weight: .bold))
+                        )
+                    
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 50, height: 50)
+                            .stroke(color: Color("collection"), width: 2)
+                        
+                        Image("collectionIcon")
+                        
+                        VStack(spacing: -8) {
+                            Text("コレクション")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                            
+                            Text("モード")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                        }
+                    }
+                    .onTapGesture {
+                        vm.toggleGameType()
                     }
                 }
-                .opacity(0)
                 
-                Image("matchHeader")
-                    .overlay(Text("対戦モード")
-                        .foregroundColor(Color("TextColor"))
-                        .font(.system(size: 16, weight: .bold))
+                if game.status == .notStarted && game.startTime <= Date() {
+                    Notice(
+                        label: "ゲームが開催されました！\n下のボタンからゲームに参加してください！",
+                        graColor: Color(hex: "#FEE075"),
+                        height: 40
                     )
-                
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .stroke(color: Color("collection"), width: 2)
-                    
-                    Image("collectionIcon")
-                    
-                    VStack(spacing: -8) {
-                        Text("コレクション")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color("TextColor"))
+                } else if game.status == .inProgress {
+                    HStack {
+                        Spacer()
                         
-                        Text("モード")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color("TextColor"))
+                        ScoreStatusPanel(rank: 10, currentScore: 123, scoreToTop: 123)
+                            .padding(.trailing)
                     }
-                }
-                .onTapGesture {
-                    gameMode = .solo
                 }
             }
         } else {
-            HStack(spacing: 10) {
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .stroke(color: Color("collection"), width: 2)
-                    
-                    VStack(spacing: -8) {
-                        Text("対戦")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
+            VStack {
+                HStack(spacing: 10) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 50, height: 50)
+                            .stroke(color: Color("collection"), width: 2)
                         
-                        Text("モード")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
+                        VStack(spacing: -8) {
+                            Text("対戦")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                            
+                            Text("モード")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                        }
+                    }
+                    .opacity(0)
+                    
+                    Image("collectionHeader")
+                        .overlay(Text("コレクションモード")
+                            .foregroundColor(Color("TextColor"))
+                            .font(.system(size: 16, weight: .bold))
+                        )
+                    
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 50, height: 50)
+                            .stroke(color: Color("match"), width: 2)
+                        
+                        Image("matchIcon")
+                        
+                        VStack(spacing: -8) {
+                            Text("対戦")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                            
+                            Text("モード")
+                                .stroke(color: Color.white, width: 1.4)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("TextColor"))
+                        }
+                    }
+                    .onTapGesture {
+                        vm.toggleGameType()
                     }
                 }
-                .opacity(0)
                 
-                Image("collectionHeader")
-                    .overlay(Text("コレクションモード")
-                        .foregroundColor(Color("TextColor"))
-                        .font(.system(size: 16, weight: .bold))
+                if game.status == .notStarted && game.startTime <= Date() {
+                    Notice(
+                        label: "ゲームが開催されました！\n対戦モードに切り替えて！",
+                        graColor: Color(hex: "#FEE075"),
+                        height: 40
                     )
-                
-                ZStack {
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 50, height: 50)
-                        .stroke(color: Color("match"), width: 2)
-                    
-                    Image("matchIcon")
-                    
-                    VStack(spacing: -8) {
-                        Text("対戦")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color("TextColor"))
-                        
-                        Text("モード")
-                            .stroke(color: Color.white, width: 1.4)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(Color("TextColor"))
-                    }
-                }
-                .onTapGesture {
-                    gameMode = .match
                 }
             }
         }

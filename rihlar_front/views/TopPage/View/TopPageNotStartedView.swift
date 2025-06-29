@@ -8,11 +8,18 @@
 import SwiftUI
 
 struct TopPageNotStartedView: View {
+    @ObservedObject var vm: GameViewModel
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+        Text("🕹️ ゲーム開始前です")
+            .font(.title).bold()
 
-#Preview {
-    TopPageNotStartedView()
+        Button("ゲームを開始する") {
+            vm.startGameLocally()
+        }
+        .padding()
+        .background(Color.blue)
+        .foregroundColor(.white)
+        .cornerRadius(8)
+    }
 }

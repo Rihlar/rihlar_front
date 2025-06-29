@@ -21,6 +21,7 @@ final class GameViewModel: ObservableObject {
     /// デフォルトで Real、テスト時に Mock を渡せる
     init(service: GameServiceProtocol = RealGameService()) {
         self.service = service
+        fetchGame(by: "テスト用GameID")
     }
 
     func fetchGame(by id: String) {
@@ -36,5 +37,25 @@ final class GameViewModel: ObservableObject {
                 print("[DEBUG] fetched game:", game)
             }
             .store(in: &cancellables)
+    }
+/// ゲーム開始ボタン押下時に呼ぶ
+    func startGameLocally() {
+        guard var g = game else { return }
+        g.statusRaw = GameStatus.inProgress.rawValue
+        game = g
+    }
+    
+/// ゲーム終了ボタン押下時に呼ぶ
+    func endGameLocally() {
+        guard var g = game else { return }
+        g.statusRaw = GameStatus.ended.rawValue
+        game = g
+    }
+    
+/// type を 0 ↔ 1 で切り替える
+    func toggleGameType() {
+        guard var g = game else { return }
+        g.type = (g.type == 0 ? 1 : 0)
+        game = g
     }
 }
