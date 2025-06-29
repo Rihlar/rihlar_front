@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct Footer: View {
-//    メニューが開いているかどうかを親から受け取る
-    let isMenuOpen: Bool
+    @ObservedObject var router: Router
 //    メニューボタンと戻るボタンのどちらかを親から受け取る
     let isChangeBtn: Bool
 //    カメラアイコンタップ時
@@ -27,7 +26,17 @@ struct Footer: View {
                 padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
             )
             
-            Spacer()
+//            Spacer()
+            BlueBtn(
+                label: "プレイ",
+                width: 160,
+                height: 100,
+                action: {
+                    router.push(.mode)
+                },
+                isBigBtn: true
+            )
+            .padding( EdgeInsets(top: -100, leading: 0, bottom: 0, trailing: 0))
             
 //            ─── メニュー⇄戻る 切り替えボタン ───
             FooterBtn(

@@ -11,6 +11,7 @@ import SwiftUI
 struct AppRootView: View {
     @StateObject private var router = Router()
     @State private var isLoggedIn = false
+    @State private var didReceiveToken = false
     
     var body: some View {
         contentView
@@ -27,10 +28,16 @@ struct AppRootView: View {
                             route in
                             switch route{
                             case .camera:
-                                // カメラ画面の遷移
+//                              　カメラ画面の遷移
                                 Camera()
                             case .profile:
-                                ProfileView()
+                                ProfileView(router: router)
+                            case .mode:
+                                ModeSelection(router: router)
+                            case .teamMatch:
+                                TeamMatch(router: router)
+                            case .loading:
+                                LoadingView(router: router)
 //                        case .friend:
                                 // フレンド画面の遷移
 //                        case .gacha:
@@ -47,8 +54,9 @@ struct AppRootView: View {
                         }
                 }
             } else {
-                loginDesignView {
+                loginDesignView (didReceiveToken: $didReceiveToken){
                     print("ログイン成功！")
+                    
                     isLoggedIn = true
                 }
             }

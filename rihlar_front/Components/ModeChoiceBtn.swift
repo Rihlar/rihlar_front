@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ModeChoiceBtn: View {
     let isModeFlag: Bool
+    let action: () -> Void
     let width:CGFloat = 300
     let height:CGFloat = 200
     
@@ -108,14 +109,23 @@ struct ModeChoiceBtn: View {
                 }
             }
         }
+        .onTapGesture {
+            action()
+        }
     }
 }
 
 #Preview {
     ModeChoiceBtn(
-        isModeFlag: true
+        isModeFlag: true,
+        action: {
+            print("aaaa")
+        }
     )
     ModeChoiceBtn(
-        isModeFlag: false
+        isModeFlag: false,
+        action: {
+            print("iii")
+        }
     )
 }
