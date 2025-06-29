@@ -203,11 +203,8 @@ struct ProfileView: View {
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
-            PhotoViewerView(
-                images: viewData.photos.map { $0.url },
-                startIndex: imageIndex.id
-            )
-            .presentationDragIndicator(.hidden)
+            PhotoViewerView(photos: viewData.photos, startIndex: imageIndex.id)
+                .presentationDragIndicator(.hidden)
         }
         
         .sheet(isPresented: $showAchievementSheet) {
