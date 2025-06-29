@@ -21,8 +21,9 @@ struct ProfileView: View {
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
     
-    init(viewData: UserProfileViewData) {
+    init(viewData: UserProfileViewData, router: Router) {
         self.viewData = viewData
+        self.router = router
         _editableName = State(initialValue: viewData.user.name)
     }
     
@@ -55,22 +56,22 @@ struct ProfileView: View {
                     VStack(spacing: 5) {
                         HStack{
                             // 入力時と表示時で変化
-                            if isEditing{
-                                TextField("名前を入力",text: $editableName)
+                            if isEditing {
+                                TextField("名前を入力", text: $editableName)
                                     .padding(8)
                                     .background(Color.gray.opacity(0.2))
                                     .cornerRadius(8)
                                     .focused($isNameFieldFocused)
-                                    .frame(width:150)
+                                    .frame(width: 150)
                                     .onAppear {
                                         isNameFieldFocused = true
                                     }
-                            }else{
+                            } else {
                                 Text(limitTextWithVisualWeight(editableName))
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(Color.textColor)
-                                    .frame(width:150)
+                                    .frame(width: 150)
                             }
                             
                             Button {
@@ -85,7 +86,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 12)
                                     .foregroundColor(Color.textColor)
-                                    .background(isEditing ? Color.gray :Color.buttonColor)
+                                    .background(isEditing ? Color.gray : Color.buttonColor)
                                     .cornerRadius(8)
                                     .shadow(radius: 4)
                             }
@@ -95,7 +96,6 @@ struct ProfileView: View {
                             .frame(width: 240, height: 1)
                             .foregroundColor(Color.separatorLine)
                     }
-                    
                 }
                 
                 // 実績バッジ
@@ -135,7 +135,6 @@ struct ProfileView: View {
                     .cornerRadius(20)
                 }
                 
-                
                 // 記録した写真
                 Text("記録した写真")
                     .font(.title3)
@@ -147,7 +146,7 @@ struct ProfileView: View {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
                         ForEach(viewData.photos.indices, id: \.self) { index in
                             let photo = viewData.photos[index]
-
+                            
                             Group {
                                 if photo.url.contains("http"),
                                    let url = URL(string: photo.url) {
@@ -174,15 +173,25 @@ struct ProfileView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 120)
                 }
-            }   
             }
-            //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
+            
+            // 実績選択シート
+            .sheet(isPresented: $showAchievementSheet) {
+                AchievementSelectionView()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.hidden)
+            }
+            
+            // 写真拡大表示シート
             .sheet(item: $selectedImageIndex) { imageIndex in
                 PhotoViewerView(
                     images: viewData.photos.map { $0.url },
                     startIndex: imageIndex.id
                 )
+                .presentationDragIndicator(.hidden)
+            }
             
+            // メニュー表示
             if isShowMenu {
                 Color.white.opacity(0.5)
                     .ignoresSafeArea()
@@ -195,7 +204,7 @@ struct ProfileView: View {
                     )
             }
             
-            // ZStack内で最前面に置くナビゲーション
+            // 最前面に置くナビゲーションバー
             BottomNavigationBar(
                 router: router,
                 isChangeBtn: isChangeBtn,
@@ -203,80 +212,54 @@ struct ProfileView: View {
                     router.push(.camera)
                 },
                 onMenuTap: {
-//                        ボタンの見た目切り替えは即時（アニメなし）
+                    // ボタンの見た目切り替えは即時（アニメなし）
                     isChangeBtn.toggle()
-
-//                        メニュー本体の表示はアニメーション付き
+                    
+                    // メニュー本体の表示はアニメーション付き
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isShowMenu.toggle()
                     }
                 }
             )
         }
-        //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
-        .sheet(item: $selectedImageIndex) { imageIndex in
-            PhotoViewerView(images: images, startIndex: imageIndex.id)
-                .presentationDragIndicator(.hidden)
-            }
-            
-            .sheet(isPresented: $showAchievementSheet) {
-                AchievementSelectionView()
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.hidden)
-            }
-        }
-        
     }
+}
     #Preview {
-        ProfileView(viewData: mockUserProfile)
+        ProfileView(viewData: mockUserProfile, router: Router())
     }
+    
     // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
     struct ImageIndex: Identifiable {
         let id: Int
     }
-    
-}
-#Preview {
-//    ProfileView()
-}
-// ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
-struct ImageIndex: Identifiable {
-    let id: Int
-}
 
 
-// 文字数を計算して重みの合計が10以下
+// 文字数を計算して重みの合計がmaxVisualLength以下に制限する関数
 func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
     var visualLength: Double = 0.0
     var result = ""
     
-    // 文字数を計算して重みの合計が10以下
-    func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
-        var visualLength: Double = 0.0
-        var result = ""
+    for char in text {
+        let weight: Double
         
-        for char in text {
-            let weight: Double
-            
-            if ("\u{3040}"..."\u{309F}").contains(char) {
-                weight = 1.5 // ひらがな
-            } else if ("a"..."z").contains(char.lowercased()) {
-                weight = 1.0 // アルファベット
-            } else if char.isNumber {
-                weight = 1.2 // 数字は中間くらい
-            } else {
-                weight = 2.0 // 漢字や記号など
-            }
-            
-            if visualLength + weight > maxVisualLength {
-                result += "…"
-                break
-            }
-            
-            visualLength += weight
-            result.append(char)
+        if ("\u{3040}"..."\u{309F}").contains(char) {
+            weight = 1.5 // ひらがな
+        } else if ("a"..."z").contains(char.lowercased()) {
+            weight = 1.0 // アルファベット
+        } else if char.isNumber {
+            weight = 1.2 // 数字は中間くらい
+        } else {
+            weight = 2.0 // 漢字や記号など
         }
         
-        return result
+        if visualLength + weight > maxVisualLength {
+            result += "…"
+            break
+        }
+        
+        visualLength += weight
+        result.append(char)
     }
-
+    
+    return result
+}
