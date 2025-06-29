@@ -1,14 +1,15 @@
 //
-//  topPage.swift
+//  TopPageInProgressView.swift
 //  rihlar_front
 //
-//  Created by Kodai Hirata on 2025/06/06.
+//  Created by Kodai Hirata on 2025/06/29.
 //
 
 import SwiftUI
 import CoreLocation
 
-struct topPage: View {
+struct TopPageInProgressView: View {
+    @ObservedObject var vm: GameViewModel
     @ObservedObject var router: Router
 //    プレイヤーに追従モードか自由に移動できるかなどの処理をしている関数
     @StateObject private var playerPosition = PlayerPosition()
@@ -20,25 +21,46 @@ struct topPage: View {
     @State private var isShowMenu = false
 //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
+    let game: Game
     
     var body: some View {
         ZStack {
-            Group {
-                // mapkitを使用した地図表示
-                CircleMap(playerPosition: playerPosition, circles: circles)
-                    .ignoresSafeArea()
-                    .onAppear {
-                        loadSampleJSON()
-                    }
-                
-                VStack {
-                    Header()
-                    
-                    Spacer()
+            // mapkitを使用した地図表示
+            CircleMap(playerPosition: playerPosition, circles: circles)
+                .ignoresSafeArea()
+                .onAppear {
+                    loadSampleJSON()
                 }
+                .blur(radius: isShowMenu ? 10 : 0)
+                .animation(.easeInOut, value: isShowMenu)
+            
+            VStack {
+                Header(
+                    vm: vm,
+                    game: game
+                )
+                
+                Spacer()
             }
             .blur(radius: isShowMenu ? 10 : 0)
             .animation(.easeInOut, value: isShowMenu)
+            
+// ─────────── 「陣取りスタート！」のオーバーレイ ───────────
+            if router.didStartFromLoading {
+                Text("陣取りスタート！")
+                    .font(.system(size: 32,weight: .bold))
+                    .foregroundColor(.white)
+                    .stroke(color: Color(hex: "#E85B5B"), width: 0.8)
+                    .transition(.opacity)
+                    .onAppear {
+                        // 2秒後にフラグをリセットして非表示に
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                            withAnimation {
+                                router.didStartFromLoading = false
+                            }
+                        }
+                    }
+            }
             
             if isShowMenu {
                 Color.white.opacity(0.1)
@@ -50,6 +72,7 @@ struct topPage: View {
                         .move(edge: .trailing)
                         .combined(with: .opacity)
                     )
+                    .zIndex(10)
             }
             
             VStack(spacing: 0) {
@@ -93,16 +116,15 @@ struct topPage: View {
                         withAnimation(.easeInOut(duration: 0.3)) {
                           isShowMenu.toggle()
                         }
-                    }
+                    },
+                    vm: vm,
+                    game: game,
+                    gameType: vm.game?.type ?? 0
                 )
             }
             .zIndex(1)
         }
-//        .sheet(isPresented: $isShowCamera) {
-//          test()をカメラのページに変更するとトップページとカメラが繋がる
-//          test()を書き換えたらコメントアウトは消してください
-//            test()
-//        }
+        .animation(.easeInOut, value: router.didStartFromLoading)
     }
     
 // テストデータなのでバックエンドと繋がったらこれは削除
@@ -138,3 +160,4 @@ struct topPage: View {
         }
     }
 }
+

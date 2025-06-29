@@ -91,7 +91,7 @@ struct CircleMap: UIViewRepresentable {
         if !coordinator.hasAnimatedCircles && !circles.isEmpty {
             for circleData in circles {
                 let radius = computedRadius(for: circleData.size)
-                print("▶️ [CircleMap] 初回アニメーション: \(circleData.coordinate), radius: \(radius)")
+//                print("▶️ [CircleMap] 初回アニメーション: \(circleData.coordinate), radius: \(radius)")
 
 //                 円オーバーレイを追加
                 let overlay = MKCircle(center: circleData.coordinate, radius: radius)
@@ -113,7 +113,7 @@ struct CircleMap: UIViewRepresentable {
 //             2回目以降は静的オーバーレイのみ
             for circleData in circles {
                 let radius = computedRadius(for: circleData.size)
-                print("▶️ [CircleMap] 静的オーバーレイ: \(circleData.coordinate), radius: \(radius)")
+//                print("▶️ [CircleMap] 静的オーバーレイ: \(circleData.coordinate), radius: \(radius)")
                 let overlay = MKCircle(center: circleData.coordinate, radius: radius)
                 mapView.addOverlay(overlay)
             }
@@ -145,7 +145,7 @@ struct CircleMap: UIViewRepresentable {
 
 //         地図タイル読み込み完了でフラグを立てる
         func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
-            print("▶️ [Coordinator] didFinishLoadingMap – 初回ロードフラグ ON")
+//            print("▶️ [Coordinator] didFinishLoadingMap – 初回ロードフラグ ON")
             isFirstLoadFlag = true
             parent.addOverlays(to: mapView, using: self)
         }

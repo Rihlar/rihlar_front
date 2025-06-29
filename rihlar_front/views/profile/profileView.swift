@@ -9,10 +9,12 @@ import SwiftUI
 
 struct ProfileView: View {
     let viewData: UserProfileViewData
-    @State private var editableName: String
     @ObservedObject var router: Router
+    @State private var editableName: String
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
+    
+
     @State private var isEditing = false
     @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
     
@@ -29,7 +31,8 @@ struct ProfileView: View {
     
     init(viewData: UserProfileViewData, router: Router) {
         self.viewData = viewData
-        self.router = router
+        // ObservedObject の初期化にはプロパティラッパーの _router を使います
+        _router = ObservedObject(initialValue: router)
         _editableName = State(initialValue: viewData.user.name)
         _records = State(initialValue: viewData.records)
     }
@@ -233,10 +236,14 @@ struct ProfileView: View {
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
+
             PhotoViewerView(photos: viewData.photos, startIndex: imageIndex.id)
                 .presentationDragIndicator(.hidden)
         }
         
+
+    
+
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSelectionView(records: $records)
                 .presentationDetents([.medium, .large])
@@ -245,20 +252,20 @@ struct ProfileView: View {
     }
     
 }
-#Preview {
-    ProfileView(viewData: mockUserProfile)
-}
+//#Preview {
+//    ProfileView(viewData: mockUserProfile)
+//}
 // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
 struct ImageIndex: Identifiable {
     let id: Int
 }
 
-
-// 文字数を計算して重みの合計が10以下
-func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+/// 文字数を計算して幅の合計が maxVisualLength を超えないようトリミングし、
+/// はみ出す場合は末尾に「…」を追加
+func limitTextWithVisualWeight(_ text: String,
+                              maxVisualLength: Double = 10.0) -> String {
     var visualLength: Double = 0.0
     var result = ""
-    
     for char in text {
         let weight: Double
         
@@ -276,7 +283,7 @@ func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -
             result += "…"
             break
         }
-        
+
         visualLength += weight
         result.append(char)
     }
