@@ -78,7 +78,7 @@ struct topPage: View {
                     .opacity(0)
                 }
                 Footer (
-                    isMenuOpen: isShowMenu,
+                    router: router,
                     isChangeBtn: isChangeBtn,
 //                            カメラ画面を表示するためのflag
                     onCameraTap: {
@@ -98,11 +98,11 @@ struct topPage: View {
             }
             .zIndex(1)
         }
-        .sheet(isPresented: $isShowCamera) {
+//        .sheet(isPresented: $isShowCamera) {
 //          test()をカメラのページに変更するとトップページとカメラが繋がる
 //          test()を書き換えたらコメントアウトは消してください
 //            test()
-        }
+//        }
     }
     
 // テストデータなのでバックエンドと繋がったらこれは削除

@@ -10,95 +10,76 @@ import SwiftUI
 // 他の画面でも再利用可能なコンポーネント
 
 struct BottomNavigationBar: View {
+    @ObservedObject var router: Router
+    let isChangeBtn: Bool
     // ボタンのアクション(親Viewから渡す)
     let onCameraTap: () -> Void
-    let onHomeTap: () -> Void
     let onMenuTap: () -> Void
+
     
     var body: some View {
         HStack(spacing: 20) {
+            FooterBtn(
+                iconName: "cameraIcon",
+                label: "カメラ",
+                action: onCameraTap,
+                padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
+            )
             
-            // カメラボタン
-            Button {
-                print("カメラが押された")
-            } label: {
-                VStack(spacing: 0) {
-                    ZStack{
-                        // ボタンの円背景
-                        Circle()
-                            .fill(Color.backgroundColor)
-                            .frame(width: 80, height: 80)
-                            .shadow(radius: 2)
-                        // アイコン画像（カメラ）
-                        Image("camera")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 65, height: 65)
-                            .foregroundColor(Color.textColor)
-                        
-                        
-                    }
-                    .offset(y:8)
-                    // テキスト
-                    ShadowedText("カメラ", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
-                    
-                }
-            }
-//           MARK: トップページで使っているカメラコンポーネント
-//            FooterBtn(
-//                iconName: "cameraIcon",
-//                label: "カメラ",
-//                action: onCameraTap,
-//                padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
-//            )
-            
-            // ホームボタン
             BlueBtn(
                 label: "ホームに戻る",
                 width: 160,
                 height: 60,
                 action: {
-                    print("ホームへ戻る")
+                    router.path.removeAll()
                 },
                 isBigBtn: false
             )
             
-            // メニューボタン
-            Button {
-                print("メニューが押された")
-            } label: {
-                VStack (spacing:0){
-                    
-                    ZStack {
-                        // ボタンの円背景
-                        Circle()
-                            .fill(Color.backgroundColor)
-                            .frame(width: 80, height: 80)
-                            .shadow(radius: 2)
-                        // アイコン画像（設定）
-                        Image("line.3.horizontal")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(Color.textColor)
-                    }
-                    .offset(y:8)
-                    // テキスト
-                    ShadowedText("メニュー", font: .system(size: 24, weight: .bold), foregroundColor: .white, shadowColor: .black, shadowRadius: 2, offsetY: 0)
-                    
-                }
-            }
-            
-//            MARK: トップページで使っているメニューコンポーネント
-//            これを使う時は、let isChangeBtn: Boolが必要
-//            FooterBtn(
-//                iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
-//                label: isChangeBtn ? "戻る" : "メニュー",
-//                action: onMenuTap,
-//                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
-//            )
+            FooterBtn(
+                iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
+                label: isChangeBtn ? "戻る" : "メニュー",
+                action: onMenuTap,
+                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
+            )
         }
     }
 }
+
+//　使用例
+//    インポート
+//    @ObservedObject var router: Router
+//    @State private var isChangeBtn = false
+//    @State private var isShowMenu = false
+
+//    画面の最前面に表示できるところに
+//        if isShowMenu {
+//            Color.white.opacity(0.5)
+//                .ignoresSafeArea()
+//                .transition(.opacity)
+//
+//            Menu(router: router)
+//                .transition(
+//                    .move(edge: .trailing)
+//                    .combined(with: .opacity)
+//                )
+//        }
+//
+//        BottomNavigationBar(
+//            router: router,
+//            isChangeBtn: isChangeBtn,
+//            onCameraTap: {
+//                router.push(.camera)
+//            },
+//            onMenuTap: {
+//                ボタンの見た目切り替えは即時（アニメなし）
+//                isChangeBtn.toggle()
+//
+//            　　メニュー本体の表示はアニメーション付き
+//                withAnimation(.easeInOut(duration: 0.3)) {
+//                    isShowMenu.toggle()
+//                }
+//            }
+//        )
 
 

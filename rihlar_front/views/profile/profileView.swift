@@ -10,7 +10,9 @@ import SwiftUI
 struct ProfileView: View {
     let viewData: UserProfileViewData
     @State private var editableName: String
-    
+    @ObservedObject var router: Router
+    @State private var isChangeBtn = false
+    @State private var isShowMenu = false
     @State private var isEditing = false
     @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
     
@@ -172,15 +174,7 @@ struct ProfileView: View {
                     .padding(.horizontal)
                     .padding(.bottom, 120)
                 }
-            }
-                
-                //            // ZStack内で最前面に置くナビゲーション
-                //            BottomNavigationBar(
-                //                onCameraTap: { print("カメラタップ") },
-                //                onHomeTap: { print("ホームタップ") },
-                //                onMenuTap: { print("メニュータップ") }
-                //            )
-                //            .padding(.bottom, 30)
+            }   
             }
             //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
             .sheet(item: $selectedImageIndex) { imageIndex in
@@ -188,6 +182,40 @@ struct ProfileView: View {
                     images: viewData.photos.map { $0.url },
                     startIndex: imageIndex.id
                 )
+            
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
+            
+            // ZStack内で最前面に置くナビゲーション
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: {
+                    router.push(.camera)
+                },
+                onMenuTap: {
+//                        ボタンの見た目切り替えは即時（アニメなし）
+                    isChangeBtn.toggle()
+
+//                        メニュー本体の表示はアニメーション付き
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
+        }
+        //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
+        .sheet(item: $selectedImageIndex) { imageIndex in
+            PhotoViewerView(images: images, startIndex: imageIndex.id)
                 .presentationDragIndicator(.hidden)
             }
             
@@ -207,6 +235,20 @@ struct ProfileView: View {
         let id: Int
     }
     
+}
+#Preview {
+//    ProfileView()
+}
+// ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
+struct ImageIndex: Identifiable {
+    let id: Int
+}
+
+
+// 文字数を計算して重みの合計が10以下
+func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+    var visualLength: Double = 0.0
+    var result = ""
     
     // 文字数を計算して重みの合計が10以下
     func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
