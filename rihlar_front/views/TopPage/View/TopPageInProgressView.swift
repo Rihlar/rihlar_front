@@ -72,6 +72,7 @@ struct TopPageInProgressView: View {
                         .move(edge: .trailing)
                         .combined(with: .opacity)
                     )
+                    .zIndex(10)
             }
             
             VStack(spacing: 0) {
@@ -116,8 +117,9 @@ struct TopPageInProgressView: View {
                           isShowMenu.toggle()
                         }
                     },
-                    
-                    gameStatus: game.status.rawValue
+                    vm: vm,
+                    game: game,
+                    gameType: vm.game?.type ?? 0
                 )
             }
             .zIndex(1)

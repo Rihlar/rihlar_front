@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ProfileView: View {
     let viewData: UserProfileViewData
-    @State private var editableName: String
     @ObservedObject var router: Router
+    @State private var editableName: String
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
     @State private var isEditing = false
@@ -21,8 +21,10 @@ struct ProfileView: View {
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
     
-    init(viewData: UserProfileViewData) {
+    init(viewData: UserProfileViewData, router: Router) {
         self.viewData = viewData
+        // ObservedObject の初期化にはプロパティラッパーの _router を使います
+        _router = ObservedObject(initialValue: router)
         _editableName = State(initialValue: viewData.user.name)
     }
     
@@ -215,7 +217,7 @@ struct ProfileView: View {
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
-            PhotoViewerView(images: images, startIndex: imageIndex.id)
+            PhotoViewerView(images: viewData.photos.map { $0.url }, startIndex: imageIndex.id)
                 .presentationDragIndicator(.hidden)
             }
             
@@ -228,55 +230,49 @@ struct ProfileView: View {
         
     }
     #Preview {
-        ProfileView(viewData: mockUserProfile)
+//        ProfileView(viewData: mockUserProfile)
     }
     // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
     struct ImageIndex: Identifiable {
         let id: Int
     }
     
-}
-#Preview {
-//    ProfileView()
-}
+//}
 // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
-struct ImageIndex: Identifiable {
-    let id: Int
-}
+//struct ImageIndex: Identifiable {
+//    let id: Int
+//}
 
 
-// 文字数を計算して重みの合計が10以下
-func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+/// 文字数を計算して幅の合計が maxVisualLength を超えないようトリミングし、
+/// はみ出す場合は末尾に「…」を追加
+func limitTextWithVisualWeight(_ text: String,
+                              maxVisualLength: Double = 10.0) -> String {
     var visualLength: Double = 0.0
     var result = ""
-    
-    // 文字数を計算して重みの合計が10以下
-    func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
-        var visualLength: Double = 0.0
-        var result = ""
-        
-        for char in text {
-            let weight: Double
-            
-            if ("\u{3040}"..."\u{309F}").contains(char) {
-                weight = 1.5 // ひらがな
-            } else if ("a"..."z").contains(char.lowercased()) {
-                weight = 1.0 // アルファベット
-            } else if char.isNumber {
-                weight = 1.2 // 数字は中間くらい
-            } else {
-                weight = 2.0 // 漢字や記号など
-            }
-            
-            if visualLength + weight > maxVisualLength {
-                result += "…"
-                break
-            }
-            
-            visualLength += weight
-            result.append(char)
+
+    for char in text {
+        let weight: Double
+        if ("\u{3040}"..."\u{309F}").contains(char) {
+            weight = 1.5   // ひらがな
+        } else if ("a"..."z").contains(char.lowercased()) {
+            weight = 1.0   // アルファベット
+        } else if char.isNumber {
+            weight = 1.2   // 数字
+        } else {
+            weight = 2.0   // 漢字・記号など
         }
-        
-        return result
+
+        // ここで超えたら「…」をつけて終了
+        if visualLength + weight > maxVisualLength {
+            result += "…"
+            break
+        }
+
+        visualLength += weight
+        result.append(char)
     }
+
+    return result
+}
 

@@ -13,11 +13,27 @@ import Combine
 /// テスト用のダミー実装
 class MockGameService: GameServiceProtocol {
     func fetchGame(id: String) -> AnyPublisher<Game, Error> {
+        // 2025-06-29 15:00:00 JST を固定
+        let start = DateComponents(
+            calendar: .current,
+            timeZone: TimeZone(identifier: "Asia/Tokyo"),
+            year: 2025, month: 6, day: 29,
+            hour: 15, minute: 0, second: 0
+        ).date!
+        
+        let end = DateComponents(
+            calendar: .current,
+            timeZone: TimeZone(identifier: "Asia/Tokyo"),
+            year: 2025, month: 6, day: 31,
+            hour: 15, minute: 0, second: 0
+        ).date!
+        
         let sample = Game(
             gameID: id,
-            startTime: Date().addingTimeInterval(-60),
-            endTime: Date().addingTimeInterval(3000),
-            flag: 0, type: 0,
+            startTime: start,
+            endTime: end,
+            flag: 0,
+            type: 0,
             teams: ["Red","Blue"],
             statusRaw: 0,
             regionID: "tokyo"

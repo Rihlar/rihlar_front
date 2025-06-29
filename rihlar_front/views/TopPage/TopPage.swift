@@ -10,28 +10,18 @@ import CoreLocation
 
 struct TopPage: View {
     @ObservedObject var router: Router
-    @StateObject private var vm = GameViewModel(service: MockGameService())
+    @ObservedObject var vm: GameViewModel
     
     var body: some View {
         if vm.isLoading {
             ProgressView("読み込み中…")
-        }
-        else if let game = vm.game {
-            if game.status == .notStarted {
-                TopPageNotStartedView(vm: vm)
-            }
-            else if game.status == .inProgress {
-                TopPageInProgressView(
-                    vm: vm,
-                    router: router,
-                    game: game
-                )
-            }
-            else {  // .ended
-                TopPageEndedView()
-            }
-        }
-        else if let err = vm.errorMessage {
+        } else if let game = vm.game {
+            TopPageInProgressView(
+                vm: vm,
+                router: router,
+                game: game
+            )
+        } else if let err = vm.errorMessage {
             Text("エラー: \(err)")
                 .foregroundColor(.red)
         }

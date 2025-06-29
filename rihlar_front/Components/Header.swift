@@ -36,12 +36,19 @@ struct Header: View {
                         }
                     }
                     .opacity(0)
-                    
-                    Image("matchHeader")
-                        .overlay(Text("対戦モード")
-                            .foregroundColor(Color("TextColor"))
-                            .font(.system(size: 16, weight: .bold))
-                        )
+                    if game.status == .inProgress {
+                        Image("matchHeader")
+                            .overlay(Text(remainingTimeString(until: game.endTime))
+                                .foregroundColor(Color("TextColor"))
+                                .font(.system(size: 16, weight: .bold))
+                            )
+                    } else {
+                        Image("matchHeader")
+                            .overlay(Text("対戦モード")
+                                .foregroundColor(Color("TextColor"))
+                                .font(.system(size: 16, weight: .bold))
+                            )
+                    }
                     
                     ZStack {
                         Circle()
