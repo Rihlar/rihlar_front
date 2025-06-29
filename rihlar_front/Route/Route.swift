@@ -17,4 +17,9 @@ enum Route {
     case items
     case record
     case setting
+    
+    case loading
+    
+    case mode
+    case teamMatch
 }
