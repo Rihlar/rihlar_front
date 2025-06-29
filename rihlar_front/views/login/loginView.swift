@@ -176,24 +176,28 @@ struct loginDesignView: View {
             
             // 非同期処理を実行
             Task{
-                do{
-                    // 3ふん以内にキャッシュされたトークンがあれば取得、なければfetchしてキャッシュ
-                    let accessToken = try await TokenManager.shared.getAccessToken()
-                        ?? try await TokenManager.shared.fetchAndCacheAccessToken()
-                    
-                    print("アクセストークンの取得成功:\(accessToken)")
-                    DispatchQueue.main.async {
-                        onLoginSuccess()
+                do {
+                        // まずキャッシュを試す
+                        if let token = try await TokenManager.shared.getAccessToken() {
+                            print("キャッシュからトークン取得成功: \(token)")
+                            DispatchQueue.main.async {
+                                onLoginSuccess()
+                            }
+                        } else {
+                            // キャッシュがなければfetchして取得
+                            let token = try await TokenManager.shared.fetchAndCacheAccessToken()
+                            print("新規取得トークン成功: \(token)")
+                            DispatchQueue.main.async {
+                                onLoginSuccess()
+                            }
+                        }
+                    } catch {
+                        print("トークン取得失敗: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            didReceiveToken = false
+                            authManager.reset()
+                        }
                     }
-                    
-                }catch{
-                    print("アクセストークンの取得失敗:\(error.localizedDescription)")
-                    // 再取得
-                    DispatchQueue.main.async {
-                                        didReceiveToken = false
-                                        authManager.reset()
-                                    }
-                }
             }
             
         } else {
