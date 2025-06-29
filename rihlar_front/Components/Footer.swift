@@ -9,8 +9,6 @@ import SwiftUI
 
 struct Footer: View {
     @ObservedObject var router: Router
-//    メニューが開いているかどうかを親から受け取る
-    let isMenuOpen: Bool
 //    メニューボタンと戻るボタンのどちらかを親から受け取る
     let isChangeBtn: Bool
 //    カメラアイコンタップ時

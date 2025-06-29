@@ -10,6 +10,8 @@ import SwiftUI
 struct ModeSelection: View {
     @ObservedObject var router: Router
     @State private var isModeFlag: Bool = false
+    @State private var isChangeBtn = false
+    @State private var isShowMenu = false
     
     var body: some View {
         ZStack {
@@ -38,6 +40,39 @@ struct ModeSelection: View {
                 )
                 
                 Spacer()
+            }
+            
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+    
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
+    
+            VStack() {
+                Spacer()
+                
+                BottomNavigationBar(
+                    router: router,
+                    isChangeBtn: isChangeBtn,
+                    onCameraTap: {
+                        router.push(.camera)
+                    },
+                    onMenuTap: {
+                        //                    ボタンの見た目切り替えは即時（アニメなし）
+                        isChangeBtn.toggle()
+                        
+                        //                　　メニュー本体の表示はアニメーション付き
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isShowMenu.toggle()
+                        }
+                    }
+                )
             }
             
             ModalView(

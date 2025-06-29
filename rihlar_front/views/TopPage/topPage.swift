@@ -79,7 +79,6 @@ struct topPage: View {
                 }
                 Footer (
                     router: router,
-                    isMenuOpen: isShowMenu,
                     isChangeBtn: isChangeBtn,
 //                            カメラ画面を表示するためのflag
                     onCameraTap: {
