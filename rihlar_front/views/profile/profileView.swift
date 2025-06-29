@@ -1,265 +1,265 @@
-////
-////  profileView.swift
-////  rihlar_front
-////
-////  Created by 川岸遥奈 on 2025/06/10.
-////
 //
-//import SwiftUI
+//  profileView.swift
+//  rihlar_front
 //
-//struct ProfileView: View {
-//    let viewData: UserProfileViewData
-//    @State private var editableName: String
-//    @ObservedObject var router: Router
-//    @State private var isChangeBtn = false
-//    @State private var isShowMenu = false
-//    @State private var isEditing = false
-//    @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
-//    
-//    // タップされた画像のインデックスを管理するState（Optional）
-//    @State private var selectedImageIndex: ImageIndex? = nil
-//    // 実績を選択する処理をするかどうか
-//    @State private var showAchievementSheet = false
-//    
-//    init(viewData: UserProfileViewData) {
-//        self.viewData = viewData
-//        _editableName = State(initialValue: viewData.user.name)
-//    }
-//    
-//    var body: some View {
-//        ZStack(alignment: .bottom) {
-//            Color(Color.backgroundColor)
-//                .ignoresSafeArea()
-//            
-//            VStack(spacing: 20) {
-//                Spacer().frame(height: 0)
-//                
-//                // プロフィール画像
-//                ZStack {
-//                    Circle()
-//                        .fill(Color.gray.opacity(0.4))
-//                        .frame(width: 120, height: 120)
-//                    AsyncImage(url: viewData.user.iconUrl) { image in
-//                        image
-//                            .resizable()
-//                            .scaledToFill()
-//                    } placeholder: {
-//                        Color.gray.opacity(0.3)
-//                    }
-//                    .frame(width: 120, height: 120)
-//                    .clipShape(Circle())
-//                }
-//                
-//                // ユーザーネーム＋編集ボタン
-//                HStack(alignment: .center, spacing: 10) {
-//                    VStack(spacing: 5) {
-//                        HStack{
-//                            // 入力時と表示時で変化
-//                            if isEditing{
-//                                TextField("名前を入力",text: $editableName)
-//                                    .padding(8)
-//                                    .background(Color.gray.opacity(0.2))
-//                                    .cornerRadius(8)
-//                                    .focused($isNameFieldFocused)
-//                                    .frame(width:150)
-//                                    .onAppear {
-//                                        isNameFieldFocused = true
-//                                    }
-//                            }else{
-//                                Text(limitTextWithVisualWeight(editableName))
-//                                    .font(.title2)
-//                                    .fontWeight(.bold)
-//                                    .foregroundColor(Color.textColor)
-//                                    .frame(width:150)
-//                            }
-//                            
-//                            Button {
-//                                if isEditing {
-//                                    // フォーカスを外して編集終了
-//                                    isNameFieldFocused = false
-//                                }
-//                                isEditing.toggle()
-//                            } label: {
-//                                Text(isEditing ? "保存" : "編集")
-//                                    .font(.system(size: 14))
-//                                    .padding(.vertical, 6)
-//                                    .padding(.horizontal, 12)
-//                                    .foregroundColor(Color.textColor)
-//                                    .background(isEditing ? Color.gray :Color.buttonColor)
-//                                    .cornerRadius(8)
-//                                    .shadow(radius: 4)
-//                            }
-//                        }
-//                        
-//                        Rectangle()
-//                            .frame(width: 240, height: 1)
-//                            .foregroundColor(Color.separatorLine)
-//                    }
-//                    
-//                }
-//                
-//                // 実績バッジ
-//                Button {
-//                    showAchievementSheet = true
-//                } label: {
-//                    HStack(spacing: 20) {
-//                        ForEach(0..<3, id: \.self) { index in
-//                            if index < viewData.records.count {
-//                                let record = viewData.records[index]
-//                                
-//                                Group {
-//                                    if record.imageUrl.contains("http"),
-//                                       let url = URL(string: record.imageUrl) {
-//                                        AsyncImage(url: url) { image in
-//                                            image.resizable()
-//                                        } placeholder: {
-//                                            Circle().fill(Color.gray.opacity(0.3))
-//                                        }
-//                                    } else {
-//                                        Image(record.imageUrl)
-//                                            .resizable()
-//                                    }
-//                                }
-//                                .frame(width: 70, height: 70)
-//                                .clipShape(Circle())
-//                                
-//                            } else {
-//                                Circle()
-//                                    .strokeBorder(Color.gray.opacity(0.4), lineWidth: 2)
-//                                    .frame(width: 70, height: 70)
-//                            }
-//                        }
-//                    }
-//                    .padding()
-//                    .background(Color(red: 0.95, green: 0.93, blue: 0.87))
-//                    .cornerRadius(20)
-//                }
-//                
-//                
-//                // 記録した写真
-//                Text("記録した写真")
-//                    .font(.title3)
-//                    .fontWeight(.medium)
-//                    .foregroundColor(Color.textColor)
-//                
-//                // 写真一覧（下にスペース追加）
-//                ScrollView {
-//                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-//                        ForEach(viewData.photos.indices, id: \.self) { index in
-//                            let photo = viewData.photos[index]
+//  Created by 川岸遥奈 on 2025/06/10.
 //
-//                            Group {
-//                                if photo.url.contains("http"),
-//                                   let url = URL(string: photo.url) {
-//                                    AsyncImage(url: url) { image in
-//                                        image.resizable().scaledToFill()
-//                                    } placeholder: {
-//                                        RoundedRectangle(cornerRadius: 10)
-//                                            .fill(Color.gray.opacity(0.2))
-//                                    }
-//                                } else {
-//                                    Image(photo.url)
-//                                        .resizable()
-//                                        .scaledToFill()
-//                                }
-//                            }
-//                            .frame(height: 160)
-//                            .clipped()
-//                            .cornerRadius(10)
-//                            .onTapGesture {
-//                                selectedImageIndex = ImageIndex(id: index)
-//                            }
-//                        }
-//                    }
-//                    .padding(.horizontal)
-//                    .padding(.bottom, 120)
-//                }
-//            }   
-//            }
-//            //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
-//            .sheet(item: $selectedImageIndex) { imageIndex in
-//                PhotoViewerView(
-//                    images: viewData.photos.map { $0.url },
-//                    startIndex: imageIndex.id
-//                )
-//            
-//            if isShowMenu {
-//                Color.white.opacity(0.5)
-//                    .ignoresSafeArea()
-//                    .transition(.opacity)
-//                
-//                Menu(router: router)
-//                    .transition(
-//                        .move(edge: .trailing)
-//                        .combined(with: .opacity)
-//                    )
-//            }
-//            
-//            // ZStack内で最前面に置くナビゲーション
-//            BottomNavigationBar(
-//                router: router,
-//                isChangeBtn: isChangeBtn,
-//                onCameraTap: {
-//                    router.push(.camera)
-//                },
-//                onMenuTap: {
-////                        ボタンの見た目切り替えは即時（アニメなし）
-//                    isChangeBtn.toggle()
-//
-////                        メニュー本体の表示はアニメーション付き
-//                    withAnimation(.easeInOut(duration: 0.3)) {
-//                        isShowMenu.toggle()
-//                    }
-//                }
-//            )
-//        }
-//    
-//            
-//            .sheet(isPresented: $showAchievementSheet) {
-//                AchievementSelectionView()
-//                    .presentationDetents([.medium, .large])
-//                    .presentationDragIndicator(.hidden)
-//            }
-//        }
-//        
-//    }
-//    #Preview {
-//        ProfileView(viewData: mockUserProfile)
-//    }
-//    // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
-//    struct ImageIndex: Identifiable {
-//        let id: Int
-//    }
-//    
-//
-//
-//    // 文字数を計算して重みの合計が10以下
-//    func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
-//        var visualLength: Double = 0.0
-//        var result = ""
-//        
-//        for char in text {
-//            let weight: Double
-//            
-//            if ("\u{3040}"..."\u{309F}").contains(char) {
-//                weight = 1.5 // ひらがな
-//            } else if ("a"..."z").contains(char.lowercased()) {
-//                weight = 1.0 // アルファベット
-//            } else if char.isNumber {
-//                weight = 1.2 // 数字は中間くらい
-//            } else {
-//                weight = 2.0 // 漢字や記号など
-//            }
-//            
-//            if visualLength + weight > maxVisualLength {
-//                result += "…"
-//                break
-//            }
-//            
-//            visualLength += weight
-//            result.append(char)
-//        }
-//        
-//        return result
-//    }
-//
+
+import SwiftUI
+
+struct ProfileView: View {
+    let viewData: UserProfileViewData
+    @State private var editableName: String
+    @ObservedObject var router: Router
+    @State private var isChangeBtn = false
+    @State private var isShowMenu = false
+    @State private var isEditing = false
+    @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
+    
+    // タップされた画像のインデックスを管理するState（Optional）
+    @State private var selectedImageIndex: ImageIndex? = nil
+    // 実績を選択する処理をするかどうか
+    @State private var showAchievementSheet = false
+    
+    init(viewData: UserProfileViewData, router: Router) {
+        self.viewData = viewData
+        self.router = router
+        _editableName = State(initialValue: viewData.user.name)
+    }
+    
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            Color(Color.backgroundColor)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 20) {
+                Spacer().frame(height: 0)
+                
+                // プロフィール画像
+                ZStack {
+                    Circle()
+                        .fill(Color.gray.opacity(0.4))
+                        .frame(width: 120, height: 120)
+                    AsyncImage(url: viewData.user.iconUrl) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    } placeholder: {
+                        Color.gray.opacity(0.3)
+                    }
+                    .frame(width: 120, height: 120)
+                    .clipShape(Circle())
+                }
+                
+                // ユーザーネーム＋編集ボタン
+                HStack(alignment: .center, spacing: 10) {
+                    VStack(spacing: 5) {
+                        HStack{
+                            // 入力時と表示時で変化
+                            if isEditing {
+                                TextField("名前を入力", text: $editableName)
+                                    .padding(8)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(8)
+                                    .focused($isNameFieldFocused)
+                                    .frame(width: 150)
+                                    .onAppear {
+                                        isNameFieldFocused = true
+                                    }
+                            } else {
+                                Text(limitTextWithVisualWeight(editableName))
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(Color.textColor)
+                                    .frame(width: 150)
+                            }
+                            
+                            Button {
+                                if isEditing {
+                                    // フォーカスを外して編集終了
+                                    isNameFieldFocused = false
+                                }
+                                isEditing.toggle()
+                            } label: {
+                                Text(isEditing ? "保存" : "編集")
+                                    .font(.system(size: 14))
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 12)
+                                    .foregroundColor(Color.textColor)
+                                    .background(isEditing ? Color.gray : Color.buttonColor)
+                                    .cornerRadius(8)
+                                    .shadow(radius: 4)
+                            }
+                        }
+                        
+                        Rectangle()
+                            .frame(width: 240, height: 1)
+                            .foregroundColor(Color.separatorLine)
+                    }
+                }
+                
+                // 実績バッジ
+                Button {
+                    showAchievementSheet = true
+                } label: {
+                    HStack(spacing: 20) {
+                        ForEach(0..<3, id: \.self) { index in
+                            if index < viewData.records.count {
+                                let record = viewData.records[index]
+                                
+                                Group {
+                                    if record.imageUrl.contains("http"),
+                                       let url = URL(string: record.imageUrl) {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable()
+                                        } placeholder: {
+                                            Circle().fill(Color.gray.opacity(0.3))
+                                        }
+                                    } else {
+                                        Image(record.imageUrl)
+                                            .resizable()
+                                    }
+                                }
+                                .frame(width: 70, height: 70)
+                                .clipShape(Circle())
+                                
+                            } else {
+                                Circle()
+                                    .strokeBorder(Color.gray.opacity(0.4), lineWidth: 2)
+                                    .frame(width: 70, height: 70)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(red: 0.95, green: 0.93, blue: 0.87))
+                    .cornerRadius(20)
+                }
+                
+                // 記録した写真
+                Text("記録した写真")
+                    .font(.title3)
+                    .fontWeight(.medium)
+                    .foregroundColor(Color.textColor)
+                
+                // 写真一覧（下にスペース追加）
+                ScrollView {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                        ForEach(viewData.photos.indices, id: \.self) { index in
+                            let photo = viewData.photos[index]
+                            
+                            Group {
+                                if photo.url.contains("http"),
+                                   let url = URL(string: photo.url) {
+                                    AsyncImage(url: url) { image in
+                                        image.resizable().scaledToFill()
+                                    } placeholder: {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.gray.opacity(0.2))
+                                    }
+                                } else {
+                                    Image(photo.url)
+                                        .resizable()
+                                        .scaledToFill()
+                                }
+                            }
+                            .frame(height: 160)
+                            .clipped()
+                            .cornerRadius(10)
+                            .onTapGesture {
+                                selectedImageIndex = ImageIndex(id: index)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 120)
+                }
+            }
+            
+            // 実績選択シート
+            .sheet(isPresented: $showAchievementSheet) {
+                AchievementSelectionView()
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.hidden)
+            }
+            
+            // 写真拡大表示シート
+            .sheet(item: $selectedImageIndex) { imageIndex in
+                PhotoViewerView(
+                    images: viewData.photos.map { $0.url },
+                    startIndex: imageIndex.id
+                )
+                .presentationDragIndicator(.hidden)
+            }
+            
+            // メニュー表示
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
+            
+            // 最前面に置くナビゲーションバー
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: {
+                    router.push(.camera)
+                },
+                onMenuTap: {
+                    // ボタンの見た目切り替えは即時（アニメなし）
+                    isChangeBtn.toggle()
+                    
+                    // メニュー本体の表示はアニメーション付き
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
+        }
+    }
+}
+    #Preview {
+        ProfileView(viewData: mockUserProfile, router: Router())
+    }
+    
+    // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
+    struct ImageIndex: Identifiable {
+        let id: Int
+    }
+
+
+// 文字数を計算して重みの合計がmaxVisualLength以下に制限する関数
+func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+    var visualLength: Double = 0.0
+    var result = ""
+    
+    for char in text {
+        let weight: Double
+        
+        if ("\u{3040}"..."\u{309F}").contains(char) {
+            weight = 1.5 // ひらがな
+        } else if ("a"..."z").contains(char.lowercased()) {
+            weight = 1.0 // アルファベット
+        } else if char.isNumber {
+            weight = 1.2 // 数字は中間くらい
+        } else {
+            weight = 2.0 // 漢字や記号など
+        }
+        
+        if visualLength + weight > maxVisualLength {
+            result += "…"
+            break
+        }
+        
+        visualLength += weight
+        result.append(char)
+    }
+    
+    return result
+}
