@@ -35,7 +35,8 @@ struct AppRootView: View {
 //                              　カメラ画面の遷移
                                 Camera()
                             case .profile:
-                                ProfileView(viewData: mockUserProfile)
+                                ProfileView(viewData: mockUserProfile
+                                , router: router)
                             case .mode:
                                 ModeSelection(router: router)
                             case .teamMatch:

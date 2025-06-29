@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ProfileView: View {
     let viewData: UserProfileViewData
-
     @ObservedObject var router: Router
     @State private var editableName: String
     @State private var isChangeBtn = false
@@ -209,10 +208,7 @@ struct ProfileView: View {
         }
         
 
-    // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
-    struct ImageIndex: Identifiable {
-        let id: Int
-    }
+    
 
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSelectionView(records: $records)
@@ -222,10 +218,13 @@ struct ProfileView: View {
     }
     
 }
-#Preview {
-    ProfileView(viewData: mockUserProfile)
+//#Preview {
+//    ProfileView(viewData: mockUserProfile)
+//}
+// ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
+struct ImageIndex: Identifiable {
+    let id: Int
 }
-
 
 /// 文字数を計算して幅の合計が maxVisualLength を超えないようトリミングし、
 /// はみ出す場合は末尾に「…」を追加
