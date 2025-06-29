@@ -25,7 +25,7 @@ struct ProfileView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 20) {
-                Spacer().frame(height: 40)
+                Spacer().frame(height: 0)
                 
                 // プロフィール画像
                 ZStack {
@@ -53,16 +53,6 @@ struct ProfileView: View {
                                     .onAppear {
                                         isNameFieldFocused = true
                                     }
-                                //                                文字数が１０文字以上になった場合点線をリアルタイムで入れる？
-                                //                                    .onChange(of: playerName) { newValue in
-                                //                                        // 入力制限（10文字相当）をリアルタイムで反映
-                                //                                        let limited = limitTextWithVisualWeight(newValue)
-                                //                                        if limited != newValue {
-                                //                                            playerName = limited
-                                //                                        }
-                                //                                    }
-                                
-                                
                             }else{
                                 Text(limitTextWithVisualWeight(playerName))
                                     .font(.title2)
@@ -90,7 +80,7 @@ struct ProfileView: View {
                         }
                         
                         Rectangle()
-                            .frame(width: 200, height: 1)
+                            .frame(width: 240, height: 1)
                             .foregroundColor(.gray)
                     }
                     
