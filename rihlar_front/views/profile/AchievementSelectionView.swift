@@ -8,71 +8,58 @@
 import SwiftUI
 
 struct AchievementSelectionView: View {
-    // プロフィール側と実績状態を共有するためのBinding
-    @Binding var records: [Record]
-
-    // シートを閉じるための環境変数
+    // 表示する実績画像の仮データ
+    let images = ["king", "king", "king"]
+    
+    // 表示を閉じるための dismiss 環境変数
     @Environment(\.dismiss) var dismiss
-
+    // 選択せれた画像のインデックスを保持する状態変数
+    @State private var selectedImages: Set<Int> = [0,2]
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // ドラッグインジケーター（シートの上部に表示されるバー）
+                // ドラッグインジケーター
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.backgroundColor)
-                    .frame(width: 80, height: 5)
+                    .frame(width:80,height: 5)
                     .padding(.top, 12)
-
-                // 区切り線
+                // 緑の区切り線
                 Rectangle()
                     .fill(Color.buttonFrameColor)
                     .frame(height: 2)
-                    .padding(.top, 12)
-
-                // 実績アイコンを表示するグリッド
+                    .padding(.top,12)
+                
                 ScrollView {
-                    LazyVGrid(
-                        columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3),
-                        spacing: 12
-                    ) {
-                        ForEach(records.indices, id: \.self) { index in
-                            var record = records[index]
-
+                    // 三列のグリットで実績を並べる
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12){
+                        
+                        // 画像配列のインデックスでループ
+                        ForEach(images.indices,id:\.self){
+                            index in
+                            // 実績画像の背景
                             ZStack(alignment: .topTrailing) {
-                                // 円形背景（常に表示）
+                                // 丸背景
                                 Circle()
                                     .fill(Color.backgroundColor)
                                     .frame(width: 100, height: 100)
                                     .overlay(
-                                        // アイコン画像の読み込み
-                                        Group {
-                                            if let url = URL(string: record.imageUrl), record.imageUrl.contains("http") {
-                                                // URLがhttpを含む → ネットから読み込む
-                                                AsyncImage(url: url) { image in
-                                                    image.resizable()
-                                                } placeholder: {
-                                                    Color.gray.opacity(0.3)
-                                                }
-                                            } else {
-                                                // ローカル画像名として表示
-                                                Image(record.imageUrl)
-                                                    .resizable()
-                                            }
-                                        }
-                                        .scaledToFill()
-                                        .frame(width: 80, height: 80)
-                                        .clipShape(Circle())
+                                        Image(images[index])
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 80, height: 80)
+                                            .clipShape(Circle())
                                     )
                                     .overlay(
-                                        // 選択されているときは点線の枠を表示
+                                        // 点線枠：選択時のみ表示（でも常にレイアウト上は存在）
                                         RoundedRectangle(cornerRadius: 10)
                                             .stroke(style: StrokeStyle(lineWidth: 4, dash: [5]))
                                             .foregroundColor(Color.buttonFrameColor)
-                                            .opacity(record.isSelected ? 1 : 0)
+                                            .opacity(selectedImages.contains(index) ? 1 : 0)
                                     )
-
-                                // チェックマーク（選択時のみ）
-                                if record.isSelected {
+                                
+                                // チェックマーク：選択時のみ
+                                if selectedImages.contains(index) {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 30))
                                         .foregroundColor(Color.buttonColor)
@@ -82,22 +69,19 @@ struct AchievementSelectionView: View {
                                 }
                             }
                             .onTapGesture {
-                                // 選択数を数える（最大3つまで）
-                                let selectedCount = records.filter { $0.isSelected }.count
-                                if record.isSelected {
-                                    // 選択解除
-                                    records[index].isSelected = false
-                                } else if selectedCount < 3 {
-                                    // 3つ未満のときだけ選択可能
-                                    records[index].isSelected = true
+                                if selectedImages.contains(index) {
+                                    selectedImages.remove(index)
+                                } else {
+                                    selectedImages.insert(index)
                                 }
                             }
+                            
                         }
                     }
                     .padding()
+                    
                 }
-
-                // 閉じるボタン（戻る）
+                // スワイプで出したものを閉じる
                 Button {
                     dismiss()
                 } label: {
@@ -112,11 +96,11 @@ struct AchievementSelectionView: View {
                     .frame(width: 180, height: 80)
                     .background(
                         ZStack {
-                            // ベースのボタンカラー
+                            // 内側のボタンカラー（buttonColor）
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(Color.buttonColor)
-
-                            // 左から光が当たっているようなグラデーション
+                            
+                            // 左から光が当たるグラデーション
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(
                                     LinearGradient(
@@ -128,16 +112,14 @@ struct AchievementSelectionView: View {
                                         endPoint: .trailing
                                     )
                                 )
-
-                            // 枠線と影
+                            
+                            // 縁の色（buttonFrameColor）
                             RoundedRectangle(cornerRadius: 20)
                                 .stroke(Color.buttonFrameColor, lineWidth: 4)
                                 .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
                         }
                     )
-                }
-                .padding(.bottom, 20)
-            }
+                }}
             .background(Color.mainDecorationColor)
         }
     }

@@ -8,89 +8,77 @@
 import SwiftUI
 
 struct PhotoViewerView: View {
-    let photos: [Photo]             // 画像情報モデル
+    // 表示する画像のファイル名リスト（Assetにある画像など）
+    let images: [String]
+    // タップされた時の画像の初期位置
     let startIndex: Int
+    // 現在表示中のインデックス（スワイプで変わる）
     @State private var currentIndex: Int
+    // 表示を閉じるための dismiss 環境変数
     @Environment(\.dismiss) var dismiss
-    
-    init(photos: [Photo], startIndex: Int) {
-        self.photos = photos
+    // イニシャライザで初期化
+    init(images: [String], startIndex: Int) {
+        self.images = images
         self.startIndex = startIndex
         _currentIndex = State(initialValue: startIndex)
     }
     
     var body: some View {
-        if currentIndex < 0 || currentIndex >= photos.count {
-            EmptyView()
+        if currentIndex >= images.count {
+            // インデックスが範囲外なら表示しない
+            Color.clear
         } else {
-            ZStack {
+            ZStack{
+                // 背景色
                 Color.mainDecorationColor.ignoresSafeArea()
-                
-                VStack(spacing: 0) {
-                    // ドラッグインジケーター
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.backgroundColor)
-                        .frame(width: 80, height: 5)
-                        .padding(.top, 12)
-                    
-                    // 緑の区切り線
-                    Rectangle()
-                        .fill(Color.buttonFrameColor)
-                        .frame(height: 2)
-                        .padding(.top, 12)
-                    
-                    Spacer()
-                }
-                
+//                あとでやります
+//                // ドラッグインジケーター
+//                RoundedRectangle(cornerRadius: 3)
+//                    .fill(Color.backgroundColor)
+//                    .frame(width:80,height: 5)
+//                    .padding(.top, 12)
+//                // 緑の区切り線
+//                Rectangle()
+//                    .fill(Color.buttonFrameColor)
+//                    .frame(height: 2)
+//                    .padding(.top,12)
+                // 横須ワイプで画面切り替えする
                 TabView(selection: $currentIndex) {
-                    ForEach(photos.indices, id: \.self) { index in
-                        let photo = photos[index]
-                        
-                        VStack(spacing: 20) {
+                    ForEach(images.indices,id: \.self) { index in
+                        VStack(spacing: 20){
                             Spacer()
-                            
-                            Group {
-                                if photo.url.starts(with: "http"),
-                                   let url = URL(string: photo.url) {
-                                    AsyncImage(url: url) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFit()
-                                    } placeholder: {
-                                        ProgressView()
+                                .onAppear {
+                                    // 表示せれるたびにログ表示
+                                    print("画像名: \(images[index])")
+                                    if UIImage(named: images[index]) == nil {
+                                        print("UIImageとして読み込めてない")
                                     }
-                                } else {
-                                    Image(photo.url)
-                                        .resizable()
-                                        .scaledToFit()
                                 }
-                            }
-                            .frame(maxHeight: 400)
-                            .padding()
-                            .background(Color.backgroundColor)
-                            .cornerRadius(20)
-                            .shadow(radius: 4)
-                            
-                            // テーマ表示（小さく）
-                            if let theme = photo.theme {
-                                Text("テーマ：\(theme)")
-                                    .font(.caption)
-                                    .foregroundColor(.textColor)
-                            }
-                            
-                            // 投稿日時
-                            Text(formattedDate(from: photo.createdAt))
+                            // メイン画像の表示
+                            Image(images[index])
+                                .resizable()
+                                .scaledToFit()
+                                .frame(maxHeight: 400)
+                                .background(Color.red)
+                                .padding()
+                                .background(Color.backgroundColor)
+                                .cornerRadius(20)
+                                .shadow(radius: 4)
+                            // 日付テキスト（画像ごとに仮で違う表示）
+                            Text(formattedDate(for: index))
                                 .font(.subheadline)
                                 .foregroundColor(.textColor)
-                            
                             Spacer()
+                            
                         }
+                        // タブの識別用
                         .tag(index)
+                        
                     }
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                
-                // 戻るボタン（画面下固定）
+                .tabViewStyle (
+                    PageTabViewStyle(indexDisplayMode: .never))
+                // 戻るボタン（画面下に固定表示）
                 VStack {
                     Spacer()
                     Button {
@@ -129,16 +117,36 @@ struct PhotoViewerView: View {
                         )
                     }
                     .padding(.bottom, 30)
+                    
                 }
             }
         }
     }
-    
-    /// 日時を"yyyy年MM月dd日（E）HH:mm"形式に整形
-    func formattedDate(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.dateFormat = "yyyy年M月d日（E）HH:mm"
-        return formatter.string(from: date)
+        // 各インデックスに応じた日付を表示する関数
+        func formattedDate(for index: Int) -> String {
+            // 仮のフォーマット
+            return "2025年5月\(21 + index)日 水曜日　12時30分"
+        }
+        
     }
-}
+    struct PhotoViewerWrapper: View {
+        let images: [String]
+        let selectedImageIndex: Int?
+        
+        var body: some View {
+            if let index = selectedImageIndex {
+                PhotoViewerView(images: images, startIndex: index)
+                    .presentationDragIndicator(.hidden)
+            } else {
+                // 非表示（何も描画しない）
+                EmptyView()
+            }
+        }
+    }
+    
+
+
+
+
+
+
