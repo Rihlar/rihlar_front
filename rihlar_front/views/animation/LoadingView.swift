@@ -30,7 +30,7 @@ struct LoadingView : View {
             // ローディング画像
             Image(frames[frameindex])
                 .resizable()
-                .frame(width: 200, height: 150,alignment: .center)
+                .frame(width: 225, height: 101,alignment: .center)
                 .onReceive(timer){_ in
                     frameindex = (frameindex + 1) % frames.count
                     
