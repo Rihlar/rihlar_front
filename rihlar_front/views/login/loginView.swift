@@ -20,36 +20,36 @@ struct Bubble: Identifiable {
 // 単体バブルのビュー
 struct BubbleView: View {
     @State private var animate = false
-
+    
     let bubble: Bubble
-
+    
     var body: some View {
         Circle()
-            // 円の中身は透過（透明）
+        // 円の中身は透過（透明）
             .fill(Color.clear)
             .frame(width: bubble.size, height: bubble.size)
-            // 縁（Stroke）だけをオーバーレイ表示し、縁の不透明度とスケールをアニメーション
+        // 縁（Stroke）だけをオーバーレイ表示し、縁の不透明度とスケールをアニメーション
             .overlay(
                 Circle()
                     .stroke(Color.white.opacity(animate ? 1 : 0), lineWidth: 3) // 白縁3pt
                     .scaleEffect(animate ? 1.0 : 0.5) // スケール変化 小→大
                     .animation(
                         .easeOut(duration: 1.5)
-                            .delay(bubble.delay),
+                        .delay(bubble.delay),
                         value: animate
                     )
             )
-            // 画面上のランダム位置指定
+        // 画面上のランダム位置指定
             .position(x: bubble.x, y: bubble.y)
-            // バブル全体のスケールと不透明度もアニメーション
+        // バブル全体のスケールと不透明度もアニメーション
             .scaleEffect(animate ? 1.0 : 0.5)
             .opacity(animate ? 1.0 : 0.8)
             .animation(
                 .easeOut(duration: 1.5)
-                    .delay(bubble.delay),
+                .delay(bubble.delay),
                 value: animate
             )
-            // View表示時にアニメーション開始
+        // View表示時にアニメーション開始
             .onAppear {
                 animate = true
             }
@@ -58,14 +58,14 @@ struct BubbleView: View {
 
 // バブルをランダムに背景に表示
 struct BackgroundBubblesView: View {
-
+    
     // バブルの色候補（未使用だが保持）
     let colors = [
         Color.red.opacity(0.5),
         Color.blue.opacity(0.5),
         Color.green.opacity(0.5)
     ]
-
+    
     // 12個のバブルをランダム生成
     let bubbles: [Bubble] = (0..<12).map { _ in
         Bubble(
@@ -76,7 +76,7 @@ struct BackgroundBubblesView: View {
             color: [Color.red.opacity(0.5), Color.blue.opacity(0.5), Color.green.opacity(0.5)].randomElement()!
         )
     }
-
+    
     var body: some View {
         ZStack {
             ForEach(bubbles) { bubble in
@@ -94,24 +94,24 @@ struct loginDesignView: View {
     @StateObject private var authManager = AuthManager.shared
     
     var onLoginSuccess: () -> Void
-
+    
     let gradient = Gradient(stops: [
         .init(color: Color(red: 254/255, green: 224/255, blue: 117/255), location: 0.2),
         .init(color: Color(red: 152/255, green: 186/255, blue: 135/255), location: 0.5)
     ])
-
+    
     var body: some View {
         NavigationStack {
             ZStack {
                 LinearGradient(gradient: gradient, startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
                 BackgroundBubblesView()
-
+                
                 VStack {
                     Text("ロゴ")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.black)
-
+                    
                     Button(action: {
                         print("ログインボタン押された")
                         startAuthentication()
@@ -177,27 +177,27 @@ struct loginDesignView: View {
             // 非同期処理を実行
             Task{
                 do {
-                        // まずキャッシュを試す
-                        if let token = try await TokenManager.shared.getAccessToken() {
-                            print("キャッシュからトークン取得成功: \(token)")
-                            DispatchQueue.main.async {
-                                onLoginSuccess()
-                            }
-                        } else {
-                            // キャッシュがなければfetchして取得
-                            let token = try await TokenManager.shared.fetchAndCacheAccessToken()
-                            print("新規取得トークン成功: \(token)")
-                            DispatchQueue.main.async {
-                                onLoginSuccess()
-                            }
-                        }
-                    } catch {
-                        print("トークン取得失敗: \(error.localizedDescription)")
+                    // まずキャッシュを試す
+                    if let token = try await TokenManager.shared.getAccessToken() {
+                        print("キャッシュからトークン取得成功: \(token)")
                         DispatchQueue.main.async {
-                            didReceiveToken = false
-                            authManager.reset()
+                            onLoginSuccess()
+                        }
+                    } else {
+                        // キャッシュがなければfetchして取得
+                        let token = try await TokenManager.shared.fetchAndCacheAccessToken()
+                        print("新規取得トークン成功: \(token)")
+                        DispatchQueue.main.async {
+                            onLoginSuccess()
                         }
                     }
+                } catch {
+                    print("トークン取得失敗: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        didReceiveToken = false
+                        authManager.reset()
+                    }
+                }
             }
             
         } else {
@@ -212,14 +212,15 @@ struct loginDesignView: View {
 // 認証結果のURLからトークンを抽出する関数
 func getCode(callbackURL: URL) -> String? {
     print(callbackURL)
-
+    
     guard let components = URLComponents(url: callbackURL, resolvingAgainstBaseURL: false),
           let queryItems = components.queryItems else {
         return nil
     }
-
+    
     if let codeValue = queryItems.first(where: { $0.name == "token" })?.value {
-        print("Code value: \(codeValue)")
+        print("コールバックから取得したトークン: \(codeValue)")
+        
         saveKeyChain(tag: "authToken", value: codeValue)
         return codeValue
     } else {
