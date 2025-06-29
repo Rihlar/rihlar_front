@@ -11,6 +11,8 @@ import SwiftUI
 @MainActor
 class Router: ObservableObject {
     @Published var path: [Route] = []
+/// LoadingView からTopPageに戻って「陣取りスタート！」の文字を出すのに必要
+    @Published var didStartFromLoading: Bool = false
     
     func push(_ route: Route) {
         path.append(route)

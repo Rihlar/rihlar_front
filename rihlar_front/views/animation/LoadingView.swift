@@ -11,6 +11,7 @@ import SwiftUI
 
 struct LoadingView : View {
     @ObservedObject var router: Router
+    @ObservedObject var vm: GameViewModel
     // 流れてるアニメーションの配列で動かすための定義
     @State private var frameindex = 0
     // 画面遷移フラグ
@@ -35,9 +36,10 @@ struct LoadingView : View {
                     frameindex = (frameindex + 1) % frames.count
                     
                     // 四周目で画面遷移
-                    if frameindex == 3{
-//                        isNavigate.toggle()
+                    if frameindex == frames.count - 1{
+                        router.didStartFromLoading = true
                         router.path.removeAll()
+                        vm.startGameLocally()
                     }
                 }
             NavigationLink(
