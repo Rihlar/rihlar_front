@@ -18,8 +18,7 @@ let mockRecord = Record(
     id: 1,
     title: "100スポット達成！",
     description: "100か所のスポットに訪問しました！",
-    imageUrl:"king",
-    isSelected: false
+    imageUrl:"king"
 )
 
 // Photo モック

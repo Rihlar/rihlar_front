@@ -7,11 +7,10 @@
 
 // 実績情報のモデル定義
 struct Record: Codable, Identifiable {
-    let id: Int                     // 実績のID
-    let title: String               // 実績名
-    let description: String         // 実績の説明
-    let imageUrl: String            // 実績アイコン
-    var isSelected: Bool = false    // 表示する実績かどうか
+    let id: Int                 // 実績のID
+    let title: String           // 実績名
+    let description: String     // 実績の説明
+    let imageUrl: String        // 実績アイコン
     
 }
 
