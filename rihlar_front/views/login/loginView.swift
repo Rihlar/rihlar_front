@@ -173,9 +173,29 @@ struct loginDesignView: View {
         if let token = getCode(callbackURL: callbackURL) {
             print("トークン取得成功 → onLoginSuccess()")
             self.code = token
-            DispatchQueue.main.async {
-                onLoginSuccess()
+            
+            // 非同期処理を実行
+            Task{
+                do{
+                    // 3ふん以内にキャッシュされたトークンがあれば取得、なければfetchしてキャッシュ
+                    let accessToken = try await TokenManager.shared.getAccessToken()
+                        ?? try await TokenManager.shared.fetchAndCacheAccessToken()
+                    
+                    print("アクセストークンの取得成功:\(accessToken)")
+                    DispatchQueue.main.async {
+                        onLoginSuccess()
+                    }
+                    
+                }catch{
+                    print("アクセストークンの取得失敗:\(error.localizedDescription)")
+                    // 再取得
+                    DispatchQueue.main.async {
+                                        didReceiveToken = false
+                                        authManager.reset()
+                                    }
+                }
             }
+            
         } else {
             print("トークン取得失敗")
             DispatchQueue.main.async {

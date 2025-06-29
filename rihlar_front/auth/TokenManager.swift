@@ -46,40 +46,54 @@ class TokenManager {
         
     }
     
-    // エンドポイントから新しいトークンをとってきて保持する関数
     func fetchAndCacheAccessToken() async throws -> String {
-        // KeyChainから認証トークンを取得
-        guard let autoToken = getKeyChain(key: "autoToken") else{
+        // KeyChainから認証トークン（Authorizationヘッダに使うもの）を取得
+        guard let autoToken = getKeyChain(key: "autoToken") else {
+            // 取得できなければエラーを投げる
             throw NSError(domain: "TokenManager", code: 401, userInfo: [NSLocalizedDescriptionKey: "Authorizationトークンがありません"])
         }
-        guard let url = URL(string: " https://authbase-test.kokomeow.com/auth/token")else{
+        
+        // トークン取得用のURLを生成（不正なURLならエラー）
+        guard let url = URL(string: "https://authbase-test.kokomeow.com/auth/token") else {
             throw NSError(domain: "TokenManager", code: 400, userInfo: [NSLocalizedDescriptionKey: "URLが不正です"])
         }
+        
+        // URLRequestを作成し、HTTPメソッドをGETに設定
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("autoTokeapplication/json", forHTTPHeaderField: "Content-Type")
+        
+        // HTTPヘッダーにContent-Typeを設定（APIにJSON形式でリクエストすることを伝える）
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 認証に必要なAuthorizationヘッダーにKeyChainから取得したトークンをセット
         request.setValue(autoToken, forHTTPHeaderField: "Authorization")
         
-        // 非同期リクエスト
+        // URLSessionを使って非同期にAPIへリクエストを送信
         let (data, _) = try await URLSession.shared.data(for: request)
         
-        // サーバーからのjson構造
+        // APIレスポンスのJSONを受け取るための構造体を定義
         struct TokenResponse: Codable {
             let message: String
             let token: String
         }
-        // jsonをデコードしてtokenを取得
+        
+        // 受け取ったJSONデータをデコードし、tokenを取得
         let response = try JSONDecoder().decode(TokenResponse.self, from: data)
         let token = response.token
         
-        // トークンと取得時間をUserDefaultsに保存
-        UserDefaults.standard.set(token, forKey: "tokenKey")
-        UserDefaults.standard.set(Date(), forKey: "tokenTimeKey")
+        // トークンをUserDefaultsに保存（キーはtokenKeyで管理）
+        UserDefaults.standard.set(token, forKey: tokenKey)
         
+        // トークンを取得した現在時刻もUserDefaultsに保存（有効期限チェック用）
+        UserDefaults.standard.set(Date(), forKey: tokenTimeKey)
+        
+        // 取得成功をログに表示
         print("新しいトークンを取得しました！")
         
+        // 取得したトークンを返す
         return token
     }
-    
+
+
 }
 
