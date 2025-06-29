@@ -10,6 +10,7 @@ import SwiftUI
 // ゲームが始まる前にローディングとして流れるアニメーション
 
 struct LoadingView : View {
+    @ObservedObject var router: Router
     // 流れてるアニメーションの配列で動かすための定義
     @State private var frameindex = 0
     // 画面遷移フラグ
@@ -29,13 +30,14 @@ struct LoadingView : View {
             // ローディング画像
             Image(frames[frameindex])
                 .resizable()
-                .frame(width: 200, height: 150,alignment: .center)
+                .frame(width: 225, height: 101,alignment: .center)
                 .onReceive(timer){_ in
                     frameindex = (frameindex + 1) % frames.count
                     
                     // 四周目で画面遷移
                     if frameindex == 3{
-                        isNavigate.toggle()
+//                        isNavigate.toggle()
+                        router.path.removeAll()
                     }
                 }
             NavigationLink(
@@ -51,6 +53,6 @@ struct LoadingView : View {
     
 }
 
-#Preview {
-    LoadingView()
-}
+//#Preview {
+//    LoadingView()
+//}

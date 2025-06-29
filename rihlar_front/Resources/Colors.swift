@@ -38,5 +38,6 @@ extension Color {
     static let mulchModeColor = Color(hex: "#F2E6B8")           // チーム戦モード選択のボタンの背景
     static let mulchModeLine = Color(hex: "#D9C377")            // チーム戦モード選択のボタンの線
     static let separatorLine = Color(hex: "#B2AFA5")            // 線、区切り線
-    static let recordBackgroundColor = Color(hex: "#E7E3D7")    // 実績の背景色
+    static let itemBackgroundColor = Color(hex:"#D9D9D9")       // アイテム一個ずつの後ろの色
+    static let redColor = Color(hex: "#E13535")
 }
