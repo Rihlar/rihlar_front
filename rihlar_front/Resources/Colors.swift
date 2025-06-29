@@ -26,16 +26,17 @@ extension Color {
     }
     
     // カラーの定義
-    static let textColor = Color(hex: "#4F4936")            // 文字
-    static let buttonColor = Color(hex: "#A8EAF0")          // ボタン
-    static let subDecorationColor = Color(hex: "#87B6BA")  // サブ装飾
-    static let mainDecorationColor = Color(hex: "#98BA87") // メイン装飾
-    static let mainShadowColor = Color(hex: "#87A578")      // メイン装飾影
-    static let buttonFrameColor = Color(hex: "#89A77A")     // ボタンの枠
-    static let backgroundColor = Color(hex: "#EEEBE1")      // 背景
-    static let linkColor = Color(hex: "#3D8BFF")            // リンク
-    static let soloModeLine = Color(hex: "#5F874B")       // 個人戦モード選択のボタンの線
-    static let mulchModeColor = Color(hex: "#F2E6B8")     // チーム戦モード選択のボタンの背景
-    static let mulchModeLine = Color(hex: "#D9C377")      // チーム戦モード選択のボタンの線
-    static let separatorLine = Color(hex: "#B2AFA5")      // 線、区切り線
+    static let textColor = Color(hex: "#4F4936")                // 文字
+    static let buttonColor = Color(hex: "#A8EAF0")              // ボタン
+    static let subDecorationColor = Color(hex: "#87B6BA")       // サブ装飾
+    static let mainDecorationColor = Color(hex: "#98BA87")      // メイン装飾
+    static let mainShadowColor = Color(hex: "#87A578")          // メイン装飾影
+    static let buttonFrameColor = Color(hex: "#89A77A")         // ボタンの枠
+    static let backgroundColor = Color(hex: "#EEEBE1")          // 背景
+    static let linkColor = Color(hex: "#3D8BFF")                // リンク
+    static let soloModeLine = Color(hex: "#5F874B")             // 個人戦モード選択のボタンの線
+    static let mulchModeColor = Color(hex: "#F2E6B8")           // チーム戦モード選択のボタンの背景
+    static let mulchModeLine = Color(hex: "#D9C377")            // チーム戦モード選択のボタンの線
+    static let separatorLine = Color(hex: "#B2AFA5")            // 線、区切り線
+    static let recordBackgroundColor = Color(hex: "#E7E3D7")    // 実績の背景色
 }

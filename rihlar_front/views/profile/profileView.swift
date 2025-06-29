@@ -90,7 +90,7 @@ struct ProfileView: View {
                         }
                         
                         Rectangle()
-                            .frame(width: 240, height: 1)
+                            .frame(width: 236, height: 1)
                             .foregroundColor(Color.separatorLine)
                     }
                     
@@ -102,34 +102,42 @@ struct ProfileView: View {
                 } label: {
                     HStack(spacing: 20) {
                         ForEach(0..<3, id: \.self) { index in
-                            if index < viewData.records.count {
-                                let record = viewData.records[index]
-                                
-                                Group {
-                                    if record.imageUrl.contains("http"),
-                                       let url = URL(string: record.imageUrl) {
-                                        AsyncImage(url: url) { image in
-                                            image.resizable()
-                                        } placeholder: {
-                                            Circle().fill(Color.gray.opacity(0.3))
-                                        }
-                                    } else {
-                                        Image(record.imageUrl)
-                                            .resizable()
-                                    }
-                                }
-                                .frame(width: 70, height: 70)
-                                .clipShape(Circle())
-                                
-                            } else {
+                            ZStack {
+                                // ベースの白丸
                                 Circle()
-                                    .strokeBorder(Color.gray.opacity(0.4), lineWidth: 2)
+                                    .fill(Color.white)
                                     .frame(width: 70, height: 70)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
+
+                                if index < viewData.records.count {
+                                    let record = viewData.records[index]
+                                    
+                                    Group {
+                                        if record.imageUrl.contains("http"),
+                                           let url = URL(string: record.imageUrl) {
+                                            AsyncImage(url: url) { image in
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                            } placeholder: {
+                                                Color.white
+                                            }
+                                        } else {
+                                            Image(record.imageUrl)
+                                                .resizable()
+                                                .scaledToFill()
+                                        }
+                                    }
+                                    .frame(width: 70, height: 70)
+                                    .clipShape(Circle())
+                                }
                             }
                         }
                     }
+
                     .padding()
-                    .background(Color(red: 0.95, green: 0.93, blue: 0.87))
+                    .background(Color.recordBackgroundColor)
+                    .frame(width:300,height:90)
                     .cornerRadius(20)
                 }
                 
@@ -145,7 +153,7 @@ struct ProfileView: View {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
                         ForEach(viewData.photos.indices, id: \.self) { index in
                             let photo = viewData.photos[index]
-
+                            
                             Group {
                                 if photo.url.contains("http"),
                                    let url = URL(string: photo.url) {
@@ -173,68 +181,68 @@ struct ProfileView: View {
                     .padding(.bottom, 120)
                 }
             }
-                
-                //            // ZStack内で最前面に置くナビゲーション
-                //            BottomNavigationBar(
-                //                onCameraTap: { print("カメラタップ") },
-                //                onHomeTap: { print("ホームタップ") },
-                //                onMenuTap: { print("メニュータップ") }
-                //            )
-                //            .padding(.bottom, 30)
-            }
-            //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
-            .sheet(item: $selectedImageIndex) { imageIndex in
-                PhotoViewerView(
-                    images: viewData.photos.map { $0.url },
-                    startIndex: imageIndex.id
-                )
+            
+            //            // ZStack内で最前面に置くナビゲーション
+            //            BottomNavigationBar(
+            //                onCameraTap: { print("カメラタップ") },
+            //                onHomeTap: { print("ホームタップ") },
+            //                onMenuTap: { print("メニュータップ") }
+            //            )
+            //            .padding(.bottom, 30)
+        }
+        //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
+        .sheet(item: $selectedImageIndex) { imageIndex in
+            PhotoViewerView(
+                images: viewData.photos.map { $0.url },
+                startIndex: imageIndex.id
+            )
+            .presentationDragIndicator(.hidden)
+        }
+        
+        .sheet(isPresented: $showAchievementSheet) {
+            AchievementSelectionView()
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
-            }
-            
-            .sheet(isPresented: $showAchievementSheet) {
-                AchievementSelectionView()
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.hidden)
-            }
         }
-        
-    }
-    #Preview {
-        ProfileView(viewData: mockUserProfile)
-    }
-    // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
-    struct ImageIndex: Identifiable {
-        let id: Int
     }
     
+}
+#Preview {
+    ProfileView(viewData: mockUserProfile)
+}
+// ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
+struct ImageIndex: Identifiable {
+    let id: Int
+}
+
+
+// 文字数を計算して重みの合計が10以下
+func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
+    var visualLength: Double = 0.0
+    var result = ""
     
-    // 文字数を計算して重みの合計が10以下
-    func limitTextWithVisualWeight(_ text: String, maxVisualLength: Double = 10.0) -> String {
-        var visualLength: Double = 0.0
-        var result = ""
+    for char in text {
+        let weight: Double
         
-        for char in text {
-            let weight: Double
-            
-            if ("\u{3040}"..."\u{309F}").contains(char) {
-                weight = 1.5 // ひらがな
-            } else if ("a"..."z").contains(char.lowercased()) {
-                weight = 1.0 // アルファベット
-            } else if char.isNumber {
-                weight = 1.2 // 数字は中間くらい
-            } else {
-                weight = 2.0 // 漢字や記号など
-            }
-            
-            if visualLength + weight > maxVisualLength {
-                result += "…"
-                break
-            }
-            
-            visualLength += weight
-            result.append(char)
+        if ("\u{3040}"..."\u{309F}").contains(char) {
+            weight = 1.5 // ひらがな
+        } else if ("a"..."z").contains(char.lowercased()) {
+            weight = 1.0 // アルファベット
+        } else if char.isNumber {
+            weight = 1.2 // 数字は中間くらい
+        } else {
+            weight = 2.0 // 漢字や記号など
         }
         
-        return result
+        if visualLength + weight > maxVisualLength {
+            result += "…"
+            break
+        }
+        
+        visualLength += weight
+        result.append(char)
     }
+    
+    return result
+}
 
