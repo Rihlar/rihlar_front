@@ -256,4 +256,3 @@ func limitTextWithVisualWeight(_ text: String,
     
     return result
 }
-
