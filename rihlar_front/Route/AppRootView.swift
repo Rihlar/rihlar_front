@@ -43,8 +43,8 @@ struct AppRootView: View {
                                 TeamMatch(router: router)
                             case .loading:
                                 LoadingView(router: router, vm: vm)
-//                        case .friend:
-                                // フレンド画面の遷移
+                        case .friend:
+                                FriendView(router:router)
 //                        case .gacha:
                                 // ガチャ画面の遷移
                         case .items:
