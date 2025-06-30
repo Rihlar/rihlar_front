@@ -114,8 +114,6 @@ struct ProfileView: View {
                     showAchievementSheet = true
                 } label: {
                     HStack(spacing: 20) {
-                        // 選択済みレコードを3件まで取得（最大3件）
-                        let selectedRecords = Array(records.filter { $0.isSelected }.prefix(3))
                         
                         ForEach(0..<3, id: \.self) { index in
                             ZStack {
@@ -198,6 +196,34 @@ struct ProfileView: View {
                     .padding(.bottom, 120)
                 }
             }
+            if isShowMenu {
+                        Color.white.opacity(0.5)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
+            
+                        Menu(router: router)
+                            .transition(
+                                .move(edge: .trailing)
+                                .combined(with: .opacity)
+                            )
+                    }
+            
+                    BottomNavigationBar(
+                        router: router,
+                        isChangeBtn: isChangeBtn,
+                        onCameraTap: {
+                            router.push(.camera)
+                        },
+                        onMenuTap: {
+                            //   ボタンの見た目切り替えは即時（アニメなし）
+                            isChangeBtn.toggle()
+            
+                        //　　メニュー本体の表示はアニメーション付き
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isShowMenu.toggle()
+                            }
+                        }
+                    )
             
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
@@ -218,9 +244,9 @@ struct ProfileView: View {
     }
     
 }
-//#Preview {
-//    ProfileView(viewData: mockUserProfile)
-//}
+#Preview {
+    ProfileView(viewData: mockUserProfile,router:  Router())
+}
 // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
 struct ImageIndex: Identifiable {
     let id: Int
