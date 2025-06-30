@@ -96,7 +96,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 12)
                                     .foregroundColor(Color.textColor)
-                                    .background(isEditing ? Color.gray :Color.buttonColor)
+                                    .background(isEditing ? Color.itemBackgroundColor :Color.buttonColor)
                                     .cornerRadius(8)
                                     .shadow(radius: 4)
                             }
