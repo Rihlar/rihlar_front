@@ -20,4 +20,13 @@ class RealGameService: GameServiceProtocol {
             .receive(on: RunLoop.main)
             .eraseToAnyPublisher()
     }
+    
+    func fetchCircles(for gameID: String) -> AnyPublisher<CirclesResponse, Error> {
+        let url = URL(string: "https://api.example.com/games/\(gameID)/circles")!
+        return URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .decode(type: CirclesResponse.self, decoder: JSONDecoder())
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
+    }
 }

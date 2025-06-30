@@ -13,7 +13,7 @@ import MapKit
 /// アニメーション付きで表示するコンポーネント
 struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
-    let circles: [CircleData]
+    let circlesByTeam: [TeamCircles]
 
 ///     UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
@@ -88,16 +88,20 @@ struct CircleMap: UIViewRepresentable {
         }
 
 //         初回のみアニメーション付きオーバーレイ追加
-        if !coordinator.hasAnimatedCircles && !circles.isEmpty {
-            for circleData in circles {
+        if !coordinator.hasAnimatedCircles && !circlesByTeam.isEmpty {
+        // ─────────── 初回アニメーション ───────────
+        for team in circlesByTeam {
+            let color = color(for: team.groupName)
+            for circleData in team.circles {
                 let radius = computedRadius(for: circleData.size)
-//                print("▶️ [CircleMap] 初回アニメーション: \(circleData.coordinate), radius: \(radius)")
-
-//                 円オーバーレイを追加
                 let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                overlay.title = team.groupName
+                
+                print("▶️ addOverlays: team=\(team.groupName), color=\(color)")
+                
                 mapView.addOverlay(overlay)
-
-//                 レンダラー取得後にフェードインさせる
+                
+                // レンダラー取得後にフェードイン
                 DispatchQueue.main.async {
                     if let renderer = mapView.renderer(for: overlay) as? MKCircleRenderer {
                         renderer.alpha = 0
@@ -107,19 +111,37 @@ struct CircleMap: UIViewRepresentable {
                     }
                 }
             }
-            coordinator.hasAnimatedCircles = true
+        }
+        coordinator.hasAnimatedCircles = true
 
         } else {
 //             2回目以降は静的オーバーレイのみ
-            for circleData in circles {
-                let radius = computedRadius(for: circleData.size)
-//                print("▶️ [CircleMap] 静的オーバーレイ: \(circleData.coordinate), radius: \(radius)")
-                let overlay = MKCircle(center: circleData.coordinate, radius: radius)
-                mapView.addOverlay(overlay)
+            for team in circlesByTeam {
+                let color = color(for: team.groupName)
+                for circleData in team.circles {
+                    let radius = computedRadius(for: circleData.size)
+                    let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                    overlay.title = team.groupName
+                    
+                    print("▶️ addOverlays(static): team=\(team.groupName), color=\(color)")
+                    
+                    mapView.addOverlay(overlay)
+                }
             }
         }
     }
 
+    private func color(for group: String) -> UIColor {
+        switch group {
+        case "Top1":  return .red
+        case "Top2":  return .green
+        case "Top3":  return .blue
+        case "Other": return .gray
+        case "Self":  return .purple
+        default:      return .black
+        }
+    }
+    
 ///    size（歩数等）からメートル半径を返す
     private func computedRadius(for size: Int) -> CLLocationDistance {
         switch size {
@@ -153,14 +175,24 @@ struct CircleMap: UIViewRepresentable {
 ///         MKOverlay の描画設定
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let circle = overlay as? MKCircle {
-//                円描画設定
                 let renderer = MKCircleRenderer(circle: circle)
-                renderer.strokeColor = UIColor.blue.withAlphaComponent(0.6)
-                renderer.fillColor   = UIColor.blue.withAlphaComponent(0.2)
+                
+                // overlay.title に入っている groupName を取得
+                let group = circle.title ?? "unknown"
+                // groupName に応じた色を取得
+                let uiColor = parent.color(for: group)
+                
+                // 動的に色を設定
+                renderer.strokeColor = uiColor.withAlphaComponent(0.6)
+                renderer.fillColor   = uiColor.withAlphaComponent(0.3)
                 renderer.lineWidth   = 2
+                
+                // デバッグ用プリント（任意）
+                print("▶️ rendererFor: group=\(group), stroke=\(renderer.strokeColor!), fill=\(renderer.fillColor!)")
+                
                 return renderer
+                
             } else if let line = overlay as? MKPolyline {
-//                通過ルートを描くポリライン
                 let renderer = MKPolylineRenderer(polyline: line)
                 renderer.strokeColor = UIColor.systemBlue
                 renderer.lineWidth   = 4
@@ -168,6 +200,7 @@ struct CircleMap: UIViewRepresentable {
             }
             return MKOverlayRenderer(overlay: overlay)
         }
+
 
 ///         ユーザー操作かプログラム移動かを判定
         func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
