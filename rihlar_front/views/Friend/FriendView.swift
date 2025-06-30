@@ -33,7 +33,7 @@ struct FriendView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack (alignment: .bottom){
             Color(Color.backgroundColor)
                 .ignoresSafeArea(edges: .all)
 
@@ -65,25 +65,26 @@ struct FriendView: View {
                 }
 
                 Spacer()
-
-                if isShowMenu {
-                    Color.white.opacity(0.5).ignoresSafeArea()
-                    Menu(router: router)
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
-                }
-
-                BottomNavigationBar(
-                    router: router,
-                    isChangeBtn: isChangeBtn,
-                    onCameraTap: { router.push(.camera) },
-                    onMenuTap: {
-                        isChangeBtn.toggle()
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isShowMenu.toggle()
-                        }
-                    }
-                )
+                
             }
+            if isShowMenu {
+                Color.white.opacity(0.5).ignoresSafeArea()
+                Menu(router: router)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
+
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: { router.push(.camera) },
+                onMenuTap: {
+                    isChangeBtn.toggle()
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
+            
         }
         .navigationBarBackButtonHidden(true)
     }
