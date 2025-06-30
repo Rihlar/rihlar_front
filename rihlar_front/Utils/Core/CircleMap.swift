@@ -80,6 +80,19 @@ struct CircleMap: UIViewRepresentable {
             let polyline = MKPolyline(coordinates: coords, count: coords.count)
             mapView.addOverlay(polyline)
         }
+        
+        // ─────────── ソート準備 ───────────
+         let allCircles: [(group: String, data: CircleDataEntity)] =
+             circlesByTeam.flatMap { team in
+                 team.circles.map { (team.groupName, $0) }
+             }
+         let sortedCircles = allCircles.sorted { a, b in
+             if a.data.level != b.data.level {
+                 return a.data.level > b.data.level
+             } else {
+                 return a.data.timeStamp > b.data.timeStamp
+             }
+         }
 
 //         アニメーション中は再実行を抑制
         coordinator.isAnimatingCircles = true
@@ -97,7 +110,7 @@ struct CircleMap: UIViewRepresentable {
                 let overlay = MKCircle(center: circleData.coordinate, radius: radius)
                 overlay.title = team.groupName
                 
-                print("▶️ addOverlays: team=\(team.groupName), color=\(color)")
+//                print("▶️ addOverlays: team=\(team.groupName), color=\(color)")
                 
                 mapView.addOverlay(overlay)
                 
@@ -123,7 +136,7 @@ struct CircleMap: UIViewRepresentable {
                     let overlay = MKCircle(center: circleData.coordinate, radius: radius)
                     overlay.title = team.groupName
                     
-                    print("▶️ addOverlays(static): team=\(team.groupName), color=\(color)")
+//                    print("▶️ addOverlays(static): team=\(team.groupName), color=\(color)")
                     
                     mapView.addOverlay(overlay)
                 }
@@ -177,18 +190,21 @@ struct CircleMap: UIViewRepresentable {
             if let circle = overlay as? MKCircle {
                 let renderer = MKCircleRenderer(circle: circle)
                 
-                // overlay.title に入っている groupName を取得
+//                 overlay.title に入っている groupName を取得
                 let group = circle.title ?? "unknown"
-                // groupName に応じた色を取得
+//                 groupName に応じた色を取得
                 let uiColor = parent.color(for: group)
                 
-                // 動的に色を設定
+//                 動的に色を設定
                 renderer.strokeColor = uiColor.withAlphaComponent(0.6)
                 renderer.fillColor   = uiColor.withAlphaComponent(0.3)
+//                テストで不透明にしている
+//                renderer.strokeColor = uiColor.withAlphaComponent(1.0)
+//                renderer.fillColor   = uiColor.withAlphaComponent(1.0)
                 renderer.lineWidth   = 2
                 
                 // デバッグ用プリント（任意）
-                print("▶️ rendererFor: group=\(group), stroke=\(renderer.strokeColor!), fill=\(renderer.fillColor!)")
+//                print("▶️ rendererFor: group=\(group), stroke=\(renderer.strokeColor!), fill=\(renderer.fillColor!)")
                 
                 return renderer
                 

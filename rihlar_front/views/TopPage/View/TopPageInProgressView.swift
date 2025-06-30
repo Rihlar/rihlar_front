@@ -50,7 +50,7 @@ struct TopPageInProgressView: View {
                 Text("陣取りスタート！")
                     .font(.system(size: 32,weight: .bold))
                     .foregroundColor(.white)
-                    .stroke(color: Color(hex: "#E85B5B"), width: 0.8)
+                    .stroke(color: Color(hex: "#E85B5B"), width: 2)
                     .transition(.opacity)
                     .onAppear {
                         // 2秒後にフラグをリセットして非表示に

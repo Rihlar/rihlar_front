@@ -62,7 +62,6 @@ final class GameViewModel: ObservableObject {
                             circles: entity.circles
                         )
                     }
-                    print(self?.circlesByTeam)
                 }
             )
             .store(in: &cancellables)
