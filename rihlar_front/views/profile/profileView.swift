@@ -44,6 +44,8 @@ struct ProfileView: View {
             
             VStack(spacing: 20) {
                 Spacer().frame(height: 0)
+                // back表示を消す
+                    .navigationBarBackButtonHidden(true)
                 
                 // プロフィール画像
                 ZStack {

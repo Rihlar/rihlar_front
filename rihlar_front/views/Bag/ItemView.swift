@@ -27,6 +27,9 @@ struct ItemView: View {
                 Text("アイテム")
                     .font(.title2)
                     .foregroundStyle(Color.textColor)
+                // back表示を消す
+                    .navigationBarBackButtonHidden(true)
+                
                 
                 // アイテム一覧を表示するList
                 List(viewModel.items) { item in
