@@ -48,7 +48,7 @@ struct AppRootView: View {
 //                        case .gacha:
                                 // ガチャ画面の遷移
                         case .items:
-                                ItemView()
+                                ItemView(router:router)
 //                        case .record:
                                 // 戦績画面の遷移
 //                        case .setting:

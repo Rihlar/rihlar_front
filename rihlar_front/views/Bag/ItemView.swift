@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct ItemView: View {
+    @ObservedObject var router: Router
+    @State private var isChangeBtn = false
+    @State private var isShowMenu = false
     // ViewModelを状態として保持（画面に紐づく）
     @StateObject private var viewModel = ItemViewModel()
     // 選ばれたアイテム
@@ -36,35 +39,67 @@ struct ItemView: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                     .listRowSeparator(.hidden)      // 区切り線を消す
-                        .listRowBackground(Color.clear) // デフォ背景を消す
-                        .padding(.vertical, 4)          // 行間を少し空ける
+                    .listRowBackground(Color.clear) // デフォ背景を消す
+                    .padding(.vertical, 4)          // 行間を少し空ける
                     
                     
                     
                 }
                 .listStyle(PlainListStyle()) // 枠線などを省いたシンプルなスタイル
+                
+                if isShowMenu {
+                    Color.white.opacity(0.5)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                    
+                    Menu(router: router)
+                        .transition(
+                            .move(edge: .trailing)
+                            .combined(with: .opacity)
+                        )
+                }
+                
+                BottomNavigationBar(
+                    router: router,
+                    isChangeBtn: isChangeBtn,
+                    onCameraTap: {
+                        router.push(.camera)
+                    },
+                    onMenuTap: {
+                        //   ボタンの見た目切り替えは即時（アニメなし）
+                        isChangeBtn.toggle()
+                        
+                        //　　メニュー本体の表示はアニメーション付き
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            isShowMenu.toggle()
+                        }
+                    }
+                )
+                
             }
             .padding(.horizontal)
             // ポップアップ表示
-                        if let item = selectedItem, showPopup {
-                            ZStack {
-                                    Color.black.opacity(0.3)
-                                        .ignoresSafeArea()
-                                        .onTapGesture {
-                                            showPopup = false
-                                        }
-
-                                    ItemDetailPopup(item: item, isPresented: $showPopup)
-                                        .transition(.scale)
-                                        .animation(.easeInOut, value: showPopup)
-                                        .zIndex(1)
-                                }
+            if let item = selectedItem, showPopup {
+                ZStack {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            showPopup = false
                         }
+                    
+                    ItemDetailPopup(item: item, isPresented: $showPopup)
+                        .transition(.scale)
+                        .animation(.easeInOut, value: showPopup)
+                        .zIndex(1)
+                }
+            }
+            
+            
         }
     }
 }
 
 #Preview {
-    ItemView()
+    ItemView(router:Router())
 }
 
