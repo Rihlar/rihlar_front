@@ -196,11 +196,11 @@ struct CircleMap: UIViewRepresentable {
                 let uiColor = parent.color(for: group)
                 
 //                 動的に色を設定
-//                renderer.strokeColor = uiColor.withAlphaComponent(0.6)
-//                renderer.fillColor   = uiColor.withAlphaComponent(0.3)
+                renderer.strokeColor = uiColor.withAlphaComponent(0.6)
+                renderer.fillColor   = uiColor.withAlphaComponent(0.3)
 //                テストで不透明にしている
-                renderer.strokeColor = uiColor.withAlphaComponent(1.0)
-                renderer.fillColor   = uiColor.withAlphaComponent(1.0)
+//                renderer.strokeColor = uiColor.withAlphaComponent(1.0)
+//                renderer.fillColor   = uiColor.withAlphaComponent(1.0)
                 renderer.lineWidth   = 2
                 
                 // デバッグ用プリント（任意）
