@@ -79,7 +79,7 @@ class MockGameService: GameServiceProtocol {
               {
                 "CircleID": "circle-b2c3d4e5-f6a7-8901-2345-67890abcdef1",
                 "GameID": "adminGame-e1d2c3b4-a5f6-7890-1234-567890abcdef",
-                "Size": 1001,
+                "Size": 3001,
                 "Level": 3,
                 "Latitude": 34.705525,
                 "Longitude": 135.500971,
@@ -155,11 +155,11 @@ class MockGameService: GameServiceProtocol {
                 "CircleID": "circle-self-a1b2-c3d4-e5f6-7890abcdef",
                 "GameID": "adminGame-self-f1e2-d3c4-b5a6-9876543210",
                 "Size": 10001,
-                "Level": 3,
-                "Latitude": 34.673041,
-                "Longitude": 135.526201,
+                "Level": 4,
+                "Latitude": 34.703000,
+                "Longitude": 135.500000,
                 "ImageID": "imageid-f7b3a9d1-c8e0-4f2a-8b6d-1e0c9a8b7c6d",
-                "TimeStamp": 1751290000
+                "TimeStamp": 1751250000
               },
               {
                 "CircleID": "circle-self-b2c3-d4e5-f6a7-8901234567",
