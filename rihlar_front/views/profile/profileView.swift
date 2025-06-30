@@ -14,7 +14,7 @@ struct ProfileView: View {
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
     
-
+    
     @State private var isEditing = false
     @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
     
@@ -44,6 +44,8 @@ struct ProfileView: View {
             
             VStack(spacing: 20) {
                 Spacer().frame(height: 0)
+                // back表示を消す
+                    .navigationBarBackButtonHidden(true)
                 
                 // プロフィール画像
                 ZStack {
@@ -96,7 +98,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 6)
                                     .padding(.horizontal, 12)
                                     .foregroundColor(Color.textColor)
-                                    .background(isEditing ? Color.gray :Color.buttonColor)
+                                    .background(isEditing ? Color.itemBackgroundColor :Color.buttonColor)
                                     .cornerRadius(8)
                                     .shadow(radius: 4)
                             }
@@ -114,8 +116,6 @@ struct ProfileView: View {
                     showAchievementSheet = true
                 } label: {
                     HStack(spacing: 20) {
-                        // 選択済みレコードを3件まで取得（最大3件）
-                        let selectedRecords = Array(records.filter { $0.isSelected }.prefix(3))
                         
                         ForEach(0..<3, id: \.self) { index in
                             ZStack {
@@ -124,7 +124,7 @@ struct ProfileView: View {
                                     .fill(Color.white)
                                     .frame(width: 70, height: 70)
                                     .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
-
+                                
                                 // 選択済みの実績があれば画像を表示
                                 if index < selectedRecords.count {
                                     let record = selectedRecords[index]
@@ -149,9 +149,9 @@ struct ProfileView: View {
                             }
                         }
                     }
-
-
-
+                    
+                    
+                    
                     .padding()
                     .background(Color.recordBackgroundColor)
                     .frame(width:300,height:90)
@@ -198,18 +198,46 @@ struct ProfileView: View {
                     .padding(.bottom, 120)
                 }
             }
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
+            
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: {
+                    router.push(.camera)
+                },
+                onMenuTap: {
+                    //   ボタンの見た目切り替えは即時（アニメなし）
+                    isChangeBtn.toggle()
+                    
+                    //　　メニュー本体の表示はアニメーション付き
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
             
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
-
+            
             PhotoViewerView(photos: viewData.photos, startIndex: imageIndex.id)
                 .presentationDragIndicator(.hidden)
         }
         
-
-    
-
+        
+        
+        
         .sheet(isPresented: $showAchievementSheet) {
             AchievementSelectionView(records: $records)
                 .presentationDetents([.medium, .large])
@@ -218,9 +246,9 @@ struct ProfileView: View {
     }
     
 }
-//#Preview {
-//    ProfileView(viewData: mockUserProfile)
-//}
+#Preview {
+    ProfileView(viewData: mockUserProfile,router:  Router())
+}
 // ImageIndex構造体はIdentifiableに準拠し、sheetのitemバインディング用に使う
 struct ImageIndex: Identifiable {
     let id: Int
@@ -229,7 +257,7 @@ struct ImageIndex: Identifiable {
 /// 文字数を計算して幅の合計が maxVisualLength を超えないようトリミングし、
 /// はみ出す場合は末尾に「…」を追加
 func limitTextWithVisualWeight(_ text: String,
-                              maxVisualLength: Double = 10.0) -> String {
+                               maxVisualLength: Double = 10.0) -> String {
     var visualLength: Double = 0.0
     var result = ""
     for char in text {
@@ -249,7 +277,7 @@ func limitTextWithVisualWeight(_ text: String,
             result += "…"
             break
         }
-
+        
         visualLength += weight
         result.append(char)
     }

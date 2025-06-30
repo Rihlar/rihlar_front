@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MenuList: View {
+    @ObservedObject var router: Router
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 0)
@@ -29,7 +30,7 @@ struct MenuList: View {
                     print("circleタップ")
                 }
                 MenuItem(systemName: "duffle.bag", label: "アイテム") {
-                    print("bagタップ")
+                    router.push(.items)
                 }
                 MenuItem(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90", label: "戦績") {
                     print("clockタップ")
