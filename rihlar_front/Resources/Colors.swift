@@ -41,4 +41,6 @@ extension Color {
     static let itemBackgroundColor = Color(hex:"#D9D9D9")       // アイテム一個ずつの後ろの色
     static let redColor = Color(hex: "#E13535")                 // VS
     static let recordBackgroundColor = Color(hex: "#E7E3D7")    // 実績の背景色
+    static let subuBtnColor = Color(hex:"#F9D5B0")              // サブボタン
+    static let subuBtnLineColor = Color(hex: "#BAA987")         // サブボタンの線
 }

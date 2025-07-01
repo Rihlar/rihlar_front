@@ -23,7 +23,7 @@ struct MenuList: View {
             VStack(spacing: 0) {
 //                       ① フレンド行
                 MenuItem(systemName: "person.2", label: "フレンド") {
-                    print("フレンドタップ")
+                    router.push(.friend)
                 }
                 
                 MenuItem(systemName: "circle.bottomhalf.filled", label: "ガチャ") {
