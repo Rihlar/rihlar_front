@@ -22,6 +22,7 @@ struct TopPageInProgressView: View {
     //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
     let game: Game
+    @StateObject private var hk = StepsHealthKit()
     
     var body: some View {
         ZStack {
@@ -44,7 +45,7 @@ struct TopPageInProgressView: View {
             }
             .blur(radius: isShowMenu ? 10 : 0)
             .animation(.easeInOut, value: isShowMenu)
-            
+           
             // ─────────── 「陣取りスタート！」のオーバーレイ ───────────
             if router.didStartFromLoading {
                 Text("陣取りスタート！")
