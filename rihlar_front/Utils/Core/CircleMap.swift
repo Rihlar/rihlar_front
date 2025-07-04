@@ -106,8 +106,7 @@ struct CircleMap: UIViewRepresentable {
         for team in circlesByTeam {
             let color = color(for: team.groupName)
             for circleData in team.circles {
-                let radius = computedRadius(for: circleData.size)
-                let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                let overlay = MKCircle(center: circleData.coordinate, radius: CLLocationDistance(circleData.size))
                 overlay.title = team.groupName
                 
 //                print("▶️ addOverlays: team=\(team.groupName), color=\(color)")
