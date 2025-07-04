@@ -44,22 +44,37 @@ final class GameViewModel: ObservableObject {
 /// 円情報だけ取得
     func fetchCircles(for gameID: String) {
         isLoadingCircles = true
-        service.fetchCircles(for: gameID)
+        service.getTop3CircleRankingURL(for: gameID)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
                     self?.isLoadingCircles = false
                     if case .failure(let err) = completion {
+                        print("❌ fetchCircles エラー: \(err.localizedDescription)")
                         self?.errorMessage = err.localizedDescription
+                    } else {
+                        print("✅ fetchCircles 成功")
                     }
                 },
                 receiveValue: { [weak self] (respDict: [String: TeamCirclesEntity]) in
+                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
                     // 辞書 → [TeamCircles] へ変換
                     self?.circlesByTeam = respDict.map { key, entity in
                         TeamCircles(
                             groupName: key,
                             teamID: entity.teamID,
-                            circles: entity.circles
+                            circles: (entity.circles ?? []).map { circle in
+                                CircleDataEntity(
+                                    circleID: circle.circleID,
+                                    gameID: circle.gameID,
+                                    size: circle.size,
+                                    level: circle.level,
+                                    latitude: circle.latitude,
+                                    longitude: circle.longitude,
+                                    imageID: circle.imageID,
+                                    timeStamp: Double(circle.timeStamp)
+                                )
+                            }
                         )
                     }
                 }

@@ -132,8 +132,7 @@ struct CircleMap: UIViewRepresentable {
             for team in circlesByTeam {
                 let color = color(for: team.groupName)
                 for circleData in team.circles {
-                    let radius = computedRadius(for: circleData.size)
-                    let overlay = MKCircle(center: circleData.coordinate, radius: radius)
+                    let overlay = MKCircle(center: circleData.coordinate, radius: CLLocationDistance(circleData.size))
                     overlay.title = team.groupName
                     
 //                    print("▶️ addOverlays(static): team=\(team.groupName), color=\(color)")
@@ -152,17 +151,6 @@ struct CircleMap: UIViewRepresentable {
         case "Other": return .gray
         case "Self":  return .purple
         default:      return .black
-        }
-    }
-    
-///    size（歩数等）からメートル半径を返す
-    private func computedRadius(for size: Int) -> CLLocationDistance {
-        switch size {
-        case 0..<1000:      return 50
-        case 1000..<3000:   return 100
-        case 3000..<6000:   return 200
-        case 6000..<10000:  return 300
-        default:            return 400
         }
     }
 
