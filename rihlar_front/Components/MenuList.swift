@@ -33,7 +33,7 @@ struct MenuList: View {
                     router.push(.items)
                 }
                 MenuItem(systemName: "clock.arrow.trianglehead.counterclockwise.rotate.90", label: "戦績") {
-                    print("clockタップ")
+                    router.push(.record)
                 }
 
 //                        区切り線
