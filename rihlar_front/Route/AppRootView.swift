@@ -12,7 +12,7 @@ struct AppRootView: View {
     @StateObject private var router = Router()
     @State private var isLoggedIn = false
     @State private var didReceiveToken = false
-    @StateObject private var vm = GameViewModel(service: MockGameService())
+    @StateObject private var vm = GameViewModel(service: RealGameService())
     
     var body: some View {
         contentView

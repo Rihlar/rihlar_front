@@ -15,6 +15,6 @@ protocol GameServiceProtocol {
     func fetchGame(id: String) -> AnyPublisher<Game, Error>
     
 /// 円データを取得するメソッドを追加
-    func fetchCircles(for gameID: String) -> AnyPublisher<CirclesResponse, Error>
+    func getTop3CircleRankingURL(for gameID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error>
 }
 
