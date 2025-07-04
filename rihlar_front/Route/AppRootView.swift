@@ -49,8 +49,9 @@ struct AppRootView: View {
                                 // ガチャ画面の遷移
                         case .items:
                                 ItemView(router:router)
-//                        case .record:
-                                // 戦績画面の遷移
+                        case .record:
+                                SoloRankingView()
+//                                 戦績画面の遷移
 //                        case .setting:
                                 // 設定画面の遷移
                             default:
