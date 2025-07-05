@@ -14,7 +14,10 @@ protocol GameServiceProtocol {
 /// ゲーム情報を返す既存メソッド
     func fetchGame(id: String) -> AnyPublisher<Game, Error>
     
-/// 円データを取得するメソッドを追加
-    func getTop3CircleRankingURL(for gameID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error>
+/// 円データを取得するメソッド
+    func getTop3CircleRankingURL(for gameID: String, userID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error>
+    
+/// ユーザーの歩数を取得流メソッド
+    func getUserStep(for gameID:String, userID: String) -> AnyPublisher<[UserStep], Error>
 }
 

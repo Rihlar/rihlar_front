@@ -53,19 +53,57 @@ class RealGameService: GameServiceProtocol {
             .eraseToAnyPublisher()
     }
     
-    func getTop3CircleRankingURL(for gameID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error> {
-        let GameID = "gameid-413a287b-213c-414f-a287-c1397db8f9bf"
-        let path = APIConfig.top3CirclesRankingEndpoint.replacingOccurrences(of: "{gameId}", with: GameID)
+    func getTop3CircleRankingURL(for gameID: String, userID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error> {
+//        1. path の組み立て
+        let path = APIConfig.top3CirclesRankingEndpoint.replacingOccurrences(of: "{gameId}", with: gameID)
         let fullURL = APIConfig.baseURL.appendingPathComponent(path)
-        return URLSession.shared.dataTaskPublisher(for: fullURL)
+        
+//        2. URLRequest の生成
+        var request = URLRequest(url: fullURL)
+        request.httpMethod = "GET"
+        
+//        3. 標準ヘッダー設定
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+//        4. ヘッダー情報にuserIDを追加
+        request.setValue(userID, forHTTPHeaderField: "UserID")
+        
+//        5. dataTaskPublisher 実行
+        return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { output in
-                print("📦 レスポンスJSON文字列:")
+//                print("📦 トップ3円のレスポンスJSON文字列:")
+                if let jsonString = String(data: output.data, encoding: .utf8) {
+//                    print(jsonString)
+                }
+                return output.data
+            }
+            .decode(type: OuterCirclesResponse.self, decoder: JSONDecoder())
+            .map { $0.data }
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
+    }
+    
+    func getUserStep(for gameID: String, userID: String) -> AnyPublisher<[UserStep], any Error> {
+        let path = APIConfig.userMovementEndpoint
+        let fullURL = APIConfig.baseURL.appendingPathComponent(path)
+        
+        var request = URLRequest(url: fullURL)
+        request.httpMethod = "GET"
+        
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        request.setValue(gameID, forHTTPHeaderField: "GameID")
+        request.setValue(userID, forHTTPHeaderField: "UserID")
+        
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .tryMap { output in
+                print("📦 ユーザーの歩数レスポンスJSON文字列:")
                 if let jsonString = String(data: output.data, encoding: .utf8) {
                     print(jsonString)
                 }
                 return output.data
             }
-            .decode(type: OuterResponse.self, decoder: JSONDecoder())
+            .decode(type: UserStepResponse.self, decoder: JSONDecoder())
             .map { $0.data }
             .receive(on: RunLoop.main)
             .eraseToAnyPublisher()

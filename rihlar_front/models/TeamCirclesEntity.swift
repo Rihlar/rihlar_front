@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct OuterResponse: Codable {
+struct OuterCirclesResponse: Codable {
     let data: [String: TeamCirclesEntity]
 
     // サーバーは "Data" という大文字なので CodingKeys が必要
