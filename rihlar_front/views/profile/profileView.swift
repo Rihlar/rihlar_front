@@ -20,13 +20,13 @@ struct ProfileView: View {
     
     // タップされた画像のインデックスを管理するState（Optional）
     @State private var selectedImageIndex: ImageIndex? = nil
+    // ViewModelを状態として保持（画面に紐づく）
+    @StateObject private var viewModel = RecordsViewModel()
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
-    // 実績を選択式に
-    @State private var records: [Record]
     // 選択された実績だけ取り出して最大3つに制限
     var selectedRecords: [Record] {
-        Array(records.filter { $0.isSelected }.prefix(3))
+        Array(viewModel.records.filter { $0.isSelected }.prefix(3))
     }
     
     init(viewData: UserProfileViewData, router: Router) {
@@ -34,7 +34,6 @@ struct ProfileView: View {
         // ObservedObject の初期化にはプロパティラッパーの _router を使います
         _router = ObservedObject(initialValue: router)
         _editableName = State(initialValue: viewData.user.name)
-        _records = State(initialValue: viewData.records)
     }
     
     var body: some View {
@@ -239,7 +238,7 @@ struct ProfileView: View {
         
         
         .sheet(isPresented: $showAchievementSheet) {
-            AchievementSelectionView(records: $records)
+            AchievementSelectionView(records: $viewModel.records)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }

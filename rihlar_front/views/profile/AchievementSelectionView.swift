@@ -8,6 +8,10 @@
 import SwiftUI
 
 struct AchievementSelectionView: View {
+    
+    // ViewModelを状態として保持（画面に紐づく）
+    @StateObject private var viewModel = RecordsViewModel()
+
     // プロフィール側と実績状態を共有するためのBinding
     @Binding var records: [Record]
 
