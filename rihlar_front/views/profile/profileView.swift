@@ -114,17 +114,14 @@ struct ProfileView: View {
                 Button {
                     showAchievementSheet = true
                 } label: {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 0) {
                         
                         ForEach(0..<3, id: \.self) { index in
                             ZStack {
-                                // 常に白丸の枠だけは表示
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 70, height: 70)
-                                    .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
                                 
-                                // 選択済みの実績があれば画像を表示
+                                Circle()
+                                        .fill(Color.clear)
+                                        .frame(width: 90, height: 90)
                                 if index < selectedRecords.count {
                                     let record = selectedRecords[index]
                                     
@@ -142,15 +139,20 @@ struct ProfileView: View {
                                                 .scaledToFill()
                                         }
                                     }
-                                    .frame(width: 70, height: 70)
+                                    .frame(width: 90, height: 90)
                                     .clipShape(Circle())
+                                } else {
+                                    // 実績がないときだけ白丸を表示
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 70, height: 70)
+                                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
                                 }
                             }
+                            .frame(width: 90, height: 90)
+                            .contentShape(Rectangle())
                         }
                     }
-                    
-                    
-                    
                     .padding()
                     .background(Color.recordBackgroundColor)
                     .frame(width:300,height:90)

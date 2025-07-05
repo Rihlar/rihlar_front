@@ -43,39 +43,37 @@ struct AchievementSelectionView: View {
                             var record = records[index]
 
                             ZStack(alignment: .topTrailing) {
-                                // 円形背景（常に表示）
-                                Circle()
-                                    .fill(Color.backgroundColor)
-                                    .frame(width: 100, height: 100)
-                                    .overlay(
-                                        // アイコン画像の読み込み
-                                        Group {
-                                            if let url = URL(string: record.imageUrl), record.imageUrl.contains("http") {
-                                                // URLがhttpを含む → ネットから読み込む
-                                                AsyncImage(url: url) { image in
-                                                    image.resizable()
-                                                } placeholder: {
-                                                    Color.gray.opacity(0.3)
-                                                }
-                                            } else {
-                                                // ローカル画像名として表示
-                                                Image(record.imageUrl)
-                                                    .resizable()
-                                            }
+                                // 常に透明な背景で固定サイズ確保（ズレ防止）
+                                    Circle()
+                                        .fill(Color.clear)
+                                        .frame(width: 100, height: 100)
+                                
+                                // 白丸は削除。代わりに画像を直接表示
+                                Group {
+                                    if let url = URL(string: record.imageUrl), record.imageUrl.contains("http") {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable()
+                                        } placeholder: {
+                                            Color.gray.opacity(0.3)
                                         }
-                                        .scaledToFill()
-                                        .frame(width: 80, height: 80)
-                                        .clipShape(Circle())
-                                    )
-                                    .overlay(
-                                        // 選択されているときは点線の枠を表示
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(style: StrokeStyle(lineWidth: 4, dash: [5]))
-                                            .foregroundColor(Color.buttonFrameColor)
-                                            .opacity(record.isSelected ? 1 : 0)
-                                    )
+                                    } else {
+                                        Image(record.imageUrl)
+                                            .resizable()
+                                    }
+                                }
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle()) // 丸く切り取る
 
-                                // チェックマーク（選択時のみ）
+                                // 点線の選択枠（選択時のみ表示）
+                                if record.isSelected {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(style: StrokeStyle(lineWidth: 4, dash: [5]))
+                                        .foregroundColor(Color.buttonFrameColor)
+                                        .frame(width: 100, height: 100)
+                                }
+
+                                // チェックマーク
                                 if record.isSelected {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 30))
