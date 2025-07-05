@@ -21,7 +21,7 @@ class RecordsViewModel: ObservableObject {
     // 仮データ
     private func recordsData(){
         records =  [
-            
+//            Record(id: 1, title: "100km歩く", imageUrl: , isSelected: false)
         ]
     }
     
