@@ -77,6 +77,7 @@ struct FriendView: View {
                         
                         // 下のリスト部分
                         ScrollView {
+                            Spacer()
                             VStack(spacing: 16) {
                                 tabContentView()
                             }
@@ -145,12 +146,13 @@ struct FriendView: View {
 
         return Text(tab.rawValue)
             .font(.system(size: 14, weight: .bold))
-            .foregroundColor(isSelected ? .white : .black)
+            .foregroundColor(.white)
+            .stroke(color: Color.textColor, width: 0.8)
             .frame(maxWidth: .infinity)
             .frame(height: 30)
             .padding(.vertical, 10)
             .background(
-                (isSelected ? Color.mainDecorationColor : Color.subDecorationColor)
+                (isSelected ? Color.mainDecorationColor : Color.subBtnDecorationColor)
                     .clipShape(TopCornersRoundedShape(radius: radius))
             )
     }
