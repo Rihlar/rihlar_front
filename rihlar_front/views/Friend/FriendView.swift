@@ -150,7 +150,7 @@ struct FriendView: View {
             .frame(height: 30)
             .padding(.vertical, 10)
             .background(
-                (isSelected ? Color.green : Color.yellow.opacity(0.4))
+                (isSelected ? Color.mainDecorationColor : Color.subDecorationColor)
                     .clipShape(TopCornersRoundedShape(radius: radius))
             )
     }
