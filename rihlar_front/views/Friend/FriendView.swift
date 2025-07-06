@@ -7,6 +7,30 @@
 
 import SwiftUI
 
+// 上の左右だけ角丸にするカスタムShape
+struct TopCornersRoundedShape: Shape {
+    var radius: CGFloat = 10
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: radius))
+        path.addArc(center: CGPoint(x: radius, y: radius),
+                    radius: radius,
+                    startAngle: .degrees(180),
+                    endAngle: .degrees(270),
+                    clockwise: false)
+        path.addLine(to: CGPoint(x: rect.width - radius, y: 0))
+        path.addArc(center: CGPoint(x: rect.width - radius, y: radius),
+                    radius: radius,
+                    startAngle: .degrees(270),
+                    endAngle: .degrees(0),
+                    clockwise: false)
+        path.addLine(to: CGPoint(x: rect.width, y: rect.height))
+        path.addLine(to: CGPoint(x: 0, y: rect.height))
+        path.closeSubpath()
+        return path
+    }
+}
+
 struct FriendView: View {
     @ObservedObject var router: Router
     @State private var isChangeBtn = false
@@ -15,7 +39,7 @@ struct FriendView: View {
     @State private var selectedTab: FriendTab = .friends
     
     var body: some View {
-        ZStack (alignment: .bottom){
+        ZStack{
             // 背景色
             Color(Color.backgroundColor)
                 .ignoresSafeArea(edges: .all)
@@ -33,52 +57,57 @@ struct FriendView: View {
                     },
                     isBigBtn: false
                 )
-                
-                // タブ（フレンド・申請中・承認）
-                HStack(spacing: 0) {
-                    ForEach(FriendTab.allCases, id: \.self) { tab in
-                        Button {
-                            selectedTab = tab
-                        } label: {
-                            tabButtonView(for: tab)
-                        }
-                    }
-                }
-                .background(Color(UIColor.systemYellow).opacity(0.4))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .padding(.horizontal)
-                
-                
-                
-                
-                ScrollView {
-                    VStack(spacing: 16) {
-                        tabContentView()
-                    }
-                    .padding(.top, 8)
-                }
-                
                 Spacer()
                 
-            }
-            if isShowMenu {
-                Color.white.opacity(0.5).ignoresSafeArea()
-                Menu(router: router)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
-            
-            BottomNavigationBar(
-                router: router,
-                isChangeBtn: isChangeBtn,
-                onCameraTap: { router.push(.camera) },
-                onMenuTap: {
-                    isChangeBtn.toggle()
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isShowMenu.toggle()
+                ZStack(alignment: .bottom){
+                    VStack(spacing: 0) {
+                        // タブ部分
+                        HStack(spacing: 0) {
+                            ForEach(FriendTab.allCases, id: \.self) { tab in
+                                Button {
+                                    selectedTab = tab
+                                } label: {
+                                    tabButtonView(for: tab)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .frame(maxWidth: .infinity)
+                        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+                        
+                        // 下のリスト部分
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                tabContentView()
+                            }
+                            .padding(.top, 8)
+                            .padding(.horizontal, 20)
+                        }
+                        .background(Color.mainDecorationColor)
                     }
+                    
+                    Spacer()
+                    
+                    
+                    if isShowMenu {
+                        Color.white.opacity(0.5).ignoresSafeArea()
+                        Menu(router: router)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                    }
+                    
+                    BottomNavigationBar(
+                        router: router,
+                        isChangeBtn: isChangeBtn,
+                        onCameraTap: { router.push(.camera) },
+                        onMenuTap: {
+                            isChangeBtn.toggle()
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isShowMenu.toggle()
+                            }
+                        }
+                    )
                 }
-            )
-            
+            }
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -111,13 +140,18 @@ struct FriendView: View {
     
     // タブボタンの見た目
     private func tabButtonView(for tab: FriendTab) -> some View {
-        Text(tab.rawValue)
+        let isSelected = selectedTab == tab
+        let radius: CGFloat = 20
+
+        return Text(tab.rawValue)
             .font(.system(size: 14, weight: .bold))
-            .foregroundColor(selectedTab == tab ? .white : .gray)
+            .foregroundColor(isSelected ? .white : .black)
             .frame(maxWidth: .infinity)
+            .frame(height: 30)
             .padding(.vertical, 10)
             .background(
-                selectedTab == tab ? Color.accentColor : Color.clear
+                (isSelected ? Color.green : Color.yellow.opacity(0.4))
+                    .clipShape(TopCornersRoundedShape(radius: radius))
             )
     }
 }
