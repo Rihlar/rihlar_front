@@ -14,6 +14,7 @@ import MapKit
 struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
     let circlesByTeam: [TeamCircles]
+    let userStepByTeam: [UserStep]
 
 ///     UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
@@ -53,10 +54,10 @@ struct CircleMap: UIViewRepresentable {
 
 //         初回ロード完了フラグ && アニメーション中でなければオーバーレイを更新
         if context.coordinator.isFirstLoadFlag && !context.coordinator.isAnimatingCircles {
-            // 既存のオーバーレイを削除
+//             既存のオーバーレイを削除
             uiView.removeOverlays(uiView.overlays)
             
-//             通過地点をつなぐ線を追加
+//             リアルタイム追跡の線を追加
             let coords = playerPosition.track
             if coords.count >= 2 {
                 let polyline = MKPolyline(coordinates: coords, count: coords.count)

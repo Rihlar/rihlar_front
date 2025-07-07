@@ -27,11 +27,18 @@ struct TopPageInProgressView: View {
     var body: some View {
         ZStack {
             // mapkitを使用した地図表示
-            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam)
+            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam, userStepByTeam: vm.userStepByTeam)
                 .ignoresSafeArea()
                 .onAppear {
                     vm.fetchCircles(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
                     vm.fetchUserStep(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                }
+                .onChange(of: vm.userStepByTeam) { steps in
+                    let apiCoords = steps.map { CLLocationCoordinate2D(
+                        latitude: $0.latitude,
+                        longitude: $0.longitude
+                    ) }
+                    playerPosition.seedTrack(with: apiCoords)
                 }
                 .blur(radius: isShowMenu ? 10 : 0)
                 .animation(.easeInOut, value: isShowMenu)
