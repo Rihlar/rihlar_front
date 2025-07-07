@@ -8,56 +8,112 @@
 import SwiftUI
 
 struct ScoreStatusPanel: View {
-    let width:CGFloat = 140
-    let height:CGFloat = 66
+    let width:CGFloat = 200
+    let height:CGFloat = 95
     
     // 動的なデータ
     var rank: Int
     var currentScore: Int
-    var scoreToTop: Int
     
     var body: some View {
         ZStack {
-//            一番外側にある線を表現
+//            ボタンの大部分である背景
             RoundedRectangle(cornerRadius: 0)
-                .fill(Color.separatorLine)
+                .fill(Color.backgroundColor)
                 .frame(width: width, height: height)
                 .clipShape(
                     RoundedCornerShape(corners: [.topLeft, .bottomLeft, .topRight, .bottomRight], radius: 10)
                 )
-                .shadow(color: Color.black.opacity(0.25), radius: 5)
-//            ボタンの大部分である背景
-            RoundedRectangle(cornerRadius: 0)
-                .fill(Color.backgroundColor)
-                .frame(width: width - 4, height: height - 4)
-                .clipShape(
-                    RoundedCornerShape(corners: [.topLeft, .bottomLeft, .topRight, .bottomRight], radius: 10)
-                )
+                .opacity(0.8)
             
-            VStack {
-                HStack {
-                    Text("現在")
+            VStack(spacing: 3) {
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.orange)
+                        .frame(width: 10, height: 10)
+                    
+                    Text("1位")
                         .font(.system(size: 12,weight: .bold))
                         .foregroundColor(.textColor)
+                    
+                    Text("転々")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                    
+                    Spacer()
+                    
+                    Text("10000pt")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                }
+                .frame(width: width - 40)
+                
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 10, height: 10)
+                    
+                    Text("2位")
+                        .font(.system(size: 12,weight: .bold))
+                        .foregroundColor(.textColor)
+                    
+                    Text("山田太郎")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                    
+                    Spacer()
+                    
+                    Text("5030pt")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                }
+                .frame(width: width - 40)
+                
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.green)
+                        .frame(width: 10, height: 10)
+                    
+                    Text("3位")
+                        .font(.system(size: 12,weight: .bold))
+                        .foregroundColor(.textColor)
+                    
+                    Text("サーモン丼")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                    
+                    Spacer()
+                    
+                    Text("3300pt")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                }
+                .frame(width: width - 40)
+                
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(Color("LineColor").opacity(0.2))
+                    .frame(width: 160, height: 1)
+                
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color.blue)
+                        .frame(width: 10, height: 10)
                     
                     Text("\(rank)位")
-                        .font(.system(size: 16,weight: .bold))
-                        .foregroundColor(.textColor)
-                    
-                    Text("\(currentScore)点")
-                        .font(.system(size: 16,weight: .bold))
-                        .foregroundColor(.textColor)
-                }
-                
-                HStack {
-                    Text("1位まであと")
                         .font(.system(size: 12,weight: .bold))
                         .foregroundColor(.textColor)
                     
-                    Text("\(scoreToTop)点")
-                        .font(.system(size: 18,weight: .bold))
+                    Text("自分")
+                        .font(.system(size: 10,weight: .medium))
+                        .foregroundColor(.textColor)
+                    
+                    Spacer()
+                    
+                    Text("\(currentScore)pt")
+                        .font(.system(size: 10,weight: .medium))
                         .foregroundColor(.textColor)
                 }
+                .frame(width: width - 40)
             }
         }
     }
@@ -65,8 +121,7 @@ struct ScoreStatusPanel: View {
 
 #Preview {
     ScoreStatusPanel(
-        rank: 2,
-        currentScore: 1200,
-        scoreToTop: 200
+        rank: 10,
+        currentScore: 0,
     )
 }

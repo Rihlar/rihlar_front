@@ -76,6 +76,7 @@ struct CircleMap: UIViewRepresentable {
 
 //     MARK: - 円追加ロジック
     private func addOverlays(to mapView: MKMapView, using coordinator: Coordinator) {
+        let threeDaysAgo = Date().addingTimeInterval(-3 * 24 * 60 * 60)
 //        通過地点をつなぐ線を追加
         let coords = playerPosition.track
         if coords.count >= 2 {
@@ -113,6 +114,10 @@ struct CircleMap: UIViewRepresentable {
 //            決まった groupKey で色を取得
             let color = color(for: groupKey)
             for circleData in team.circles {
+//                circleData.timeStamp は秒刻みの UNIX 時間
+                let circleDate = Date(timeIntervalSince1970: circleData.timeStamp)
+//                ３日前より古いならスキップ
+                guard circleDate >= threeDaysAgo else { continue }
                 let overlay = MKCircle(center: circleData.coordinate, radius: CLLocationDistance(circleData.size))
 //                タイトルも groupKey にそろえる
                 overlay.title = groupKey
@@ -135,9 +140,13 @@ struct CircleMap: UIViewRepresentable {
 
         } else {
 //             2回目以降は静的オーバーレイのみ
-            for team in circlesByTeam {
-                let color = color(for: team.groupName)
-                for circleData in team.circles {
+        for team in circlesByTeam {
+            let color = color(for: team.groupName)
+            for circleData in team.circles {
+//                circleData.timeStamp は秒刻みの UNIX 時間
+                let circleDate = Date(timeIntervalSince1970: circleData.timeStamp)
+//                ３日前より古いならスキップ
+                guard circleDate >= threeDaysAgo else { continue }
                     let overlay = MKCircle(center: circleData.coordinate, radius: CLLocationDistance(circleData.size))
                     overlay.title = team.groupName
                     

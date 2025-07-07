@@ -10,7 +10,23 @@ import SwiftUI
 struct ModalView<Content: View>: View {
     @Binding var isModal: Bool
     let titleLabel: String
+    let closeFlag: Bool
+    let action: () -> Void
     let content: () -> Content
+    
+    init(isModal: Binding<Bool>,
+             titleLabel: String,
+             closeFlag: Bool,
+             action: @escaping () -> Void = {},   // デフォルトは何もしない
+             @ViewBuilder content: @escaping () -> Content)
+        {
+            self._isModal   = isModal
+            self.titleLabel = titleLabel
+            self.closeFlag  = closeFlag
+            self.action     = action
+            self.content    = content
+        }
+
     
     var body: some View {
         if isModal {
@@ -51,14 +67,16 @@ struct ModalView<Content: View>: View {
                     }
                     .zIndex(1)
                     
-                    Text("タップして閉じる")
-                        .font(.system(size: 14,weight: .bold))
-                        .foregroundColor(Color.white)
-                        .underline()
-                        .padding(EdgeInsets(top: 30, leading: 0, bottom: 0, trailing: 0))
-                        .onTapGesture {
-                            isModal = false
-                        }
+                    if closeFlag {
+                        Text("タップして閉じる")
+                            .font(.system(size: 14,weight: .bold))
+                            .foregroundColor(Color.white)
+                            .underline()
+                            .padding(EdgeInsets(top: 30, leading: 0, bottom: 0, trailing: 0))
+                            .onTapGesture {
+                                action()
+                            }
+                    }
                 }
             }
         }
@@ -104,7 +122,8 @@ struct ModalView<Content: View>: View {
 //    }
     ModalView(
         isModal: .constant(true),
-        titleLabel: "結果"
+        titleLabel: "結果",
+        closeFlag: false,
     ) {
         VStack {
             Spacer()
