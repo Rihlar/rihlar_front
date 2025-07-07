@@ -23,7 +23,12 @@ enum FriendRecords {
         [
             FriendData(name: "はるるん", imageName: "user", records: Array(FriendMockRecords[0..<3])),
             FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "りこぴん", imageName: "user", records: Array(FriendMockRecords[4..<7]))
+            FriendData(name: "りこぴん", imageName: "user", records: Array(FriendMockRecords[4..<7])),
+            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
+            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
+            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
+            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
+            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
         ]
     }
 }
