@@ -97,9 +97,9 @@ class RealGameService: GameServiceProtocol {
         
         return URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { output in
-                print("📦 ユーザーの歩数レスポンスJSON文字列:")
+//                print("📦 ユーザーの歩数レスポンスJSON文字列:")
                 if let jsonString = String(data: output.data, encoding: .utf8) {
-                    print(jsonString)
+//                    print(jsonString)
                 }
                 return output.data
             }

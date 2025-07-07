@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import CoreLocation
 
 //    責務：View 側に必要なデータを保持し、サービスからの取得・エラーも管理。
 //    ポイント：Combine を使って非同期を扱い、UI へのバインディングは @Published。
@@ -108,7 +109,7 @@ final class GameViewModel: ObservableObject {
                 },
                 receiveValue: { [weak self] entities in
                     guard let self = self else { return }
-                    print("🌐 fetchUserStep レスポンス内容: \(entities)")
+//                    print("🌐 fetchUserStep レスポンス内容: \(entities)")
 
                     // UserStepEntity → UserStep に変換
                     self.userStepByTeam = entities.map { e in
