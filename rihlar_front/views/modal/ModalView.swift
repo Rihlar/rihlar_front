@@ -123,7 +123,7 @@ struct ModalView<Content: View>: View {
     ModalView(
         isModal: .constant(true),
         titleLabel: "結果",
-        closeFlag: false,
+        closeFlag: false
     ) {
         VStack {
             Spacer()

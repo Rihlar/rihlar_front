@@ -122,6 +122,6 @@ struct ScoreStatusPanel: View {
 #Preview {
     ScoreStatusPanel(
         rank: 10,
-        currentScore: 0,
+        currentScore: 0
     )
 }

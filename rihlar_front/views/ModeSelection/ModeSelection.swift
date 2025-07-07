@@ -81,7 +81,7 @@ struct ModeSelection: View {
                 closeFlag: false,
                 action: {
                     isModeFlag = false
-                },
+                }
             ) {
                 VStack(spacing: 30) {
                     Text("本当に個人戦をはじめますか？")
