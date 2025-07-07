@@ -108,4 +108,34 @@ class RealGameService: GameServiceProtocol {
             .receive(on: RunLoop.main)
             .eraseToAnyPublisher()
     }
+    
+    func postUserStep(userID: String, latitude: Double, longitude: Double, steps: Int) -> AnyPublisher<UserStepReportResponse, any Error> {
+        let path = APIConfig.sendUserStepEndpoint
+        let fullURL = APIConfig.baseURL.appendingPathComponent(path)
+        
+        var request = URLRequest(url: fullURL)
+        request.httpMethod = "POST"
+        request.setValue(userID, forHTTPHeaderField: "UserID")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+//        最新の１点だけ bodyで送る
+        let body: [String: Any] = [
+            "latitude":  latitude,
+            "longitude": longitude,
+            "steps":     steps
+        ]
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        
+        return URLSession.shared
+            .dataTaskPublisher(for: request)
+            .tryMap { output in
+                guard let resp = output.response as? HTTPURLResponse,
+                      (200..<300).contains(resp.statusCode)
+                else { throw URLError(.badServerResponse) }
+                return output.data
+            }
+            .decode(type: UserStepReportResponse.self, decoder: JSONDecoder())
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
+    }
 }

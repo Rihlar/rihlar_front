@@ -19,4 +19,6 @@ struct APIConfig {
     static let userMovementEndpoint = "/gcore/get/movement"
 //    ランキング GET
     static let topRankingEndpoint = "/gcore/get/top"
+//    歩いたデータを送る POST
+    static let sendUserStepEndpoint = "/gcore/report/movement"
 }

@@ -5,83 +5,76 @@
 //  Created by Kodai Hirata on 2025/07/01.
 //
 
-import Foundation
 import HealthKit
+import Combine
 
-@MainActor
+/// HealthKit を使ってユーザーの歩数を取得し、公開するクラス
+/// - Combine の @Published で UI バインディング可能
 final class StepsHealthKit: ObservableObject {
-    private let healthStore = HKHealthStore()
+    // MARK: - 公開プロパティ
+    /// 現在のステップ合計を保持。変更時に SwiftUI に通知。
+    @Published private(set) var steps: Int = 0
 
-    @Published var authorizationStatus: Bool = false
-    @Published var todaySteps: Double? = nil
+    // MARK: - HealthKit 管理
+    /// HealthKit ストアへの参照
+    private let store = HKHealthStore()
+    /// 統計クエリを保持
+    private var query: HKStatisticsCollectionQuery?
 
-    // MARK: 認可リクエスト
-    func requestAuthorization() async {
-        guard HKHealthStore.isHealthDataAvailable(),
-              let stepType = HKObjectType.quantityType(forIdentifier: .stepCount)
-        else { return }
-        do {
-            try await healthStore.requestAuthorization(toShare: [], read: [stepType])
-            authorizationStatus = true
-        } catch {
-            authorizationStatus = false
-            debugPrint("認可エラー:", error)
+    // MARK: - 初期化
+    init() {
+        // 1) 読み取り権限をリクエスト
+        // HKQuantityTypeIdentifier.stepCount の読み取り許可が必要
+        let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+        store.requestAuthorization(toShare: [], read: [stepType]) { success, error in
+            // 成否は必要に応じてハンドル
         }
+        // 2) クエリをセットアップして実行
+        startStepQuery()
     }
 
-    // MARK: 歩数取得
-    func fetchTodaySteps() async {
-        guard let stepType = HKObjectType.quantityType(forIdentifier: .stepCount) else {
-            debugPrint("歩数タイプ取得失敗"); return
-        }
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: Date())
-        let predicate = HKQuery.predicateForSamples(
-            withStart: startOfDay, end: Date()
-        )
-        let query = HKStatisticsQuery(
+    // MARK: - クエリのセットアップ
+    /// 日付単位で累積歩数を取得するクエリを作成し、初回と更新時のハンドラを設定
+    private func startStepQuery() {
+        let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount)!
+        let now = Date()
+        // 00:00 をアンカーデートにして日単位で集計
+        let anchor = Calendar.current.startOfDay(for: now)
+        let interval = DateComponents(day: 1)
+
+        let query = HKStatisticsCollectionQuery(
             quantityType: stepType,
-            quantitySamplePredicate: predicate,
-            options: .cumulativeSum
-        ) { _, stats, error in
-            guard let sum = stats?.sumQuantity() else { return }
-            let count = sum.doubleValue(for: .count())
-            Task { @MainActor in
-                self.todaySteps = count
-            }
+            quantitySamplePredicate: nil,        // フィルタなし
+            options: [.cumulativeSum],           // 合計値を算出
+            anchorDate: anchor,
+            intervalComponents: interval
+        )
+        // 初回実行時のコールバック
+        query.initialResultsHandler = { _, results, error in
+            self.updateSteps(from: results, to: now)
         }
-        healthStore.execute(query)
+        // データ更新時のコールバック
+        query.statisticsUpdateHandler = { _, _, results, error in
+            self.updateSteps(from: results, to: now)
+        }
+        // クエリを実行して結果を受け取り始める
+        store.execute(query)
+        // メンバーに保持しておく
+        self.query = query
     }
 
-    // MARK: ——— 認可→歩数取得 を一気にやる
-    func authorizeAndFetch() async {
-        // １）権限リクエスト
-        await requestAuthorization()
-        // ２）許可が取れたら歩数取得
-        if authorizationStatus {
-            await fetchTodaySteps()
+    // MARK: - 結果処理
+    /// 統計結果から指定時刻までの累積歩数を取得し、@Published プロパティに反映
+    private func updateSteps(from stats: HKStatisticsCollection?, to end: Date) {
+        guard let stats = stats,
+              // 指定日時の統計を取得
+              let sum = stats.statistics(for: end)?
+                           .sumQuantity()?
+                           .doubleValue(for: HKUnit.count())
+        else { return }
+        // UI 更新はメインスレッドで
+        DispatchQueue.main.async {
+            self.steps = Int(sum)
         }
     }
 }
-
-//    例
-//    VStack(spacing: 16) {
-//      if !hk.authorizationStatus {
-//       MARK: ここを写真を撮るボタンなどにしたら写真を撮ると同時に認可→歩数取得ができると思う
-//        Button("許可して歩数を取得") {
-//          Task { await hk.authorizeAndFetch() }
-//        }
-//      } else {
-//        // 一度許可済みならボタン押さずに自動取得
-//        if let steps = hk.todaySteps {
-//          Text("今日の歩数：\(Int(steps)) 歩")
-//        } else {
-//          Text("取得中…")
-//            .onAppear {
-//              Task { await hk.fetchTodaySteps() }
-//            }
-//        }
-//      }
-//    }
-//    .padding()
-

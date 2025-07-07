@@ -19,5 +19,8 @@ protocol GameServiceProtocol {
     
 /// ユーザーの歩数を取得流メソッド
     func getUserStep(for gameID:String, userID: String) -> AnyPublisher<[UserStep], Error>
+    
+/// 歩数の最新の１地点だけ送信
+    func postUserStep(userID: String, latitude: Double, longitude: Double, steps: Int) -> AnyPublisher<UserStepReportResponse, Error>
 }
 

@@ -32,6 +32,7 @@ struct TopPageInProgressView: View {
                 .onAppear {
                     vm.fetchCircles(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
                     vm.fetchUserStep(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.bindPlayerPositionUpdates(for: "userid-79541130-3275-4b90-8677-01323045aca5", playerPosition: playerPosition)
                 }
                 .onChange(of: vm.userStepByTeam) { steps in
                     let apiCoords = steps.map { CLLocationCoordinate2D(
