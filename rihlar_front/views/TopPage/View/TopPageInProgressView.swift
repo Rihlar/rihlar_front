@@ -22,14 +22,25 @@ struct TopPageInProgressView: View {
     //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
     let game: Game
+    @StateObject private var hk = StepsHealthKit()
+    let currentUserTeamID: String = "teamid-32f5eb5f-534b-439e-990e-349e52d70970"
     
     var body: some View {
         ZStack {
             // mapkitを使用した地図表示
-            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam)
+            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam, userStepByTeam: vm.userStepByTeam, currentUserTeamID: currentUserTeamID)
                 .ignoresSafeArea()
                 .onAppear {
-                    vm.fetchCircles(for: "テスト用Circleデータ")
+                    vm.fetchCircles(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.fetchUserStep(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.bindPlayerPositionUpdates(for: "userid-79541130-3275-4b90-8677-01323045aca5", playerPosition: playerPosition)
+                }
+                .onChange(of: vm.userStepByTeam) { steps in
+                    let apiCoords = steps.map { CLLocationCoordinate2D(
+                        latitude: $0.latitude,
+                        longitude: $0.longitude
+                    ) }
+                    playerPosition.seedTrack(with: apiCoords)
                 }
                 .blur(radius: isShowMenu ? 10 : 0)
                 .animation(.easeInOut, value: isShowMenu)

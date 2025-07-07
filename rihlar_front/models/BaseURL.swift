@@ -16,7 +16,9 @@ struct APIConfig {
 //    上位３位の円 GET ※ゲームIDを含むURL
     static let top3CirclesRankingEndpoint = "/game/ranking/top/{gameId}"
 //    自分が歩いた記録 GET
-    static let userMovementEndpoint = "/gcore/get/movement/"
+    static let userMovementEndpoint = "/gcore/get/movement"
 //    ランキング GET
     static let topRankingEndpoint = "/gcore/get/top"
+//    歩いたデータを送る POST
+    static let sendUserStepEndpoint = "/gcore/report/movement"
 }

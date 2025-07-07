@@ -95,6 +95,22 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
             )
         }
     }
+    
+//    MARK: API などから取得した過去の座標を初期設定する
+    func seedTrack(with coords: [CLLocationCoordinate2D]) {
+        // 既存の track をクリアしてから
+        self.track = coords
+        
+        // “最後に取得した位置” を更新しておく
+        if let last = coords.last {
+            self.lastLocation = CLLocation(latitude: last.latitude,
+                                           longitude: last.longitude)
+        }
+        
+        // 初回 region 設定済みフラグを立てておけば、
+        // CircleMap の updateUIView 側で初回サイクルから描画される
+        self.didSetInitialRegion = true
+    }
 
 //     MARK: - 追従モード再開
 //   　外部から呼び出し、追従モードを ON に戻す
