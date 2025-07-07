@@ -8,58 +8,73 @@
 import SwiftUI
 
 struct AchievementSelectionView: View {
-    // 表示する実績画像の仮データ
-    let images = ["king", "king", "king"]
     
-    // 表示を閉じるための dismiss 環境変数
+    // ViewModelを状態として保持（画面に紐づく）
+    @StateObject private var viewModel = RecordsViewModel()
+
+    // プロフィール側と実績状態を共有するためのBinding
+    @Binding var records: [Record]
+
+    // シートを閉じるための環境変数
     @Environment(\.dismiss) var dismiss
-    // 選択せれた画像のインデックスを保持する状態変数
-    @State private var selectedImages: Set<Int> = [0,2]
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // ドラッグインジケーター
+                // ドラッグインジケーター（シートの上部に表示されるバー）
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Color.backgroundColor)
-                    .frame(width:80,height: 5)
+                    .frame(width: 80, height: 5)
                     .padding(.top, 12)
-                // 緑の区切り線
+
+                // 区切り線
                 Rectangle()
                     .fill(Color.buttonFrameColor)
                     .frame(height: 2)
-                    .padding(.top,12)
-                
+                    .padding(.top, 12)
+
+                // 実績アイコンを表示するグリッド
                 ScrollView {
-                    // 三列のグリットで実績を並べる
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12){
-                        
-                        // 画像配列のインデックスでループ
-                        ForEach(images.indices,id:\.self){
-                            index in
-                            // 実績画像の背景
+                    LazyVGrid(
+                        columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3),
+                        spacing: 12
+                    ) {
+                        ForEach(records.indices, id: \.self) { index in
+                            var record = records[index]
+
                             ZStack(alignment: .topTrailing) {
-                                // 丸背景
-                                Circle()
-                                    .fill(Color.backgroundColor)
-                                    .frame(width: 100, height: 100)
-                                    .overlay(
-                                        Image(images[index])
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 80, height: 80)
-                                            .clipShape(Circle())
-                                    )
-                                    .overlay(
-                                        // 点線枠：選択時のみ表示（でも常にレイアウト上は存在）
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(style: StrokeStyle(lineWidth: 4, dash: [5]))
-                                            .foregroundColor(Color.buttonFrameColor)
-                                            .opacity(selectedImages.contains(index) ? 1 : 0)
-                                    )
+                                // 常に透明な背景で固定サイズ確保（ズレ防止）
+                                    Circle()
+                                        .fill(Color.clear)
+                                        .frame(width: 100, height: 100)
                                 
-                                // チェックマーク：選択時のみ
-                                if selectedImages.contains(index) {
+                                // 白丸は削除。代わりに画像を直接表示
+                                Group {
+                                    if let url = URL(string: record.imageUrl), record.imageUrl.contains("http") {
+                                        AsyncImage(url: url) { image in
+                                            image.resizable()
+                                        } placeholder: {
+                                            Color.gray.opacity(0.3)
+                                        }
+                                    } else {
+                                        Image(record.imageUrl)
+                                            .resizable()
+                                    }
+                                }
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle()) // 丸く切り取る
+
+                                // 点線の選択枠（選択時のみ表示）
+                                if record.isSelected {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(style: StrokeStyle(lineWidth: 4, dash: [5]))
+                                        .foregroundColor(Color.buttonFrameColor)
+                                        .frame(width: 100, height: 100)
+                                }
+
+                                // チェックマーク
+                                if record.isSelected {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 30))
                                         .foregroundColor(Color.buttonColor)
@@ -69,19 +84,22 @@ struct AchievementSelectionView: View {
                                 }
                             }
                             .onTapGesture {
-                                if selectedImages.contains(index) {
-                                    selectedImages.remove(index)
-                                } else {
-                                    selectedImages.insert(index)
+                                // 選択数を数える（最大3つまで）
+                                let selectedCount = records.filter { $0.isSelected }.count
+                                if record.isSelected {
+                                    // 選択解除
+                                    records[index].isSelected = false
+                                } else if selectedCount < 3 {
+                                    // 3つ未満のときだけ選択可能
+                                    records[index].isSelected = true
                                 }
                             }
-                            
                         }
                     }
                     .padding()
-                    
                 }
-                // スワイプで出したものを閉じる
+
+                // 閉じるボタン（戻る）
                 Button {
                     dismiss()
                 } label: {
@@ -96,11 +114,11 @@ struct AchievementSelectionView: View {
                     .frame(width: 180, height: 80)
                     .background(
                         ZStack {
-                            // 内側のボタンカラー（buttonColor）
+                            // ベースのボタンカラー
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(Color.buttonColor)
-                            
-                            // 左から光が当たるグラデーション
+
+                            // 左から光が当たっているようなグラデーション
                             RoundedRectangle(cornerRadius: 20)
                                 .fill(
                                     LinearGradient(
@@ -112,14 +130,16 @@ struct AchievementSelectionView: View {
                                         endPoint: .trailing
                                     )
                                 )
-                            
-                            // 縁の色（buttonFrameColor）
+
+                            // 枠線と影
                             RoundedRectangle(cornerRadius: 20)
                                 .stroke(Color.buttonFrameColor, lineWidth: 4)
                                 .shadow(color: Color.buttonFrameColor.opacity(0.6), radius: 4, x: 2, y: 2)
                         }
                     )
-                }}
+                }
+                .padding(.bottom, 20)
+            }
             .background(Color.mainDecorationColor)
         }
     }

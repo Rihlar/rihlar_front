@@ -55,7 +55,7 @@ struct TopPageInProgressView: View {
             }
             .blur(radius: isShowMenu ? 10 : 0)
             .animation(.easeInOut, value: isShowMenu)
-           
+            
             // ─────────── 「陣取りスタート！」のオーバーレイ ───────────
             if router.didStartFromLoading {
                 Text("陣取りスタート！")

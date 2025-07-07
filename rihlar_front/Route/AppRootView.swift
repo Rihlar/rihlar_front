@@ -35,21 +35,23 @@ struct AppRootView: View {
 //                              　カメラ画面の遷移
                                 Camera()
                             case .profile:
-                                ProfileView(viewData: mockUserProfile, router: router)
+                                ProfileView(viewData: mockUserProfile
+                                , router: router)
                             case .mode:
                                 ModeSelection(router: router)
                             case .teamMatch:
                                 TeamMatch(router: router)
                             case .loading:
                                 LoadingView(router: router, vm: vm)
-//                        case .friend:
-                                // フレンド画面の遷移
+                        case .friend:
+                                FriendView(router:router)
 //                        case .gacha:
                                 // ガチャ画面の遷移
-//                        case .items:
-                                // アイテム画面の遷移
-//                        case .record:
-                                // 戦績画面の遷移
+                        case .items:
+                                ItemView(router:router)
+                        case .record:
+                                SoloRankingView()
+//                                 戦績画面の遷移
 //                        case .setting:
                                 // 設定画面の遷移
                             default:

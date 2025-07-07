@@ -10,7 +10,7 @@ import SwiftUI
 struct ItemDetailPopup: View {
     let item: Item
     @Binding var isPresented: Bool
-
+    
     var body: some View {
         VStack(spacing: 16) {
             // アイテム名
@@ -24,18 +24,15 @@ struct ItemDetailPopup: View {
             Rectangle()
                 .frame(width: 200, height: 1)
                 .foregroundColor(.gray)
-
+            
             // アイコン
-            ZStack{
-                Circle()
-                    .fill(Color.itemBackgroundColor)
-                    .frame(width: 100, height: 100)
-                Image(item.iconName)
-                    .resizable()
-                    .interpolation(.none)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width:90,height: 90)
-            }
+            
+            Image(item.iconName)
+                .resizable()
+                .interpolation(.none)
+                .aspectRatio(contentMode: .fit)
+                .frame(width:90,height: 90)
+            
             
             // 所持数
             Text("×\(item.count)")

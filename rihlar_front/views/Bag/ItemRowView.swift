@@ -15,16 +15,13 @@ struct ItemRowView: View {
         
         HStack{
             // アイコン
-            ZStack{
-                Circle()
-                    .fill(Color.itemBackgroundColor)
-                    .frame(width: 70, height: 70)
-                Image(item.iconName)
-                    .resizable()
-                    .interpolation(.none)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width:60,height: 60)
-            }
+            
+            Image(item.iconName)
+                .resizable()
+                .interpolation(.none)
+                .aspectRatio(contentMode: .fit)
+                .frame(width:60,height: 60)
+            
             
             // アイテム名
             Text(item.name)
@@ -42,9 +39,9 @@ struct ItemRowView: View {
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .background(
-                    RoundedRectangle(cornerRadius: 50)
-                        .fill(Color.white) 
-                )
+            RoundedRectangle(cornerRadius: 50)
+                .fill(Color.white)
+        )
         
     }
 }
