@@ -76,7 +76,7 @@ struct ModeSelection: View {
             }
             
             ModalView(
-                isModal: isModeFlag,
+                isModal: $isModeFlag,
                 titleLabel: "確認"
             ) {
                 VStack(spacing: 30) {
