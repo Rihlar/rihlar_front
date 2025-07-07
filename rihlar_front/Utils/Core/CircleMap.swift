@@ -14,6 +14,8 @@ import MapKit
 struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
     let circlesByTeam: [TeamCircles]
+    let userStepByTeam: [UserStep]
+    let currentUserTeamID: String
 
 ///     UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
@@ -53,10 +55,10 @@ struct CircleMap: UIViewRepresentable {
 
 //         初回ロード完了フラグ && アニメーション中でなければオーバーレイを更新
         if context.coordinator.isFirstLoadFlag && !context.coordinator.isAnimatingCircles {
-            // 既存のオーバーレイを削除
+//             既存のオーバーレイを削除
             uiView.removeOverlays(uiView.overlays)
             
-//             通過地点をつなぐ線を追加
+//             リアルタイム追跡の線を追加
             let coords = playerPosition.track
             if coords.count >= 2 {
                 let polyline = MKPolyline(coordinates: coords, count: coords.count)
@@ -105,15 +107,20 @@ struct CircleMap: UIViewRepresentable {
         if !coordinator.hasAnimatedCircles && !circlesByTeam.isEmpty {
         // ─────────── 初回アニメーション ───────────
         for team in circlesByTeam {
-            let color = color(for: team.groupName)
+//            自分チームかどうか判定
+            let isSelfTeam = (team.teamID == currentUserTeamID)
+//            タイトル（＝描画グループ名）を先に決める
+            let groupKey = isSelfTeam ? "Self" : team.groupName
+//            決まった groupKey で色を取得
+            let color = color(for: groupKey)
             for circleData in team.circles {
 //                circleData.timeStamp は秒刻みの UNIX 時間
                 let circleDate = Date(timeIntervalSince1970: circleData.timeStamp)
 //                ３日前より古いならスキップ
                 guard circleDate >= threeDaysAgo else { continue }
                 let overlay = MKCircle(center: circleData.coordinate, radius: CLLocationDistance(circleData.size))
-                overlay.title = team.groupName
-                
+//                タイトルも groupKey にそろえる
+                overlay.title = groupKey
 //                print("▶️ addOverlays: team=\(team.groupName), color=\(color)")
                 
                 mapView.addOverlay(overlay)
@@ -153,11 +160,11 @@ struct CircleMap: UIViewRepresentable {
 
     private func color(for group: String) -> UIColor {
         switch group {
-        case "Top1":  return .red
-        case "Top2":  return .green
-        case "Top3":  return .blue
-        case "Other": return .gray
-        case "Self":  return .purple
+        case "Top1":  return .orange
+        case "Top2":  return .red
+        case "Top3":  return .green
+        case "Other": return .white
+        case "Self":  return .blue
         default:      return .black
         }
     }
