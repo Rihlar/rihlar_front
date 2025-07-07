@@ -33,7 +33,7 @@ class RealGameService: GameServiceProtocol {
         let end = DateComponents(
             calendar: .current,
             timeZone: TimeZone(identifier: "Asia/Tokyo"),
-            year: 2025, month: 7, day: 4,
+            year: 2025, month: 7, day: 7,
             hour: 15, minute: 0, second: 0
         ).date!
         

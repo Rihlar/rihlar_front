@@ -76,8 +76,12 @@ struct ModeSelection: View {
             }
             
             ModalView(
-                isModal: isModeFlag,
-                titleLabel: "確認"
+                isModal: $isModeFlag,
+                titleLabel: "確認",
+                closeFlag: false,
+                action: {
+                    isModeFlag = false
+                },
             ) {
                 VStack(spacing: 30) {
                     Text("本当に個人戦をはじめますか？")

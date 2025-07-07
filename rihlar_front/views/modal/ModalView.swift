@@ -8,9 +8,25 @@
 import SwiftUI
 
 struct ModalView<Content: View>: View {
-    let isModal: Bool
+    @Binding var isModal: Bool
     let titleLabel: String
+    let closeFlag: Bool
+    let action: () -> Void
     let content: () -> Content
+    
+    init(isModal: Binding<Bool>,
+             titleLabel: String,
+             closeFlag: Bool,
+             action: @escaping () -> Void = {},   // デフォルトは何もしない
+             @ViewBuilder content: @escaping () -> Content)
+        {
+            self._isModal   = isModal
+            self.titleLabel = titleLabel
+            self.closeFlag  = closeFlag
+            self.action     = action
+            self.content    = content
+        }
+
     
     var body: some View {
         if isModal {
@@ -50,6 +66,17 @@ struct ModalView<Content: View>: View {
                         .frame(maxWidth: 300, maxHeight: 350)
                     }
                     .zIndex(1)
+                    
+                    if closeFlag {
+                        Text("タップして閉じる")
+                            .font(.system(size: 14,weight: .bold))
+                            .foregroundColor(Color.white)
+                            .underline()
+                            .padding(EdgeInsets(top: 30, leading: 0, bottom: 0, trailing: 0))
+                            .onTapGesture {
+                                action()
+                            }
+                    }
                 }
             }
         }
@@ -58,8 +85,9 @@ struct ModalView<Content: View>: View {
 
 #Preview {
     ModalView(
-        isModal: true,
-        titleLabel: "結果"
+        isModal: .constant(true),
+        titleLabel: "結果",
+        closeFlag: false,
     ) {
         VStack(spacing: 30) {
             Text("本当に個人戦をはじめますか？")
