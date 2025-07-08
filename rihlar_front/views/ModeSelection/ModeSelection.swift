@@ -95,7 +95,7 @@ struct ModeSelection: View {
                             Text("戻る")
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.redColor)
+                                .background(Color(hex: "#E95858"))
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }
