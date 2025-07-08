@@ -9,7 +9,7 @@ import Foundation
 
 // User モック
 let mockUser = User(
-    id: "9abfba53-7e49-4204-9928-73431039ca34",
+    id: "a39f14c3-61b2-48f8-9cc3-b3f7e25b64a0",
     name: "川岸 遥奈"
 )
 
@@ -35,6 +35,11 @@ let mockPhotos: [Photo] = [
         theme: "いちご",
         createdAt: Date().addingTimeInterval(-86400)
     )
+    
+    
+    
+    
+    
 ]
 
 // UserProfileViewData モック
