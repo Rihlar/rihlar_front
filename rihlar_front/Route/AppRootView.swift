@@ -22,40 +22,43 @@ struct AppRootView: View {
     private var contentView: some View  {
         Group {
             if isLoggedIn{
+                // ログイン済みの場合はNavigationStackでメイン画面を表示
                 NavigationStack(path: $router.path) {
-                    // top画面
-                    TopPage(
-                        router: router,
-                        vm: vm
-                    )
-                        .navigationDestination(for: Route.self){
-                            route in
-                            switch route{
+                    TopPage(router: router, vm: vm)
+                    // ルート画面は戻るボタンなし（通常はルートには戻るボタンは表示されないが明示的に指定）
+                        .navigationBarBackButtonHidden(true)
+                    
+                    // pathに応じた遷移先画面を定義
+                        .navigationDestination(for: Route.self) { route in
+                            switch route {
                             case .camera:
-//                              　カメラ画面の遷移
                                 Camera()
+                                // 個別画面も戻るボタン非表示に
+                                    .navigationBarBackButtonHidden(true)
                             case .profile:
-                                ProfileView(viewData: mockUserProfile
-                                , router: router)
+                                ProfileView(viewData: mockUserProfile, router: router)
+                                    .navigationBarBackButtonHidden(true)
                             case .mode:
                                 ModeSelection(router: router)
+                                    .navigationBarBackButtonHidden(true)
                             case .teamMatch:
                                 TeamMatch(router: router)
+                                    .navigationBarBackButtonHidden(true)
                             case .loading:
                                 LoadingView(router: router, vm: vm)
-                        case .friend:
-                                FriendView(router:router)
-//                        case .gacha:
-                                // ガチャ画面の遷移
-                        case .items:
-                                ItemView(router:router)
-                        case .record:
+                                    .navigationBarBackButtonHidden(true)
+                            case .friend:
+                                FriendView(router: router)
+                                    .navigationBarBackButtonHidden(true)
+                            case .items:
+                                ItemView(router: router)
+                                    .navigationBarBackButtonHidden(true)
+                            case .record:
                                 SoloRankingView()
-//                                 戦績画面の遷移
-//                        case .setting:
-                                // 設定画面の遷移
+                                    .navigationBarBackButtonHidden(true)
                             default:
                                 EmptyView()
+                                    .navigationBarBackButtonHidden(true)
                             }
                         }
                 }
