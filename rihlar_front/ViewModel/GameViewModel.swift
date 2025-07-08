@@ -227,17 +227,26 @@ final class GameViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// ビュー側から呼べる、system ↔ admin の切り替え
-    func toggleCurrentGameType() {
-        guard let before = currentGame else { return }
-        if before.isSystemGame, let next = adminGames.first {
-            currentGame = next
-        } else if before.isAdminGame, let next = systemGames.first {
-            currentGame = next
-        }
-        
-        reloadOverlaysAndSteps()
-    }
+    /// system ↔ admin 切り替え
+     func toggleCurrentGameType() {
+       guard let before = currentGame else { return }
+       // モード切り替え
+       if before.isSystemGame, let next = adminGames.first {
+         currentGame = next
+       } else if before.isAdminGame, let next = systemGames.first {
+         currentGame = next
+       }
+
+       // 🔄 切り替え後のゲームIDで再フェッチ
+       if let after = currentGame {
+         let gameID = after.gameID
+         let userID = "userid-79541130-3275-4b90-8677-01323045aca5"
+         fetchCircles(for: gameID, userID: userID)
+         fetchUserStep(for: gameID, userID: userID)
+       }
+
+       print("[GameViewModel] currentGame changed to:", currentGame?.gameID ?? "nil")
+     }
     
     /// ゲーム開始ボタン押下時に呼ぶ
     func startGameLocally() {
