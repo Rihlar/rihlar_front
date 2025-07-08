@@ -104,11 +104,6 @@ struct CircleMap: UIViewRepresentable {
                 }
             }
         }
-        
-        print("🌀 [CircleMap] mode=\(gameType) items.count=\(items.count)")
-        for (i, item) in items.enumerated() {
-            print("  \(i): group=\(item.0), coord=\(item.1), radius=\(item.2)")
-        }
 
         // ④ アニメーション抑制フラグ
         coordinator.isAnimatingCircles = true
