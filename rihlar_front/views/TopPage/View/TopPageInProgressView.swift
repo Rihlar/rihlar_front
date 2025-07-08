@@ -33,11 +33,17 @@ struct TopPageInProgressView: View {
     var body: some View {
         ZStack {
             // mapkitを使用した地図表示
-            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam, userStepByTeam: vm.userStepByTeam, currentUserTeamID: currentUserTeamID)
+            CircleMap(
+                playerPosition: playerPosition,
+                circlesByTeam: vm.circlesByTeam,
+                userStepByTeam: vm.userStepByTeam,
+                currentUserTeamID: currentUserTeamID,
+                gameStatus: GameStatus(rawValue: game.statusRaw) ?? .notStarted
+            )
                 .ignoresSafeArea()
                 .onAppear {
-                    vm.fetchCircles(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
-                    vm.fetchUserStep(for: "gameid-413a287b-213c-414f-a287-c1397db8f9bf", userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.fetchCircles(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.fetchUserStep(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
                     vm.bindPlayerPositionUpdates(for: "userid-79541130-3275-4b90-8677-01323045aca5", playerPosition: playerPosition)
                 }
                 .onChange(of: vm.userStepByTeam) { steps in
@@ -244,7 +250,7 @@ struct TopPageInProgressView: View {
                     },
                     vm: vm,
                     game: game,
-                    gameType: vm.game?.type ?? 0
+                    gameType: game.type
                 )
             }
             .zIndex(1)

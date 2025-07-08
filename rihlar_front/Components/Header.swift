@@ -12,9 +12,9 @@ struct Header: View {
     let game: Game
     
     var body: some View {
-        let mode = vm.game?.type ?? 0
+        let mode: GameType = game.type
         
-        if mode == 1 {
+        if mode == .admin {
             VStack {
                 HStack(spacing: 10) {
                     ZStack {
@@ -71,7 +71,7 @@ struct Header: View {
                         }
                     }
                     .onTapGesture {
-                        vm.toggleGameType()
+                        vm.toggleCurrentGameType()
                     }
                 }
                 
@@ -141,7 +141,7 @@ struct Header: View {
                         }
                     }
                     .onTapGesture {
-                        vm.toggleGameType()
+                        vm.toggleCurrentGameType()
                     }
                 }
                 

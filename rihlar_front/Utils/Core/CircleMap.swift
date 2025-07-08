@@ -16,6 +16,7 @@ struct CircleMap: UIViewRepresentable {
     let circlesByTeam: [TeamCircles]
     let userStepByTeam: [UserStep]
     let currentUserTeamID: String
+    let gameStatus: GameStatus
 
 ///     UIKit の MKMapView を生成し、初期設定を行う
     func makeUIView(context: Context) -> MKMapView {
@@ -65,7 +66,9 @@ struct CircleMap: UIViewRepresentable {
                 uiView.addOverlay(polyline)
             }
 //             JSON データに基づく円を追加
-            addOverlays(to: uiView, using: context.coordinator)
+            if gameStatus == .inProgress {
+               addOverlays(to: uiView, using: context.coordinator)
+           }
         }
     }
 

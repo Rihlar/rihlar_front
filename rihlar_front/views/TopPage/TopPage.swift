@@ -15,7 +15,7 @@ struct TopPage: View {
     var body: some View {
         if vm.isLoadingGame {
             ProgressView("読み込み中…")
-        } else if let game = vm.game {
+        } else if let game = vm.currentGame {
             TopPageInProgressView(
                 vm: vm,
                 router: router,
