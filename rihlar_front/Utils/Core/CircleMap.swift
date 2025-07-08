@@ -70,7 +70,8 @@ struct CircleMap: UIViewRepresentable {
         using coordinator: Coordinator
     ) {
         // ① ３日以内フィルタのための cutoff を計算
-        let threeDays: TimeInterval = 3 * 24 * 60 * 60
+//        let threeDays: TimeInterval = 3 * 24 * 60 * 60
+        let threeDays: TimeInterval = 6 * 24 * 60 * 60
         let cutoff = Date().addingTimeInterval(-threeDays)
 
         // ② gameType によって表示対象データを取得
