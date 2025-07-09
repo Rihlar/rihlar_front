@@ -9,7 +9,7 @@ import Foundation
 // 表示用にモデルをまとめたもの
 
 struct UserProfileViewData {
-    var user: User          // ユーザー情報
+    let user: User          // ユーザー情報
     let records: [Record]    // 実績情報
     let photos: [Photo]     // 写真情報
 }
