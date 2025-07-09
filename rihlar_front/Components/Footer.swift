@@ -18,12 +18,12 @@ struct Footer: View {
 
     @ObservedObject var vm: GameViewModel
     let game: Game
-    var gameType: Int
+    var gameType: GameType
     
     var body: some View {
         VStack {
             if (game.status == .notStarted && game.startTime >= Date()) || game.status == .ended {
-                if gameType == 1 {
+                if gameType == .admin {
                     Notice(
                         label: "ゲームが開始されるまでしばらくお待ちください",
                         graColor: Color.buttonColor,
@@ -41,7 +41,7 @@ struct Footer: View {
                     padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
                 )
                 
-                if game.status == .notStarted && game.type == 1 && game.startTime <= Date() {
+                if game.status == .notStarted && game.isAdminGame && game.startTime <= Date() {
                     BlueBtn(
                         label: "プレイ",
                         width: 160,

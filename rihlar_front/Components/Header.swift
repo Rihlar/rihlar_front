@@ -12,9 +12,9 @@ struct Header: View {
     let game: Game
     
     var body: some View {
-        let mode = vm.game?.type ?? 0
+        let mode: GameType = game.type
         
-        if mode == 1 {
+        if mode == .admin {
             VStack {
                 HStack(spacing: 10) {
                     ZStack {
@@ -71,7 +71,7 @@ struct Header: View {
                         }
                     }
                     .onTapGesture {
-                        vm.toggleGameType()
+                        vm.toggleCurrentGameType()
                     }
                 }
                 
@@ -82,10 +82,13 @@ struct Header: View {
                         height: 40
                     )
                 } else if game.status == .inProgress {
-                    HStack {
+                    HStack(alignment: .top) {
+                        PhotoThemes(theme: "動物")
+                            .padding(.leading)
+                        
                         Spacer()
                         
-                        ScoreStatusPanel(rank: 10, currentScore: 123, scoreToTop: 123)
+                        ScoreStatusPanel(rank: 10, currentScore: 0)
                             .padding(.trailing)
                     }
                 }
@@ -138,7 +141,7 @@ struct Header: View {
                         }
                     }
                     .onTapGesture {
-                        vm.toggleGameType()
+                        vm.toggleCurrentGameType()
                     }
                 }
                 

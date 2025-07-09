@@ -50,7 +50,7 @@ struct ProfileMenuItem: View {
                 .blur(radius: 10)
             
             HStack(spacing: 20) {
-                CircularImage(imageName: "testImg", diameter: 70)
+                CircularImage(imageName: "https://rihlar.kokomeow.com/auth/assets/6f98e3c2-2114-4122-ac54-a1f0af23cfd8.png", diameter: 70)
                 
                 VStack {
                     Text("Name")

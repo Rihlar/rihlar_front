@@ -22,109 +22,243 @@ struct TopPageInProgressView: View {
     //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
     let game: Game
+    //    ゲームが終了しているかのフラグ
+    @State private var isGameOverFlag = false
+    
+    @State private var timeString: String = ""
+    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    @StateObject private var hk = StepsHealthKit()
     
     var body: some View {
-        ZStack {
-            // mapkitを使用した地図表示
-            CircleMap(playerPosition: playerPosition, circlesByTeam: vm.circlesByTeam)
+        if let game = vm.currentGame {
+            ZStack {
+                // mapkitを使用した地図表示
+                CircleMap(
+                    playerPosition: playerPosition,
+                    circlesByTeam: vm.circlesByTeam,
+                    userStepByTeam: vm.userStepByTeam,
+                    gameStatus: GameStatus(rawValue: game.statusRaw) ?? .notStarted,
+                    gameType: game.type
+                )
                 .ignoresSafeArea()
                 .onAppear {
-                    vm.fetchCircles(for: "テスト用Circleデータ")
+                    vm.fetchCircles(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.fetchUserStep(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.bindPlayerPositionUpdates(for: "userid-79541130-3275-4b90-8677-01323045aca5", playerPosition: playerPosition)
+                    vm.fetchCircles(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    vm.fetchUserStep(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                }
+                .onChange(of: vm.userStepByTeam) { steps in
+                    let apiCoords = steps.map { CLLocationCoordinate2D(
+                        latitude: $0.latitude,
+                        longitude: $0.longitude
+                    ) }
+                    playerPosition.seedTrack(with: apiCoords)
                 }
                 .blur(radius: isShowMenu ? 10 : 0)
                 .animation(.easeInOut, value: isShowMenu)
-            
-            VStack {
-                Header(
-                    vm: vm,
-                    game: game
-                )
                 
-                Spacer()
-            }
-            .blur(radius: isShowMenu ? 10 : 0)
-            .animation(.easeInOut, value: isShowMenu)
-            
-            // ─────────── 「陣取りスタート！」のオーバーレイ ───────────
-            if router.didStartFromLoading {
-                Text("陣取りスタート！")
-                    .font(.system(size: 32,weight: .bold))
-                    .foregroundColor(.white)
-                    .stroke(color: Color(hex: "#E85B5B"), width: 2)
-                    .transition(.opacity)
-                    .onAppear {
-                        // 2秒後にフラグをリセットして非表示に
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                            withAnimation {
-                                router.didStartFromLoading = false
-                            }
-                        }
-                    }
-            }
-            
-            if isShowMenu {
-                Color.white.opacity(0.1)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                
-                Menu(router: router)
-                    .transition(
-                        .move(edge: .trailing)
-                        .combined(with: .opacity)
+                VStack {
+                    Header(
+                        vm: vm,
+                        game: game
                     )
-                    .zIndex(10)
-            }
-            
-            VStack(spacing: 0) {
-                Spacer()
-                //                    現在地に戻るボタン
-                //                    デザインは後回しにしているので変更する
-                HStack {
-                    Button {
-                        playerPosition.resumeFollow()
-                    } label: {
-                        Image(systemName: "paperplane.fill")
-                            .frame(width: 48, height: 48)
-                            .foregroundStyle(Color.white.opacity(0.8))
-                            .background(Color.blue.opacity(0.8))
-                            .cornerRadius(8)
-                    }
-                    .padding(16)
                     
                     Spacer()
-                    
-                    Button {
-                    } label: {
-                        Image(systemName: "bookmark.fill")
-                            .frame(width: 48, height: 48)
-                    }
-                    .opacity(0)
                 }
-                Footer (
-                    router: router,
-                    isChangeBtn: isChangeBtn,
-                    //                            カメラ画面を表示するためのflag
-                    onCameraTap: {
-                        router.push(.camera)
-                    },
-                    //                            メニューを表示するためのflag
-                    onMenuTap: {
-                        //                        ボタンの見た目切り替えは即時（アニメなし）
-                        isChangeBtn.toggle()
-                        
-                        //                        メニュー本体の表示はアニメーション付き
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isShowMenu.toggle()
+                .blur(radius: isShowMenu ? 10 : 0)
+                .animation(.easeInOut, value: isShowMenu)
+                
+                //            見た目は無いけど、remainingTimeString の変化を監視してフラグを立てる）
+                Color.clear
+                    .onReceive(timer) { _ in
+                        let newValue = remainingTimeString(until: game.endTime)
+                        timeString = newValue
+                    }
+                    .onChange(of: timeString) { newValue in
+                        if newValue == "終了" {
+                            isGameOverFlag = true
                         }
-                    },
-                    vm: vm,
-                    game: game,
-                    gameType: vm.game?.type ?? 0
-                )
+                    }
+                
+                if isGameOverFlag && game.status == .inProgress {
+                    ModalView(
+                        isModal: $isGameOverFlag,
+                        titleLabel: "結果",
+                        closeFlag: true,
+                        action: {
+                            isGameOverFlag = false
+                            vm.endGameLocally()
+                            
+                        },
+                        content: {
+                            VStack {
+                                Spacer()
+                                VStack(spacing: 8) {
+                                    Text("あなたの順位は")
+                                        .font(.system(size: 14,weight: .light))
+                                        .foregroundColor(Color.textColor)
+                                    
+                                    VStack(spacing: 8) {
+                                        HStack {
+                                            Text("4")
+                                                .font(.system(size: 32,weight: .bold))
+                                                .foregroundColor(Color.textColor)
+                                            Text("位")
+                                                .font(.system(size: 24,weight: .bold))
+                                                .foregroundColor(Color.textColor)
+                                        }
+                                        
+                                        Rectangle()
+                                            .fill(NoticeGradation.gradient(baseColor: Color(hex: "#F1BC00")))
+                                            .frame(height: 3)
+                                    }
+                                }
+                                VStack(spacing: 8) {
+                                    Text("合計獲得ポイント")
+                                        .font(.system(size: 14,weight: .light))
+                                        .foregroundColor(Color.textColor)
+                                    
+                                    HStack(spacing: 0) {
+                                        Text("100000")
+                                            .font(.system(size: 20,weight: .bold))
+                                            .foregroundColor(Color.textColor)
+                                        Text("pt")
+                                            .font(.system(size: 20,weight: .bold))
+                                            .foregroundColor(Color.textColor)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                VStack(spacing: 8) {
+                                    Text("報酬")
+                                        .font(.system(size: 14,weight: .light))
+                                        .foregroundColor(Color.textColor)
+                                    
+                                    HStack {
+                                        Image("coin")
+                                            .resizable()
+                                            .frame(width: 25, height: 25)
+                                        
+                                        Text("コイン")
+                                            .font(.system(size: 14,weight: .medium))
+                                            .foregroundColor(Color.textColor)
+                                        
+                                        Spacer()
+                                        
+                                        Text("×100")
+                                            .font(.system(size: 14,weight: .medium))
+                                            .foregroundColor(Color.textColor)
+                                    }
+                                    .frame(width: 170)
+                                    
+                                    HStack {
+                                        Image("zettaiman")
+                                            .resizable()
+                                            .frame(width: 25, height: 25)
+                                        
+                                        Text("コイン")
+                                            .font(.system(size: 14,weight: .medium))
+                                            .foregroundColor(Color.textColor)
+                                        
+                                        Spacer()
+                                        
+                                        Text("×100")
+                                            .font(.system(size: 14,weight: .medium))
+                                            .foregroundColor(Color.textColor)
+                                    }
+                                    .frame(width: 170)
+                                }
+                                
+                                Spacer()
+                            }
+                            .frame(width: 270, height: 320, alignment: .center)
+                        })
+                    .zIndex(1000)
+                }
+                
+                // ─────────── 「陣取りスタート！」のオーバーレイ ───────────
+                if router.didStartFromLoading {
+                    Text("陣取りスタート！")
+                        .font(.system(size: 32,weight: .bold))
+                        .foregroundColor(.white)
+                        .stroke(color: Color(hex: "#E85B5B"), width: 2)
+                        .transition(.opacity)
+                        .onAppear {
+                            // 2秒後にフラグをリセットして非表示に
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                                withAnimation {
+                                    router.didStartFromLoading = false
+                                }
+                            }
+                        }
+                }
+                
+                if isShowMenu {
+                    Color.white.opacity(0.1)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                    
+                    Menu(router: router)
+                        .transition(
+                            .move(edge: .trailing)
+                            .combined(with: .opacity)
+                        )
+                        .zIndex(10)
+                }
+                
+                VStack(spacing: 0) {
+                    Spacer()
+                    //                    現在地に戻るボタン
+                    //                    デザインは後回しにしているので変更する
+                    HStack {
+                        Button {
+                            playerPosition.resumeFollow()
+                        } label: {
+                            Image(systemName: "paperplane.fill")
+                                .frame(width: 48, height: 48)
+                                .foregroundStyle(Color.white.opacity(0.8))
+                                .background(Color.blue.opacity(0.8))
+                                .cornerRadius(8)
+                        }
+                        .padding(16)
+                        
+                        Spacer()
+                        
+                        Button {
+                        } label: {
+                            Image(systemName: "bookmark.fill")
+                                .frame(width: 48, height: 48)
+                        }
+                        .opacity(0)
+                    }
+                    Footer (
+                        router: router,
+                        isChangeBtn: isChangeBtn,
+                        //                            カメラ画面を表示するためのflag
+                        onCameraTap: {
+                            router.push(.camera)
+                        },
+                        //                            メニューを表示するためのflag
+                        onMenuTap: {
+                            //                        ボタンの見た目切り替えは即時（アニメなし）
+                            isChangeBtn.toggle()
+                            
+                            //                        メニュー本体の表示はアニメーション付き
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isShowMenu.toggle()
+                            }
+                        },
+                        vm: vm,
+                        game: game,
+                        gameType: game.type
+                    )
+                }
+                .zIndex(1)
             }
-            .zIndex(1)
+            .animation(.easeInOut, value: router.didStartFromLoading)
         }
-        .animation(.easeInOut, value: router.didStartFromLoading)
     }
 }
 

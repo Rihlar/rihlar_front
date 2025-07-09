@@ -76,8 +76,12 @@ struct ModeSelection: View {
             }
             
             ModalView(
-                isModal: isModeFlag,
-                titleLabel: "確認"
+                isModal: $isModeFlag,
+                titleLabel: "確認",
+                closeFlag: false,
+                action: {
+                    isModeFlag = false
+                }
             ) {
                 VStack(spacing: 30) {
                     Text("本当に個人戦をはじめますか？")
@@ -91,7 +95,7 @@ struct ModeSelection: View {
                             Text("戻る")
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.redColor)
+                                .background(Color(hex: "#E95858"))
                                 .foregroundColor(.white)
                                 .cornerRadius(8)
                         }

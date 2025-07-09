@@ -20,13 +20,13 @@ struct ProfileView: View {
     
     // タップされた画像のインデックスを管理するState（Optional）
     @State private var selectedImageIndex: ImageIndex? = nil
+    // ViewModelを状態として保持（画面に紐づく）
+    @StateObject private var viewModel = RecordsViewModel()
     // 実績を選択する処理をするかどうか
     @State private var showAchievementSheet = false
-    // 実績を選択式に
-    @State private var records: [Record]
     // 選択された実績だけ取り出して最大3つに制限
     var selectedRecords: [Record] {
-        Array(records.filter { $0.isSelected }.prefix(3))
+        Array(viewModel.records.filter { $0.isSelected }.prefix(3))
     }
     
     init(viewData: UserProfileViewData, router: Router) {
@@ -34,7 +34,6 @@ struct ProfileView: View {
         // ObservedObject の初期化にはプロパティラッパーの _router を使います
         _router = ObservedObject(initialValue: router)
         _editableName = State(initialValue: viewData.user.name)
-        _records = State(initialValue: viewData.records)
     }
     
     var body: some View {
@@ -115,17 +114,14 @@ struct ProfileView: View {
                 Button {
                     showAchievementSheet = true
                 } label: {
-                    HStack(spacing: 20) {
+                    HStack(spacing: 0) {
                         
                         ForEach(0..<3, id: \.self) { index in
                             ZStack {
-                                // 常に白丸の枠だけは表示
-                                Circle()
-                                    .fill(Color.white)
-                                    .frame(width: 70, height: 70)
-                                    .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
                                 
-                                // 選択済みの実績があれば画像を表示
+                                Circle()
+                                        .fill(Color.clear)
+                                        .frame(width: 90, height: 90)
                                 if index < selectedRecords.count {
                                     let record = selectedRecords[index]
                                     
@@ -143,15 +139,20 @@ struct ProfileView: View {
                                                 .scaledToFill()
                                         }
                                     }
-                                    .frame(width: 70, height: 70)
+                                    .frame(width: 90, height: 90)
                                     .clipShape(Circle())
+                                } else {
+                                    // 実績がないときだけ白丸を表示
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 70, height: 70)
+                                        .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 0)
                                 }
                             }
+                            .frame(width: 90, height: 90)
+                            .contentShape(Rectangle())
                         }
                     }
-                    
-                    
-                    
                     .padding()
                     .background(Color.recordBackgroundColor)
                     .frame(width:300,height:90)
@@ -239,7 +240,7 @@ struct ProfileView: View {
         
         
         .sheet(isPresented: $showAchievementSheet) {
-            AchievementSelectionView(records: $records)
+            AchievementSelectionView(records: $viewModel.records)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
