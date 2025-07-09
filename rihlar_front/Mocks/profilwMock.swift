@@ -1,19 +1,23 @@
+// profilwMock.swift
+// rihlar_front
 //
-//  profilwMock.swift
-//  rihlar_front
-//
-//  Created by 川岸遥奈 on 2025/06/29.
+// Created by 川岸遥奈 on 2025/06/29.
 //
 
 import Foundation
 
-// User モック
+// User モック (APIから取得するため、通常は使わないが、プレビュー用に定義しても良い)
+// ただし、ProfileViewModelはfetchCurrentUser()を使うので、このmockUserは直接は使われません
 let mockUser = User(
     id: "a39f14c3-61b2-48f8-9cc3-b3f7e25b64a0",
-    name: "川岸 遥奈"
+    name: "はるるん",
+    email: "waaaa@example.com",
+    provCode: "google",
+    provUid: "some_prov_uid",
+    iconUrl: URL(string: "https://rihlar.kokomeow.com/auth/assets/a39f14c3-61b2-48f8-9cc3-b3f7e25b64a0.png")
 )
 
-// Record モック
+// Record モック (変更なし、引き続き使用)
 let mockRecord = Record(
     id: 1,
     title: "100スポット達成！",
@@ -21,7 +25,7 @@ let mockRecord = Record(
     isSelected: false
 )
 
-// Photo モック
+// Photo モック (変更なし、引き続き使用)
 let mockPhotos: [Photo] = [
     Photo(
         id: "img1",
@@ -77,17 +81,12 @@ let mockPhotos: [Photo] = [
         theme: "ぬいぐるみ",
         createdAt: Date().addingTimeInterval(-8000)
     ),
-    
-    
-    
-    
-    
 ]
 
-// UserProfileViewData モック
+// UserProfileViewData モック (プレビュー用に必要)
+// ユーザー情報もプレビュー用に必要なので、mockUser を使用します。
 let mockUserProfile = UserProfileViewData(
-    user: mockUser,
+    user: mockUser,      // ここに mockUser を指定
     records:[mockRecord],
     photos: mockPhotos
 )
-
