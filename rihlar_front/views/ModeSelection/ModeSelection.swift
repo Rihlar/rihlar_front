@@ -15,6 +15,8 @@ struct ModeSelection: View {
     
     var body: some View {
         ZStack {
+            Color.backgroundColor
+                .edgesIgnoringSafeArea(.all)
             VStack {
                 Text("モード選択")
                     .font(.system(size: 16, weight: .bold))
