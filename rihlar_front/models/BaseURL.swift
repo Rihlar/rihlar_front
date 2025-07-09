@@ -9,21 +9,16 @@ import Foundation
 
 /// 環境設定（APIのエンドポイントなど）を定義する構造体
 struct APIConfig {
-    // テスト用
     static let baseURL = URL(string: "https://rihlar-test.kokomeow.com")!
-    // ステージング用（アクセスするときに認証が必須）
-    static let stageURL = URL(string: "https://rihlar-stage.kokomeow.com")!
     
-    // ユーザー情報取得
-    static let userInfoEndpoint = "/user/me"
-    // 円の作成 POST.
+//    円の作成 POST.
     static let createCircleEndpoint = "/gcore/create/circle"
-    // 上位３位の円 GET ※ゲームIDを含むURL
+//    上位３位の円 GET ※ゲームIDを含むURL
     static let top3CirclesRankingEndpoint = "/game/ranking/top/{gameId}"
-    // 自分が歩いた記録 GET
+//    自分が歩いた記録 GET
     static let userMovementEndpoint = "/gcore/get/movement"
-    // ランキング GET
+//    ランキング GET
     static let topRankingEndpoint = "/gcore/get/top"
-    // 歩いたデータを送る POST
+//    歩いたデータを送る POST
     static let sendUserStepEndpoint = "/gcore/report/movement"
 }
