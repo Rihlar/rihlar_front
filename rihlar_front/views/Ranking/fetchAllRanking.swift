@@ -95,6 +95,9 @@
 import SwiftUI
 
 struct SoloRankingView: View {
+    private let userId: String
+    private let gameId: String
+
     struct Player: Identifiable {
         let id = UUID()
         let name: String
@@ -102,19 +105,13 @@ struct SoloRankingView: View {
         let rank: Int
     }
 
-    // テスト用データ（最大10人）
-    @State private var players: [Player] = [
-        Player(name: "ユーザーA", points: 20000, rank: 1),
-        Player(name: "ユーザーB", points: 18000, rank: 2),
-        Player(name: "ユーザーC", points: 16000, rank: 3),
-        Player(name: "ユーザーD", points: 14000, rank: 4),
-        Player(name: "ユーザーE", points: 12000, rank: 5),
-        Player(name: "ユーザーF", points: 10000, rank: 6),
-        Player(name: "ユーザーG", points: 9000,  rank: 7),
-        Player(name: "ユーザーH", points: 8000,  rank: 8),
-        Player(name: "ユーザーI", points: 7000,  rank: 9),
-        Player(name: "ユーザーJ", points: 6000,  rank: 10),
-    ]
+    @State private var players: [Player] = []
+
+    /// UserID と GameID を渡して使う
+    init(userId: String, gameId: String) {
+        self.userId = userId
+        self.gameId = gameId
+    }
 
     var body: some View {
         ZStack {
@@ -130,6 +127,9 @@ struct SoloRankingView: View {
                 Spacer()
             }
             .padding(.horizontal, 20)
+            .onAppear {
+                loadRanking()
+            }
         }
     }
 
@@ -171,6 +171,20 @@ struct SoloRankingView: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+    }
+
+    /// サービス経由でランキングデータを取得
+    private func loadRanking() {
+        RankingService.fetchTop10(userId: userId, gameId: gameId) { topRankings in
+            // UI更新はメインスレッドで
+            DispatchQueue.main.async {
+                players = topRankings.enumerated().map { index, top in
+                    Player(name: top.UserId,
+                           points: top.Points,
+                           rank: index + 1)
+                }
+            }
+        }
     }
 }
 
