@@ -113,7 +113,6 @@ struct loginDesignView: View {
                         .frame(width: 200,height: 140)
                  
                     Button(action: {
-                        print("ログインボタン押された")
                         startAuthentication()
                     }) {
                         HStack {
@@ -164,14 +163,14 @@ struct loginDesignView: View {
         print("AuthCallback 発火")
         
         guard !didReceiveToken else {
-            print("トークン既受信、処理スキップ")
+//            print("トークン既受信、処理スキップ")
             return
         }
         
         didReceiveToken = true
         
         if let token = getCode(callbackURL: callbackURL) {
-            print("トークン取得成功 → onLoginSuccess()")
+//            print("トークン取得成功 → onLoginSuccess()")
             self.code = token
             
             // 非同期処理を実行
@@ -179,14 +178,14 @@ struct loginDesignView: View {
                 do {
                     // まずキャッシュを試す
                     if let token = try await TokenManager.shared.getAccessToken() {
-                        print("キャッシュからトークン取得成功: \(token)")
+//                        print("キャッシュからトークン取得成功: \(token)")
                         DispatchQueue.main.async {
                             onLoginSuccess()
                         }
                     } else {
                         // キャッシュがなければfetchして取得
                         let token = try await TokenManager.shared.fetchAndCacheAccessToken()
-                        print("新規取得トークン成功: \(token)")
+//                        print("新規取得トークン成功: \(token)")
                         DispatchQueue.main.async {
                             onLoginSuccess()
                         }

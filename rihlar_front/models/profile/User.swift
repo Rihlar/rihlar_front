@@ -12,6 +12,6 @@ struct User:Codable, Identifiable{
     
     // ユーザーのアイコン
     var iconUrl:URL?{
-        URL(string: "https://authbase-test.kokomeow.com/auth/assets/\(id).png")
+        URL(string: "https://rihlar.kokomeow.com/auth/assets/\(id).png")
     }
 }
