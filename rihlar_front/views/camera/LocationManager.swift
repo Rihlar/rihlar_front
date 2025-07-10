@@ -1,23 +1,16 @@
-//
-//  LocationManager.swift
-//  rihlar_front
-//
-//  Created by 小淵颯太 on 2025/06/13.
-//
-
 import Foundation
 import CoreLocation
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    private let manager = CLLocationManager()
+    private let locationManager = CLLocationManager()
     @Published var lastLocation: CLLocation?
 
     override init() {
         super.init()
-        manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyBest
-        manager.requestWhenInUseAuthorization()
-        manager.startUpdatingLocation()
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation() // ← ここで自動取得
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {

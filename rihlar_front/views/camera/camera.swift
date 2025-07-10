@@ -1,112 +1,110 @@
-//
-//  camera.swift
-//  rihlar_front
-//
-//  Created by 小淵颯太 on 2025/06/13.
-//
 
 import SwiftUI
 import CoreLocation
 
 struct Camera: View {
     @StateObject private var locationManager = LocationManager()
-    @State private var showCamera = false
+    @State private var showCamera = true
     @State private var capturedImage: UIImage?
     @State private var isUploading = false
     @State private var uploadMessage: String?
     @State private var imageLocation: CLLocation?
+    @State private var testStepCount: Int = 1234
+    @State private var theme: String = "動物"
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 20) {
-            // 撮影した画像プレビュー
-            if let image = capturedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 300)
-                    .cornerRadius(12)
-                    .shadow(radius: 5)
-            } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 300)
-                    .overlay(
-                        Text("ここに写真が表示されます")
-                            .foregroundColor(.gray)
-                    )
-                    .cornerRadius(12)
-                    .shadow(radius: 5)
-            }
+        ZStack {
+            Color.backgroundColor // 背景色（カスタムカラーを定義しておくこと）
+                .edgesIgnoringSafeArea(.all)
 
-            // 位置情報表示
-            if let location = imageLocation {
-                Text("緯度: \(location.coordinate.latitude), 経度: \(location.coordinate.longitude)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
-            } else {
-                Text("位置情報がありません")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .padding(.horizontal)
-            }
+            VStack(spacing: 30) {
+                Spacer()
 
-            Spacer(minLength: 20)
+                // 撮影画像 or プレースホルダー
+                if let image = capturedImage {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 300)
+                        .frame(maxWidth: 300)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.2))
+                        .frame(height: 300)
+                        .frame(maxWidth: 300)
+                        .cornerRadius(12)
+                        .shadow(radius: 4)
+                }
 
-            // カメラ起動ボタン
-            Button(action: {
-                showCamera = true
-            }) {
-                Text("カメラを起動")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .disabled(isUploading)
+                // テーマ表示
+                VStack(spacing: 8) {
+                    Text("この写真のテーマは？")
+                        .font(.body)
 
-            // アップロードボタン（画像があれば表示）
-            if capturedImage != nil {
+                    TextField("", text: $theme)
+                        .disabled(true)
+                        .frame(height: 44)
+                        .frame(maxWidth: 300)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                        .shadow(color: .gray.opacity(0.2), radius: 3, x: 0, y: 2)
+                        .multilineTextAlignment(.center)
+                }
+
+                // 保存ボタン
                 Button(action: uploadPhoto) {
                     if isUploading {
                         ProgressView()
                             .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            .frame(maxWidth: .infinity)
-                            .padding()
+                            .frame(width: 120, height: 44)
                             .background(Color.gray)
-                            .cornerRadius(8)
+                            .cornerRadius(20)
                     } else {
-                        Text("サーバへアップロード")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
+                        Text("保存")
+                            .foregroundColor(.black)
+                            .frame(width: 120, height: 44)
+                            .background(Color(red: 0.8, green: 1.0, blue: 1.0))
+                            .cornerRadius(20)
+                            .shadow(radius: 4)
                     }
                 }
-                .disabled(isUploading)
+                .disabled(capturedImage == nil || isUploading)
+
+                Spacer()
             }
 
-            // アップロード結果メッセージ
+            // アップロード結果
             if let message = uploadMessage {
                 Text(message)
-                    .foregroundColor(.secondary)
+                    .font(.footnote)
+                    .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
-                    .padding(.top, 10)
+                    .padding(.horizontal)
             }
         }
-        .padding()
-        .sheet(isPresented: $showCamera) {
+        .onAppear {
+            if capturedImage == nil {
+                showCamera = true
+            }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
             ImagePicker(
                 didFinishPicking: { image, location in
                     if let img = image {
                         capturedImage = img
-                        imageLocation = location
+                        imageLocation = location ?? locationManager.lastLocation
                         uploadMessage = nil
                     }
                 },
-                currentLocation: locationManager.lastLocation  // ここで現在地を渡す
+                didCancel: {
+                    // キャンセル時にホームへ戻る
+                    dismiss()
+                },
+                currentLocation: locationManager.lastLocation
             )
         }
     }
@@ -116,14 +114,13 @@ struct Camera: View {
         isUploading = true
         uploadMessage = nil
 
-        // UIImage → JPEG Data
         guard let jpegData = image.jpegData(compressionQuality: 0.8) else {
             uploadMessage = "画像データの変換に失敗しました。"
             isUploading = false
             return
         }
 
-        guard let url = URL(string: "https://example.com/api/upload") else {
+        guard let url = URL(string: "https://rihlar-test.kokomeow.com/gcore/create/circle") else {
             uploadMessage = "アップロード先のURLが不正です。"
             isUploading = false
             return
@@ -132,28 +129,48 @@ struct Camera: View {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         let boundary = "Boundary-\(UUID().uuidString)"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
 
-        var body = Data()
-        // 緯度フィールド
-        if let loc = imageLocation {
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"latitude\"\r\n\r\n")
-            body.append("\(loc.coordinate.latitude)\r\n")
-            body.append("--\(boundary)\r\n")
-            body.append("Content-Disposition: form-data; name=\"longitude\"\r\n\r\n")
-            body.append("\(loc.coordinate.longitude)\r\n")
-        }
-        // 画像ファイルフィールド
-        let fileName = "photo_\(Int(Date().timeIntervalSince1970)).jpg"
-        let mimeType = "image/jpeg"
-        body.append("--\(boundary)\r\n")
-        body.append("Content-Disposition: form-data; name=\"photo\"; filename=\"\(fileName)\"\r\n")
-        body.append("Content-Type: \(mimeType)\r\n\r\n")
-        body.append(jpegData)
-        body.append("\r\n")
-        body.append("--\(boundary)--\r\n")
-        request.httpBody = body
+//        var body = Data()
+        let body: [String: Any] = [
+            "latitude": imageLocation?.coordinate.latitude,
+            "longitude": imageLocation?.coordinate.longitude,
+            "steps": testStepCount
+        ]
+        print(body)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        // 緯度・経度
+//        if let loc = imageLocation {
+//            print("いど:\(loc.coordinate.latitude)")
+//            print("けいど:\(loc.coordinate.longitude)")
+//            body.append("--\(boundary)\r\n")
+//            body.append("Content-Disposition: form-data; name=\"latitude\"\r\n\r\n")
+//            body.append("\(loc.coordinate.latitude)\r\n")
+//
+//            body.append("--\(boundary)\r\n")
+//            body.append("Content-Disposition: form-data; name=\"longitude\"\r\n\r\n")
+//            body.append("\(loc.coordinate.longitude)\r\n")
+//        }
+//
+//        // 歩数
+//        body.append("--\(boundary)\r\n")
+//        body.append("Content-Disposition: form-data; name=\"steps\"\r\n\r\n")
+//        body.append("\(testStepCount)\r\n")
+        
+        
+
+        // 画像データ
+//        let fileName = "photo_\(Int(Date().timeIntervalSince1970)).jpg"
+//        let mimeType = "image/jpeg"
+//        body.append("--\(boundary)\r\n")
+//        body.append("Content-Disposition: form-data; name=\"photo\"; filename=\"\(fileName)\"\r\n")
+//        body.append("Content-Type: \(mimeType)\r\n\r\n")
+//        body.append(jpegData)
+//        body.append("\r\n")
+//        body.append("--\(boundary)--\r\n")
+
+//        request.httpBody = body
 
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
@@ -167,6 +184,11 @@ struct Camera: View {
                 if let httpRes = response as? HTTPURLResponse {
                     if (200...299).contains(httpRes.statusCode) {
                         uploadMessage = "アップロードが完了しました！（ステータスコード: \(httpRes.statusCode)）"
+
+                        // ✅ 1秒後に自動的にホームへ戻る
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            dismiss()
+                        }
                     } else {
                         uploadMessage = "サーバーエラー：ステータスコード \(httpRes.statusCode)"
                     }
@@ -178,7 +200,6 @@ struct Camera: View {
     }
 }
 
-// Data に文字列を追加する拡張
 private extension Data {
     mutating func append(_ string: String) {
         if let data = string.data(using: .utf8) {
@@ -186,3 +207,4 @@ private extension Data {
         }
     }
 }
+

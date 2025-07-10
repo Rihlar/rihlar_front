@@ -10,11 +10,13 @@ import UIKit
 import CoreLocation
 
 struct ImagePicker: UIViewControllerRepresentable {
-    // 写真と位置情報を返すクロージャ
+    /// 写真と位置情報を返すクロージャ
     var didFinishPicking: (UIImage?, CLLocation?) -> Void
-    var currentLocation: CLLocation?  // 撮影時の位置情報を受け取る
 
-    @Environment(\.presentationMode) private var presentationMode
+    /// キャンセルされたときに呼ばれるクロージャ
+    var didCancel: () -> Void
+
+    var currentLocation: CLLocation?
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
@@ -38,20 +40,17 @@ struct ImagePicker: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController,
                                    didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            guard let image = info[.originalImage] as? UIImage else {
+            picker.dismiss(animated: true)
+            if let image = info[.originalImage] as? UIImage {
+                parent.didFinishPicking(image, parent.currentLocation)
+            } else {
                 parent.didFinishPicking(nil, nil)
-                parent.presentationMode.wrappedValue.dismiss()
-                return
             }
-
-            // 撮影時点の位置情報を返す
-            parent.didFinishPicking(image, parent.currentLocation)
-            parent.presentationMode.wrappedValue.dismiss()
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.didFinishPicking(nil, nil)
-            parent.presentationMode.wrappedValue.dismiss()
+            picker.dismiss(animated: true)
+            parent.didCancel()
         }
     }
 }
