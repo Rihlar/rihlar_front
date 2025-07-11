@@ -173,4 +173,39 @@ class RealGameService: GameServiceProtocol {
             .receive(on: RunLoop.main)
             .eraseToAnyPublisher()
     }
+    
+//    認証トークン付きでユーザー情報を取得
+    func fetchUserProfile() async throws -> UserProfile {
+        // 1. トークン取得 or 更新
+        let token = try await TokenManager.shared.getAccessToken()
+//        nil なら改めてフェッチ
+        if token == nil {
+            try await TokenManager.shared.fetchAndCacheAccessToken()
+        }
+        guard let accessToken = token else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        
+        // 2. エンドポイント URL
+        let path = APIConfig.userProfile
+        let fullURL = APIConfig.baseURL.appendingPathComponent(path)
+        
+        // 3. リクエスト組み立て
+        var request = URLRequest(url: fullURL)
+        request.httpMethod = "GET"
+//        request.setValue(accessToken, forHTTPHeaderField: "Authorization")
+        request.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // 4. 実行＆ステータスチェック
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse {
+            guard 200..<300 ~= http.statusCode else {
+                throw URLError(.badServerResponse)
+            }
+        }
+
+        // 5. デコードして返却
+        return try JSONDecoder().decode(UserProfile.self, from: data)
+    }
 }

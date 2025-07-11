@@ -22,5 +22,7 @@ protocol GameServiceProtocol {
     
 /// 歩数の最新の１地点だけ送信
     func postUserStep(userID: String, latitude: Double, longitude: Double, steps: Int) -> AnyPublisher<UserStepReportResponse, Error>
+    
+    func fetchUserProfile() async throws -> UserProfile
 }
 

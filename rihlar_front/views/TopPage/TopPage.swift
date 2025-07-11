@@ -13,20 +13,26 @@ struct TopPage: View {
     @ObservedObject var vm: GameViewModel
     
     var body: some View {
-        if vm.isLoadingGame {
-            ProgressView("読み込み中…")
-        } else if let game = vm.currentGame {
-            TopPageInProgressView(
-                vm: vm,
-                router: router,
-                game: game
-            )
-        } else if let err = vm.errorMessage {
-            Text("エラー: \(err)")
-                .foregroundColor(.red)
+        Group {
+            if vm.isLoadingGame {
+                ProgressView("読み込み中…")
+            } else if let game = vm.currentGame {
+                TopPageInProgressView(
+                    vm: vm,
+                    router: router,
+                    game: game
+                )
+            } else if let err = vm.errorMessage {
+                Text("エラー: \(err)")
+                    .foregroundColor(.red)
+            }
+            else {
+                Text("ゲーム情報がありません")
+            }
         }
-        else {
-            Text("ゲーム情報がありません")
+        // ViewのonAppearや.taskで呼び出して使う
+        .task {
+            vm.loadUserProfile()
         }
     }
 }
