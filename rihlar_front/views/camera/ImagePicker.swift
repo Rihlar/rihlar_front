@@ -22,6 +22,8 @@ struct ImagePicker: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.sourceType = .camera
         picker.delegate = context.coordinator
+        picker.modalPresentationStyle = .fullScreen
+        picker.view.backgroundColor = .red
         return picker
     }
 

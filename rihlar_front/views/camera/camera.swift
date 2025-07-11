@@ -12,6 +12,7 @@ struct Camera: View {
     @State private var testStepCount: Int = 1234
     @State private var theme: String = "動物"
     @Environment(\.dismiss) private var dismiss
+    private let stepsHK = StepsHealthKit()
 
     var body: some View {
         ZStack {
@@ -132,11 +133,13 @@ struct Camera: View {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
 
+        let steps = stepsHK.steps
+             print("現在の歩数: \(steps)")
 //        var body = Data()
         let body: [String: Any] = [
             "latitude": imageLocation?.coordinate.latitude,
             "longitude": imageLocation?.coordinate.longitude,
-            "steps": testStepCount
+            "steps": steps
         ]
         print(body)
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)
