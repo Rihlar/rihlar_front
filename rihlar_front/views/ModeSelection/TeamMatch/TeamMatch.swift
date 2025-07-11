@@ -14,6 +14,8 @@ struct TeamMatch: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
+            Color.backgroundColor
+                .edgesIgnoringSafeArea(.all)
             VStack {
                 Text("チームマッチ")
                     .font(.system(size: 16, weight: .bold))

@@ -42,11 +42,15 @@ struct TopPageInProgressView: View {
                 )
                 .ignoresSafeArea()
                 .onAppear {
-                    vm.fetchCircles(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
-                    vm.fetchUserStep(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
-                    vm.bindPlayerPositionUpdates(for: "userid-79541130-3275-4b90-8677-01323045aca5", playerPosition: playerPosition)
-                    vm.fetchCircles(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
-                    vm.fetchUserStep(for: game.gameID, userID: "userid-79541130-3275-4b90-8677-01323045aca5")
+                    guard let userID = vm.profile?.user_id else {
+                        print("ユーザープロフィールまだです")
+                        return
+                    }
+                    vm.fetchCircles(for: game.gameID, userID: userID)
+                    vm.fetchUserStep(for: game.gameID, userID: userID)
+                    vm.bindPlayerPositionUpdates(for: userID, playerPosition: playerPosition)
+                    vm.fetchCircles(for: game.gameID, userID: userID)
+                    vm.fetchUserStep(for: game.gameID, userID: userID)
                 }
                 .onChange(of: vm.userStepByTeam) { steps in
                     let apiCoords = steps.map { CLLocationCoordinate2D(

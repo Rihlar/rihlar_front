@@ -75,22 +75,19 @@ struct Header: View {
                     }
                 }
                 
-                if game.status == .notStarted && game.startTime <= Date() {
-                    Notice(
-                        label: "ゲームが開催されました！\n下のボタンからゲームに参加してください！",
-                        graColor: Color(hex: "#FEE075"),
-                        height: 40
-                    )
-                } else if game.status == .inProgress {
+                ZStack {
                     HStack(alignment: .top) {
                         PhotoThemes(theme: "動物")
                             .padding(.leading)
                         
                         Spacer()
                         
-                        ScoreStatusPanel(rank: 10, currentScore: 0)
-                            .padding(.trailing)
+                        if game.status == .inProgress {
+                            ScoreStatusPanel(rank: 10, currentScore: 0)
+                                .padding(.trailing)
+                        }
                     }
+
                 }
             }
         } else {
@@ -145,12 +142,13 @@ struct Header: View {
                     }
                 }
                 
-                if game.status == .notStarted && game.startTime <= Date() {
-                    Notice(
-                        label: "ゲームが開催されました！\n対戦モードに切り替えて！",
-                        graColor: Color(hex: "#FEE075"),
-                        height: 40
-                    )
+                ZStack {
+                    HStack(alignment: .top) {
+                        PhotoThemes(theme: "動物")
+                            .padding(.leading)
+                        
+                        Spacer()
+                    }
                 }
             }
         }

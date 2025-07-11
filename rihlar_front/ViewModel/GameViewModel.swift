@@ -24,6 +24,9 @@ final class GameViewModel: ObservableObject {
     @Published private(set) var adminGames:  [Game] = []
     //    今ビューで使う単一のゲーム
     @Published var currentGame:   Game?
+    // プロフィール取得結果を保持するプロパティ
+    @Published var profile: UserProfile?
+    @Published var profileError: String?
     
     private let service: GameServiceProtocol
     private let stepsHK: StepsHealthKit
@@ -65,9 +68,12 @@ final class GameViewModel: ObservableObject {
 //    currentGame が変わるたびに呼び出すヘルパー
     private func reloadOverlaysAndSteps() {
         guard let game = currentGame else { return }
-        let uid = "userid-79541130-3275-4b90-8677-01323045aca5"
-        fetchCircles(for: game.gameID, userID: uid)
-        fetchUserStep(for: game.gameID, userID: uid)
+        guard let userID = profile?.user_id else {
+            print("⚠️ ユーザーIDがまだ取得できていません")
+            return
+        }
+        fetchCircles(for: game.gameID, userID: userID)
+        fetchUserStep(for: game.gameID, userID: userID)
     }
     
     /// 円情報だけ取得
@@ -225,6 +231,22 @@ final class GameViewModel: ObservableObject {
                 .store(in: &self.cancellables)
             }
             .store(in: &cancellables)
+    }
+    
+//    ユーザープロフィール取得を呼び出す
+    func loadUserProfile() {
+        Task {
+            do {
+                let profile = try await service.fetchUserProfile()
+                await MainActor.run {
+                    self.profile = profile
+                }
+            } catch {
+                await MainActor.run {
+                    self.profileError = error.localizedDescription
+                }
+            }
+        }
     }
     
     /// system ↔ admin 切り替え
