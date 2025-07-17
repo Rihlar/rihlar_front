@@ -43,7 +43,11 @@ class TokenManager {
         }
         print("KeyChainから取得したトークン: [\(autoToken)]")
         
-        guard let url = URL(string: "https://authbase-test.kokomeow.com/auth/token") else {
+//        guard let url = URL(string: "https://authbase-test.kokomeow.com/auth/token") else {
+//            throw NSError(domain: "TokenManager", code: 400,
+//                          userInfo: [NSLocalizedDescriptionKey: "URLが不正です"])
+//        }
+        guard let url = URL(string: "https://rihlar-stage.kokomeow.com/auth/token") else {
             throw NSError(domain: "TokenManager", code: 400,
                           userInfo: [NSLocalizedDescriptionKey: "URLが不正です"])
         }
