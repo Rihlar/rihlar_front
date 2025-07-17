@@ -10,8 +10,12 @@ import Foundation
 /// 環境設定（APIのエンドポイントなど）を定義する構造体
 struct APIConfig {
     static let baseURL = URL(string: "https://rihlar-test.kokomeow.com")!
-    static let actualURL = URL(string: "https://rihlar-stage.kokomeow.com")!
+    static let stagingBaseURL = URL(string: "https://rihlar-stage.kokomeow.com")! 
     
+    
+    
+    // ユーザー情報
+    static let userInfoEndpoint = "/auth/me"
 //    円の作成 POST.
     static let createCircleEndpoint = "/gcore/create/circle"
 //    上位３位の円 GET ※ゲームIDを含むURL
@@ -24,4 +28,18 @@ struct APIConfig {
     static let sendUserStepEndpoint = "/gcore/report/movement"
 //    ユーザーのプロフィール　GET
     static let userProfile = "/user/profile"
+}
+
+enum APIEnvironment {
+    case test
+    case staging
+
+    var baseURL: URL {
+        switch self {
+        case .test:
+            return URL(string: "https://rihlar-test.kokomeow.com")!
+        case .staging:
+            return URL(string: "https://rihlar-stage.kokomeow.com")!
+        }
+    }
 }

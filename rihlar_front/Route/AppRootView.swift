@@ -36,7 +36,7 @@ struct AppRootView: View {
                                 // 個別画面も戻るボタン非表示に
                                     .navigationBarBackButtonHidden(true)
                             case .profile:
-                                ProfileView(viewData: mockUserProfile, router: router)
+                                ProfileContainerView(router: router)
                                     .navigationBarBackButtonHidden(true)
                             case .mode:
                                 ModeSelection(router: router)

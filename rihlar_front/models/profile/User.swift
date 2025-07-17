@@ -6,12 +6,24 @@
 //
 import Foundation
 // ユーザー情報のモデル定義
-struct User:Codable, Identifiable{
-    let id:String   // ユーザーid
-    var name:String // ユーザー名
-    
-    // ユーザーのアイコン
-    var iconUrl:URL?{
-        URL(string: "https://rihlar.kokomeow.com/auth/assets/\(id).png")
+struct User: Codable, Identifiable {
+    let id: String
+    var name: String
+    var email: String
+    var provCode: String
+    var provUID: String
+
+    var iconUrl: URL? {
+        URL(string: "https://rihlar-stage.kokomeow.com/auth/assets/\(id).png")
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id = "user_id"
+        case name
+        case email
+        case provCode = "prov_code"
+        case provUID = "prov_uid"
     }
 }
+
+

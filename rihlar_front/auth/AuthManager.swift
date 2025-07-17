@@ -30,7 +30,9 @@ class AuthManager: ObservableObject {
             return false
         }
         
-        let authURL = "https://authbase-test.kokomeow.com/auth/oauth/google?ismobile=1"
+//        let authURL = "https://authbase-test.kokomeow.com/auth/oauth/google?ismobile=1"
+        let authURL = "https://rihlar-stage.kokomeow.com/auth/oauth/google?ismobile=1"
+
         let customURLScheme = "authbase"
         
         guard let url = URL(string: authURL) else {
