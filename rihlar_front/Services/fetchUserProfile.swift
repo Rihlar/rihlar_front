@@ -7,36 +7,39 @@
 import Foundation
 
 func fetchUserProfile() async throws -> User {
-    // トークン取得
-    let accessToken: String
-
-    if let cached = try await TokenManager.shared.getAccessToken() {
-        accessToken = cached
-    } else {
-        accessToken = try await TokenManager.shared.fetchAndCacheAccessToken()
+    guard let refreshToken = getKeyChain(key: "authToken") else {
+        throw NSError(domain: "UserFetch", code: 401, userInfo: [NSLocalizedDescriptionKey: "リフレッシュトークンが見つかりません"])
     }
-    let url = APIConfig.stagingBaseURL.appendingPathComponent(APIConfig.userInfoEndpoint)
+
+    print("リフレッシュトークン使用: \(refreshToken)")
+
+    let url = URL(string: "https://rihlar-stage.kokomeow.com/auth/me")!
+    print("プロフィール取得URL: \(url.absoluteString)")
 
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+    request.setValue(refreshToken, forHTTPHeaderField: "Authorization") // Bearerなしで
+
+    print("Authorizationヘッダー: \(refreshToken)")
 
     let (data, response) = try await URLSession.shared.data(for: request)
+    print(String(data: data, encoding: .utf8) ?? "No body")
 
     if let httpResponse = response as? HTTPURLResponse,
        !(200...299).contains(httpResponse.statusCode) {
         let body = String(data: data, encoding: .utf8) ?? ""
+        print("HTTP \(httpResponse.statusCode): \(body)")
         throw NSError(domain: "UserFetch",
                       code: httpResponse.statusCode,
                       userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(body)"])
     }
 
-    struct AuthMeResponse: Codable {
-        let user_id: String
-        let name: String
-    }
+    let decoder = JSONDecoder()
+//    decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-    let decoded = try JSONDecoder().decode(AuthMeResponse.self, from: data)
-    return User(id: decoded.user_id, name: decoded.name)
+    let userInfo = try decoder.decode(User.self, from: data)
+    print("取得したユーザー情報: \(userInfo)")
+
+    return userInfo
 }

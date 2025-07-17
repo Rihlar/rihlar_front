@@ -9,8 +9,11 @@ import Foundation
 
 // User モック
 let mockUser = User(
-    id: "a39f14c3-61b2-48f8-9cc3-b3f7e25b64a0",
-    name: "川岸 遥奈"
+    id: "ebab9786-8243-4f75-9699-136ff6044e39",
+    name: "いろいろアカウント",
+    email: "shareacount62@gmail.com",
+    provCode: "google",
+    provUID: "108057354938704198788"
 )
 
 // Record モック

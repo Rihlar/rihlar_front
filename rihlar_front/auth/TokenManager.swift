@@ -56,7 +56,7 @@ class TokenManager {
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        // Authorizationヘッダーに必ず"Bearer "を付ける
+        // Authorizationヘッダーに必ず"Bearer "を付ける（今回はなしでいい）
         request.setValue(autoToken, forHTTPHeaderField: "Authorization")
         
         let (data, response) = try await URLSession.shared.data(for: request)

@@ -13,7 +13,7 @@ struct ProfileContainerView: View {
     @State private var viewData: UserProfileViewData?
     @State private var isLoading = true
     @State private var errorMessage: String?
-
+    
     var body: some View {
         Group {
             if isLoading {
@@ -27,9 +27,12 @@ struct ProfileContainerView: View {
         }
         .task {
             do {
+                print("プロフィール取得開始")
                 viewData = try await makeUserProfileViewData()
+                print("プロフィール取得成功: \(String(describing: viewData))")
             } catch {
                 errorMessage = error.localizedDescription
+                print("プロフィール取得失敗: \(error.localizedDescription)")
             }
             isLoading = false
         }
