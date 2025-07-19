@@ -36,6 +36,10 @@ struct CircleMap: UIViewRepresentable {
     func updateUIView(_ uiView: MKMapView, context: Context) {
         context.coordinator.resetIfNeeded()
         uiView.removeOverlays(uiView.overlays)
+        
+        uiView.userTrackingMode = playerPosition.isFollowing
+                ? .follow
+                : .none
 
         if playerPosition.isFollowing {
             context.coordinator.isSettingRegionProgrammatically = true
@@ -48,6 +52,22 @@ struct CircleMap: UIViewRepresentable {
                 ), animated: true
             )
         }
+        
+        if playerPosition.recenterTrigger,
+             let loc = playerPosition.currentLocation {
+            context.coordinator.isSettingRegionProgrammatically = true
+            uiView.setRegion(
+              MKCoordinateRegion(
+                center: loc,
+                latitudinalMeters: 500,
+                longitudinalMeters: 500
+              ),
+              animated: true
+            )
+            DispatchQueue.main.async {
+              playerPosition.recenterTrigger = false
+            }
+          }
 
         // Always show track polyline
         let coords = playerPosition.track
@@ -174,6 +194,28 @@ struct CircleMap: UIViewRepresentable {
         func mapViewDidFinishLoadingMap(_ mapView: MKMapView) {
             // Not strictly needed now that updateUIView always refreshes
         }
+        
+        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            // MKMapView 上でユーザー操作や追従切り替え いずれでも呼ばれる
+            let newRegion = mapView.region
+            DispatchQueue.main.async {
+                // これで SwiftUI 側の region が更新され、
+                // 依存している isUserOnScreen が再計算されます
+                self.parent.playerPosition.region = newRegion
+            }
+        }
+        
+        func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+            // タップされたのがユーザー位置マーカーなら
+            if view.annotation is MKUserLocation {
+                DispatchQueue.main.async {
+                    // 追従モードON
+                    self.parent.playerPosition.isFollowing = true
+                    // 必要なら地図をセンターに戻すトリガーも
+                    self.parent.playerPosition.recenterTrigger = true
+                }
+            }
+        }
 
         func mapView(
             _ mapView: MKMapView,
@@ -203,8 +245,7 @@ struct CircleMap: UIViewRepresentable {
             if isSettingRegionProgrammatically {
                 isSettingRegionProgrammatically = false
             } else {
-                DispatchQueue.main.async { [weak self] in
-                    guard let self = self else { return }
+                DispatchQueue.main.async {
                     self.parent.playerPosition.isFollowing = false
                 }
             }

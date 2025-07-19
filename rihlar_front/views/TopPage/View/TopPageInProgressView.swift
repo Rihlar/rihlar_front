@@ -31,6 +31,21 @@ struct TopPageInProgressView: View {
     @State private var photos: [PhotoEntity] = []
     @State private var photoError: String?
     
+    // 画面内判定用ヘルパー
+    private var isUserOnScreen: Bool {
+        guard let user = playerPosition.currentLocation else { return false }
+        let center = playerPosition.region.center
+        let span   = playerPosition.region.span
+        let latOK  = abs(center.latitude  - user.latitude)  <= span.latitudeDelta  / 2
+        let lonOK  = abs(center.longitude - user.longitude) <= span.longitudeDelta / 2
+        return latOK && lonOK
+    }
+    
+    private var bearingAngle: Double {
+      guard let user = playerPosition.currentLocation else { return 0 }
+      return playerPosition.region.center.bearing(to: user)
+    }
+    
     var body: some View {
         if let game = vm.currentGame {
             ZStack {
@@ -216,29 +231,6 @@ struct TopPageInProgressView: View {
                 
                 VStack(spacing: 0) {
                     Spacer()
-                    //                    現在地に戻るボタン
-                    //                    デザインは後回しにしているので変更する
-                    HStack {
-                        Button {
-                            playerPosition.resumeFollow()
-                        } label: {
-                            Image(systemName: "paperplane.fill")
-                                .frame(width: 48, height: 48)
-                                .foregroundStyle(Color.white.opacity(0.8))
-                                .background(Color.blue.opacity(0.8))
-                                .cornerRadius(8)
-                        }
-                        .padding(16)
-                        
-                        Spacer()
-                        
-                        Button {
-                        } label: {
-                            Image(systemName: "bookmark.fill")
-                                .frame(width: 48, height: 48)
-                        }
-                        .opacity(0)
-                    }
                     Footer (
                         router: router,
                         isChangeBtn: isChangeBtn,
@@ -273,6 +265,55 @@ struct TopPageInProgressView: View {
                     print("photo fetch error:", error)
                 }
             }
+            .overlay(
+                Group {
+                  if let userLoc = playerPosition.currentLocation {
+                    let center = playerPosition.region.center
+                    let angle = center.bearing(to: userLoc)
+
+                    ZStack {
+                      GeometryReader { geo in
+                          let w = geo.size.width
+                          let h = geo.size.height
+                          let halfW = w / 2
+                          let halfH = h / 2
+
+                          // 北（0°）基準のベアリングをラジアンに
+                          let rad = angle * .pi / 180
+
+                          let dx = sin(rad) * halfW
+                          let dy = -cos(rad) * halfH
+                          
+                          let topInset = max(0,  cos(rad)) * 10
+                          let bottomInset = max(0, -cos(rad)) * 10
+                          let leadingInset = max(0, -sin(rad)) * 10
+                          let trailingInset = max(0,  sin(rad)) * 10
+                          ZStack {
+                              Image("BubblePointer")
+                                  .rotationEffect(.degrees(angle + 90))
+                                  .position(x: halfW + dx, y: halfH + dy)
+                                  .animation(.easeInOut(duration: 0.3), value: angle)
+                              Text("戻る")
+                                  .foregroundColor(.white)
+                                  .font(.system(size: 12, weight: .semibold))
+                                  .stroke(color: Color("TextColor"), width: 0.8)
+                                  .padding(EdgeInsets(top: topInset, leading: leadingInset, bottom: bottomInset, trailing: trailingInset))
+                                  .position(x: halfW + dx, y: halfH + dy)
+                                  .animation(.easeInOut(duration: 0.3), value: angle)
+                          }
+                          .frame(width: 42, height: 30)
+                          .onTapGesture {
+                              playerPosition.resumeFollow()
+                          }
+                      }
+                      .frame(width: 300, height: 420)
+                    }
+                  }
+                }
+                .opacity(isUserOnScreen ? 0 : 1)
+                .animation(.default, value: isUserOnScreen),
+                alignment: .center  // 画面中央
+              )
         }
     }
 }

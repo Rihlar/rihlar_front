@@ -25,10 +25,13 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var didSetInitialRegion: Bool = false
 //     追従モード：true のとき、位置更新に応じて region を自動的に書き換える
     @Published var isFollowing: Bool = true
+    @Published var recenterTrigger = false
     
 //     MARK: - トラッキング関連
 //     アプリ起動後からの通過座標を時系列で保持
     @Published private(set) var track: [CLLocationCoordinate2D] = []
+//    最新のユーザー位置を公開
+    @Published var currentLocation: CLLocationCoordinate2D?
 //     前回取得した位置を保持し、移動距離判定に使用
     private var lastLocation: CLLocation?
 //     移動判定の閾値（メートル）: この距離未満の更新はスキップ
@@ -51,6 +54,11 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 //         最新の位置情報を取得
         guard let newLocation = locations.last else { return }
+        
+//        最新位置を currentLocation にセット
+        DispatchQueue.main.async { [weak self] in
+            self?.currentLocation = newLocation.coordinate
+        }
 
 //         --- (1) 初回更新時のみ region を現在地に設定 ---
         if !didSetInitialRegion {
@@ -116,6 +124,7 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
 //   　外部から呼び出し、追従モードを ON に戻す
     func resumeFollow() {
         isFollowing = true
+        recenterTrigger = true
     }
 }
 
