@@ -9,15 +9,17 @@ import Foundation
 
 func fetchPhoto() async throws -> [PhotoEntity] {
     // アクセストークンをKeychainなどから取得（ここでは authAccessToken として保存されていると仮定）
-    guard let accessToken = getKeyChain(key: "authAccessToken") else {
+    guard let accessToken = getKeyChain(key: "authToken") else {
         throw NSError(domain: "PhotoFetch", code: 401, userInfo: [NSLocalizedDescriptionKey: "アクセストークンが見つかりません"])
     }
     
-    print("fetchPhotoアクセストークン使用: (accessToken)")
+    print("fetchPhotoアクセストークン使用: \(accessToken)")
     
     // 写真一覧を取得するAPIのエンドポイント
     let path = APIConfig.photo
-    let fullURL = APIConfig.baseURL.appendingPathComponent(path)
+    let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
+    
+    print(fullURL)
     
     var request = URLRequest(url: fullURL)
     request.httpMethod = "GET"
