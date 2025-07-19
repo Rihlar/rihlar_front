@@ -28,6 +28,8 @@ struct APIConfig {
     static let sendUserStepEndpoint = "/gcore/report/movement"
 //    ユーザーのプロフィール　GET
     static let userProfile = "/user/profile"
+//    写真取得
+    static let photo = "/photos"
 }
 
 enum APIEnvironment {

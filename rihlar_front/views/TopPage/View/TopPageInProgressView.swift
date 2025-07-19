@@ -28,6 +28,8 @@ struct TopPageInProgressView: View {
     @State private var timeString: String = ""
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     @StateObject private var hk = StepsHealthKit()
+    @State private var photos: [PhotoEntity] = []
+    @State private var photoError: String?
     
     var body: some View {
         if let game = vm.currentGame {
@@ -262,6 +264,15 @@ struct TopPageInProgressView: View {
                 .zIndex(1)
             }
             .animation(.easeInOut, value: router.didStartFromLoading)
+            .task {
+                do {
+                    let result = try await fetchPhoto()
+                    self.photos = result
+                } catch {
+                    self.photoError = error.localizedDescription
+                    print("photo fetch error:", error)
+                }
+            }
         }
     }
 }
