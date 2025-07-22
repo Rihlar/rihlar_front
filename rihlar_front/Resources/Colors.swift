@@ -44,4 +44,5 @@ extension Color {
     static let subuBtnColor = Color(hex:"#F9D5B0")              // サブボタン
     static let subuBtnLineColor = Color(hex: "#BAA987")         // サブボタンの線
     static let subBtnDecorationColor = Color(hex: "#F2E6B8")    // サブ装飾ボタンの色
+    static let CameraPreviewbgColor = Color(hex: "#D9D9D9")
 }
