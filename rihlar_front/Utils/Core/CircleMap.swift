@@ -69,10 +69,12 @@ struct CircleMap: UIViewRepresentable {
             }
           }
 
-        // Always show track polyline
-        let coords = playerPosition.track
-        if coords.count >= 2 {
-            uiView.addOverlay(MKPolyline(coordinates: coords, count: coords.count))
+//         ─────────── 歩いた軌跡を描画（進行中 or コレクションモードのときだけ） ───────────
+        if gameStatus == .inProgress || gameType == .system {
+            let coords = playerPosition.track
+            if coords.count >= 2 {
+                uiView.addOverlay(MKPolyline(coordinates: coords, count: coords.count))
+            }
         }
 
         // Show circles if in progress or in collection mode
