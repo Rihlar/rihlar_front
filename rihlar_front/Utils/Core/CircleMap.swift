@@ -160,13 +160,16 @@ struct CircleMap: UIViewRepresentable {
 
 
     private func color(for group: String) -> UIColor {
+        if group == "Self" {
+            return .blue
+        }
+        // それ以外は順位で色分け
         switch group {
         case "Top1": return .orange
         case "Top2": return .red
         case "Top3": return .green
         case "Other": return .white
-        case "Self": return .blue
-        default: return .black
+        default:     return .black
         }
     }
 
