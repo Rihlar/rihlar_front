@@ -32,7 +32,9 @@ struct AppRootView: View {
                         .navigationDestination(for: Route.self) { route in
                             switch route {
                             case .camera:
-                                Camera()
+//                                Camera()
+                                CameraViewController()
+                                    .edgesIgnoringSafeArea(.all)
                                 // 個別画面も戻るボタン非表示に
                                     .navigationBarBackButtonHidden(true)
                             case .profile:
