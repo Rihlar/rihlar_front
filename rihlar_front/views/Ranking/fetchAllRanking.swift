@@ -133,24 +133,25 @@ struct SoloRankingView: View {
                 Text("現在のランキング")
                     .font(.headline)
                     .padding(.top, 20)
+                    .foregroundColor(Color.textColor)
                 
                 if players.isEmpty && myRank == nil {
                     // ランキングデータがない（ゲーム未参加）
                     Text("ゲームに参加していないよ！")
-                        .foregroundColor(.gray)
-                        .frame(height: 300) // 固定サイズ（例）
+                        .foregroundColor(Color.textColor)
+                        .frame(height: 300)
                 } else {
                     VStack{
                         // ヘッダー
                         HStack {
                             Text("プレイヤー")
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .frame(maxWidth: .infinity, alignment: .center)
                             Text("獲得ポイント")
                                 .frame(maxWidth: .infinity, alignment: .center)
                             Text("ランキング")
-                                .frame(maxWidth: .infinity, alignment: .trailing)
+                                .frame(maxWidth: .infinity, alignment: .center)
                         }
-                        .font(.subheadline)
+                        .font(.headline)
                         .foregroundStyle(Color.textColor)
                         .padding(.vertical, 8)
                         
@@ -165,7 +166,7 @@ struct SoloRankingView: View {
             .padding(.horizontal, 20)
             // ランキングデータの取得
             .onAppear {
-                mockLoadRanking()
+                loadRanking()
             }
             
             
@@ -213,7 +214,7 @@ struct SoloRankingView: View {
                     ForEach(players) { player in
                         HStack {
                             Text(player.name)
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .frame(maxWidth: .infinity, alignment: .center)
                                 .font(.title2)
                                 .foregroundStyle(Color.textColor)
                             Text("\(player.points)pt")
@@ -222,10 +223,10 @@ struct SoloRankingView: View {
                                 .foregroundStyle(Color.textColor)
                             if player.rank <= 3 {
                                 RankTextView(text: "\(player.rank)位", rank: player.rank)
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                             } else {
                                 Text("\(player.rank)位")
-                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                                     .font(.title.bold())
                                     .foregroundStyle(Color.textColor)
                             }
@@ -233,9 +234,10 @@ struct SoloRankingView: View {
                         }
                         .padding(.vertical, 16)
                         
-                        if player.id != players.last?.id {
-                            Divider()
-                        }
+                        // figmaでは線が引かれてなかったので
+//                        if player.id != players.last?.id {
+//                            Divider()
+//                        }
                     }
                 }
             }
@@ -248,7 +250,7 @@ struct SoloRankingView: View {
                 
                 HStack {
                     Text("自分")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(maxWidth: .infinity, alignment: .center)
                         .font(.title2)
                         .foregroundStyle(Color.textColor)
                     Text("\(myRank.points)pt")
@@ -257,10 +259,10 @@ struct SoloRankingView: View {
                         .foregroundStyle(Color.textColor)
                     if myRank.rank <= 3 {
                         RankTextView(text: "\(myRank.rank)位", rank: myRank.rank)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     } else {
                         Text("\(myRank.rank)位")
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .frame(maxWidth: .infinity, alignment: .center)
                             .font(.title.bold())
                             .foregroundStyle(Color.textColor)
                     }
@@ -272,7 +274,8 @@ struct SoloRankingView: View {
         .padding()
         .background(Color.white)
         .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 2)
+        .frame(maxWidth: 350)
     }
     
     //            // プレイヤーごと行表示
@@ -300,28 +303,23 @@ struct SoloRankingView: View {
     //        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     //    }
     
-//    // MARK: - ランキング取得処理
-//    private func loadRanking() {
-//        RankingService.fetchTop10(userId: userId, gameId: gameId) { topRankings in
-//            // UI更新はメインスレッドで
-//            DispatchQueue.main.async {
-//                players = topRankings.enumerated().map { index, top in
-//                    Player(name: top.UserId,
-//                           points: top.Points,
-//                           rank: index + 1)
-//                }
-//            }
-//        }
-//    }
-    private func mockLoadRanking() {
-        let samplePlayers = (1...15).map { i in
-            Player(name: "User\(i)", points: 1500 - i * 30, rank: i)
+    // MARK: - ランキング取得処理
+    private func loadRanking() {
+        RankingService.fetchTop10(userId: userId, gameId: gameId) { topRankings in
+            // UI更新はメインスレッドで
+            DispatchQueue.main.async {
+                players = topRankings.enumerated().map { index, top in
+                    Player(name: top.UserId,
+                           points: top.Points,
+                           rank: index + 1)
+                }
+            }
         }
-        self.players = samplePlayers.filter { $0.name != "User12" }
-        self.myRank = Player(name: "User12", points: 1170, rank: 12)
     }
+    
 }
 
+// 他のファイルでグラデーション等を行い呼び出しました
 //// MARK: - ランクに応じた色付け
 //fileprivate extension View {
 //    func rankColor(rank: Int) -> some View {

@@ -22,19 +22,31 @@ struct RankTextView: View {
         switch rank {
         case 1:
             return LinearGradient(
-                gradient: Gradient(colors: [.goldGradientStart, .goldGradientMiddle]),
+                gradient: Gradient(stops: [
+                    .init(color: .goldGradientStart, location: 0.0),
+                    .init(color: .goldGradientMiddle, location: 0.5),
+                    .init(color: .goldGradientStart, location: 1.0),
+                ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case 2:
             return LinearGradient(
-                gradient: Gradient(colors: [.silverGradientStart, .silverGradientMiddle]),
+                gradient: Gradient(stops: [
+                    .init(color: .silverGradientStart, location: 0.0),
+                    .init(color: .silverGradientMiddle, location: 0.5),
+                    .init(color: .silverGradientStart, location: 1.0),
+                ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
         case 3:
             return LinearGradient(
-                gradient: Gradient(colors: [.bronzeGradientStart, .bronzeGradientMiddle]),
+                gradient: Gradient(stops: [
+                    .init(color: .bronzeGradientStart, location: 0.0),
+                    .init(color: .bronzeGradientMiddle, location: 0.5),
+                    .init(color: .bronzeGradientStart, location: 1.0),
+                ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -46,4 +58,5 @@ struct RankTextView: View {
             )
         }
     }
+
 }
