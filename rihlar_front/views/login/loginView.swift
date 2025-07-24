@@ -146,7 +146,7 @@ struct loginDesignView: View {
     
     private func startAuthentication() {
         guard !didReceiveToken && !authManager.hasCompletedAuth && !authManager.isAuthenticating else {
-            print("認証中または受信済み。中断")
+            
             return
         }
         
@@ -160,7 +160,6 @@ struct loginDesignView: View {
     }
     
     private func handleAuthCallback(_ callbackURL: URL) {
-        print("AuthCallback 発火")
         
         guard !didReceiveToken else {
 //            print("トークン既受信、処理スキップ")
@@ -200,7 +199,7 @@ struct loginDesignView: View {
             }
             
         } else {
-            print("トークン取得失敗")
+    
             DispatchQueue.main.async {
                 didReceiveToken = false
                 authManager.reset()
@@ -218,7 +217,7 @@ func getCode(callbackURL: URL) -> String? {
     }
     
     if let codeValue = queryItems.first(where: { $0.name == "token" })?.value {
-        print("コールバックから取得したトークン: \(codeValue)")
+       
         
         saveKeyChain(tag: "authToken", value: codeValue)
         return codeValue
@@ -229,6 +228,6 @@ func getCode(callbackURL: URL) -> String? {
 
 #Preview {
     loginDesignView(didReceiveToken: .constant(false)) {
-        print("プレビュー内ログイン成功コールバック")
+        
     }
 }
