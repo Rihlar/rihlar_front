@@ -19,7 +19,7 @@ struct ItemView: View {
     @State private var showPopup = false
     
     var body: some View {
-        ZStack{
+        ZStack(alignment: .bottom){
             Color.backgroundColor
                 .edgesIgnoringSafeArea(.all)
             VStack{
@@ -50,35 +50,6 @@ struct ItemView: View {
                 }
                 .listStyle(PlainListStyle()) // 枠線などを省いたシンプルなスタイル
                 
-                if isShowMenu {
-                    Color.white.opacity(0.5)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                    
-                    Menu(router: router)
-                        .transition(
-                            .move(edge: .trailing)
-                            .combined(with: .opacity)
-                        )
-                }
-                
-                BottomNavigationBar(
-                    router: router,
-                    isChangeBtn: isChangeBtn,
-                    onCameraTap: {
-                        router.push(.camera)
-                    },
-                    onMenuTap: {
-                        //   ボタンの見た目切り替えは即時（アニメなし）
-                        isChangeBtn.toggle()
-                        
-                        //　　メニュー本体の表示はアニメーション付き
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            isShowMenu.toggle()
-                        }
-                    }
-                )
-                
             }
             .padding(.horizontal)
             // ポップアップ表示
@@ -96,7 +67,35 @@ struct ItemView: View {
                         .zIndex(1)
                 }
             }
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
             
+            
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: {
+                    router.push(.camera)
+                },
+                onMenuTap: {
+                    //   ボタンの見た目切り替えは即時（アニメなし）
+                    isChangeBtn.toggle()
+                    
+                    //　　メニュー本体の表示はアニメーション付き
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
             
         }
     }

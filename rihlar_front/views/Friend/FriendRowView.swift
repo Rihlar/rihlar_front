@@ -13,7 +13,7 @@ struct FriendRowView: View {
     let records: [Record]
     
     var selectedRecords: [Record] {
-        records.filter { $0.isSelected }.prefix(3).map { $0 }
+        Array(records.prefix(3))
     }
     
     var body: some View {
@@ -48,7 +48,7 @@ struct FriendRowView: View {
                             Image(record.imageUrl)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: 40, height: 40)
+                                .frame(width: 50, height: 50)
                                 .clipShape(Circle())
                         }
                     }
