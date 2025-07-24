@@ -66,7 +66,7 @@ struct ProfileMenuItem: View {
                     //                    称号のアイコンが3つ
                     HStack {
                         ForEach(records.prefix(3)) { record in
-                            CircularImage(imageName: record.imageUrl, diameter: 40)
+                            CircularImage(imageName: record.imageUrl, diameter: 30)
                         }
                     }
                 }
