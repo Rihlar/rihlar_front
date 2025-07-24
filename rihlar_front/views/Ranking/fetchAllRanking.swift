@@ -118,7 +118,7 @@ struct SoloRankingView: View {
     
     
     /// イニシャライザで userId, gameId を受け取る
-    init(router: Router,userId: String, gameId: String) {
+    init(router: Router, userId: String, gameId: String) {
         self.router = router
         self.userId = userId
         self.gameId = gameId
