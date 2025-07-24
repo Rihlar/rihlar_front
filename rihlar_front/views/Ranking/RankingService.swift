@@ -62,7 +62,7 @@ class RankingService {
     static func fetchTop10(userId: String,
                            gameId: String,
                            completion: @escaping ([TopRanking]) -> Void) {
-        guard let url = URL(string: "https://rihlar-test.kokomeow.com/gcore/get/top") else {
+        guard let url = URL(string: "https://rihlar-stage.kokomeow.com/gcore/get/top") else {
             print("URL生成失敗")
             completion([])
             return

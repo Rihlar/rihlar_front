@@ -10,32 +10,41 @@ import Foundation
 /// 環境設定（APIのエンドポイントなど）を定義する構造体
 struct APIConfig {
     static let baseURL = URL(string: "https://rihlar-test.kokomeow.com")!
-    static let stagingBaseURL = URL(string: "https://rihlar-stage.kokomeow.com")! 
+    static let stagingBaseURL = URL(string: "https://rihlar-stage.kokomeow.com")!
     
     
     
     // ユーザー情報
     static let userInfoEndpoint = "/auth/me"
-//    円の作成 POST.
+    // ソロランキングのAPI（ゲームIDが必要！）
+    static func soloRanking(gameId: String) -> URL {
+        // 例: https://rihlar-stage.kokomeow.com/game/ranking/solo/top10/abcd1234
+        return stagingBaseURL.appendingPathComponent("/game/ranking/solo/top10/\(gameId)")
+    }
+    // 自分のゲーム参加情報を取るAPI
+    static var gameInfo: URL {
+        return stagingBaseURL.appendingPathComponent("/game/info/self")
+    }
+    //    円の作成 POST.
     static let createCircleEndpoint = "/gcore/create/circle"
-//    上位３位の円 GET ※ゲームIDを含むURL
+    //    上位３位の円 GET ※ゲームIDを含むURL
     static let top3CirclesRankingEndpoint = "/game/ranking/top/{gameId}"
-//    自分が歩いた記録 GET
+    //    自分が歩いた記録 GET
     static let userMovementEndpoint = "/gcore/get/movement"
-//    ランキング GET
+    //    ランキング GET
     static let topRankingEndpoint = "/gcore/get/top"
-//    歩いたデータを送る POST
+    //    歩いたデータを送る POST
     static let sendUserStepEndpoint = "/gcore/report/movement"
-//    ユーザーのプロフィール　GET
+    //    ユーザーのプロフィール　GET
     static let userProfile = "/user/profile"
-//    写真取得
+    //    写真取得
     static let photo = "/photos"
 }
 
 enum APIEnvironment {
     case test
     case staging
-
+    
     var baseURL: URL {
         switch self {
         case .test:
