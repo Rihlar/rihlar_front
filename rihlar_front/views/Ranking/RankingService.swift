@@ -33,6 +33,11 @@ struct SoloRankingResponse: Codable {
     struct DataClass: Codable {
         let ranks: [SoloRank]
         let myRank: SoloSelfRank
+        
+        enum CodingKeys: String, CodingKey {
+                    case ranks
+            case myRank = "self"
+                }
     }
     let data: DataClass
 
@@ -70,6 +75,7 @@ class RankingService {
         
         let result = try JSONDecoder().decode(SoloRankingResponse.self, from: data)
         
+        let myRank = result.data.self
         return (players: result.data.ranks, myRank: result.data.myRank)
     }
 }
