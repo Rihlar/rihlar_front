@@ -140,22 +140,24 @@ struct SoloRankingView: View {
                         .foregroundColor(.gray)
                         .frame(height: 300) // 固定サイズ（例）
                 } else {
-                    // ヘッダー
-                    HStack {
-                        Text("プレイヤー")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        Text("獲得ポイント")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        Text("ランキング")
-                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    VStack{
+                        // ヘッダー
+                        HStack {
+                            Text("プレイヤー")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text("獲得ポイント")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            Text("ランキング")
+                                .frame(maxWidth: .infinity, alignment: .trailing)
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(Color.textColor)
+                        .padding(.vertical, 8)
+                        
+                        // ランキングカード
+                        buildRankingCard()
                     }
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding(.vertical, 8)
                     
-                    // ランキングカード
-                    buildRankingCard()
-                        .frame(height: 350)  // 7人分くらいの高さに固定（調整可）
                 }
                 
                 Spacer()
@@ -203,7 +205,8 @@ struct SoloRankingView: View {
     // MARK: - ランキング表示カード
     @ViewBuilder
     private func buildRankingCard() -> some View {
-        VStack(spacing: 0) {
+        
+        VStack{
             // スクロールビューで7人分の高さに固定
             ScrollView {
                 VStack(spacing: 0) {
@@ -211,13 +214,19 @@ struct SoloRankingView: View {
                         HStack {
                             Text(player.name)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .font(.title2)
+                                .foregroundStyle(Color.textColor)
                             Text("\(player.points)pt")
                                 .frame(maxWidth: .infinity, alignment: .center)
+                                .font(.title2)
+                                .foregroundStyle(Color.textColor)
                             Text("\(player.rank)位")
                                 .frame(maxWidth: .infinity, alignment: .trailing)
+                                .font(.title.bold())
                                 .rankColor(rank: player.rank)
+                            
                         }
-                        .padding(.vertical, 12)
+                        .padding(.vertical, 16)
                         
                         if player.id != players.last?.id {
                             Divider()
@@ -225,7 +234,7 @@ struct SoloRankingView: View {
                     }
                 }
             }
-            .frame(height: 12 * 7 * 2) // おおよそ7人分の高さ（padding12*2 * 7人）
+            .frame(height: 420)
             // 自分の順位を最後に表示（playersに含まれていない場合）
             if let myRank = myRank,
                !players.contains(where: { $0.name == myRank.name }) {
@@ -235,14 +244,18 @@ struct SoloRankingView: View {
                 HStack {
                     Text("自分")
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.title2)
+                        .foregroundStyle(Color.textColor)
                     Text("\(myRank.points)pt")
                         .frame(maxWidth: .infinity, alignment: .center)
+                        .font(.title2)
+                        .foregroundStyle(Color.textColor)
                     Text("\(myRank.rank)位")
                         .frame(maxWidth: .infinity, alignment: .trailing)
+                        .font(.title.bold())
                         .rankColor(rank: myRank.rank)
                 }
-                .padding(.vertical, 12)
-                .background(Color(Color.backgroundColor).opacity(0.2))
+                .padding(.vertical, 16)
                 .cornerRadius(8)
             }
         }
@@ -306,7 +319,7 @@ fileprivate extension View {
         case 1: return self.foregroundColor(.yellow)
         case 2: return self.foregroundColor(.gray)
         case 3: return self.foregroundColor(.orange)
-        default: return self.foregroundColor(.brown)
+        default: return self.foregroundColor(Color.textColor)
         }
     }
 }
