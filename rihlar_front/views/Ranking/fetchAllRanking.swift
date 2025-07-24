@@ -220,10 +220,15 @@ struct SoloRankingView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .font(.title2)
                                 .foregroundStyle(Color.textColor)
-                            Text("\(player.rank)位")
-                                .frame(maxWidth: .infinity, alignment: .trailing)
-                                .font(.title.bold())
-                                .rankColor(rank: player.rank)
+                            if player.rank <= 3 {
+                                RankTextView(text: "\(player.rank)位", rank: player.rank)
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                            } else {
+                                Text("\(player.rank)位")
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
+                                    .font(.title.bold())
+                                    .foregroundStyle(Color.textColor)
+                            }
                             
                         }
                         .padding(.vertical, 16)
@@ -250,10 +255,15 @@ struct SoloRankingView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .font(.title2)
                         .foregroundStyle(Color.textColor)
-                    Text("\(myRank.rank)位")
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-                        .font(.title.bold())
-                        .rankColor(rank: myRank.rank)
+                    if myRank.rank <= 3 {
+                        RankTextView(text: "\(myRank.rank)位", rank: myRank.rank)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                    } else {
+                        Text("\(myRank.rank)位")
+                            .frame(maxWidth: .infinity, alignment: .trailing)
+                            .font(.title.bold())
+                            .foregroundStyle(Color.textColor)
+                    }
                 }
                 .padding(.vertical, 16)
                 .cornerRadius(8)
@@ -312,17 +322,17 @@ struct SoloRankingView: View {
     }
 }
 
-// MARK: - ランクに応じた色付け
-fileprivate extension View {
-    func rankColor(rank: Int) -> some View {
-        switch rank {
-        case 1: return self.foregroundColor(.yellow)
-        case 2: return self.foregroundColor(.gray)
-        case 3: return self.foregroundColor(.orange)
-        default: return self.foregroundColor(Color.textColor)
-        }
-    }
-}
+//// MARK: - ランクに応じた色付け
+//fileprivate extension View {
+//    func rankColor(rank: Int) -> some View {
+//        switch rank {
+//        case 1: return self.foregroundColor(.goldGradientStart)
+//        case 2: return self.foregroundColor(.silverGradientStart)
+//        case 3: return self.foregroundColor(.bronzeGradientStart)
+//        default: return self.foregroundColor(Color.textColor)
+//        }
+//    }
+//}
 
 #Preview {
     SoloRankingView(router: Router(),
