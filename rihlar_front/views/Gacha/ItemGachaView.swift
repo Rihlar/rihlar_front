@@ -45,36 +45,56 @@ struct ItemGachaView: View {
             
             // メインのガチャUI
             VStack(spacing: 16) {
-                // 所持コイン表示
-                Text("所持コイン: \(totalCoin)")
-                    .font(.headline)
-                
                 // 説明テキスト
-                Text("アイテムを手に入れよう！")
-                    .font(.title2)
+                Text("アイテムガチャ")
+                    .font(.headline)
                     .bold()
-                // ガチャを引くボタン
-                Button("ガチャを引く") {
-                    // コインが100以上あるなら消費してアニメ開始
-                    if totalCoin >= 100 {
-                        totalCoin -= 100
-                        animationState.startAnimation(items: itemViewModel.items)
+
+                // 所持コイン表示
+                ZStack {
+                    HStack{
+                        Image("coin")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width:40, height: 32)
+                        Spacer()
+                        Text("\(totalCoin)")
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .fontWeight(.heavy)
+                            .padding(.trailing, 8)
                     }
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 10)
+                    .background(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24)
+                            .stroke(Color.mainDecorationColor, lineWidth: 8)
+                    )
+                    .cornerRadius(20)
                 }
-                .frame(width: 150, height: 55)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                // ボタンの表示不透明度はアニメ状態で制御
+                .frame(maxWidth: 200)
+                
+                OrangeBtn(
+                    label: "ガチャを引く",
+                    width: 160,
+                    height: 60,
+                    action: {
+                        if totalCoin >= 100 {
+                            totalCoin -= 100
+                            animationState.startAnimation(items: itemViewModel.items)
+                        }
+                    },
+                    isBigBtn: false
+                )
                 .opacity(animationState.buttonOpacity)
-                // コインが不足しているか、アニメ中は無効化
                 .disabled(totalCoin < 100 || animationState.buttonOpacity == 0.0)
                 
                 // ガチャマシン本体の描画
                 ZStack {
                     Image("gachagacha")
                         .resizable()
-                        .frame(width: 250, height: 450)
+                        .frame(width: 254, height: 449)
                     
                     // カプセルの上下移動
                     Image("BlueCapsule")
@@ -96,7 +116,7 @@ struct ItemGachaView: View {
                 
             }
             .offset(y: 70) // 少し下にずらす
-            .padding(.bottom, 180)
+            .padding(.bottom, 200)
             
             ZStack {
                 // カプセルの開封演出を表示（演出中かつキャラ詳細が出ていない時）
