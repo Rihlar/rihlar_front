@@ -57,9 +57,7 @@ struct AppRootView: View {
                                 ItemView(router: router)
                                     .navigationBarBackButtonHidden(true)
                             case .record:
-                                SoloRankingView(router: router,
-                                    userId: "userid-50452766-49e8-4dd9-84a1-d02ee1c2425c",
-                                                gameId: "gameid-8a5fafff-0b2e-4f2b-b011-da21a5a724cd")
+                                SoloRankingView(router: router)
                                     .navigationBarBackButtonHidden(true)
                             default:
                                 EmptyView()
