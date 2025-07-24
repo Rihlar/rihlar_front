@@ -19,8 +19,7 @@ func fetchUserProfile() async throws -> User {
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue(refreshToken, forHTTPHeaderField: "Authorization") // Bearerなしで
-
+    request.setValue(refreshToken, forHTTPHeaderField: "Authorization") 
     print("Authorizationヘッダー: \(refreshToken)")
 
     let (data, response) = try await URLSession.shared.data(for: request)

@@ -1,34 +1,68 @@
-// ランキングページ　そろ
 import SwiftUI
 
+// ランキングページ 親ビュー：userId, gameIdを非同期取得してから本体表示
 struct SoloRankingView: View {
-    // ルーティング（画面遷移など）に使用
     @ObservedObject var router: Router
-    // メニュー表示状態
+    
+    @State private var userId: String? = nil
+    @State private var gameId: String? = nil
+    
+    var body: some View {
+        Group {
+            if let userId = userId, let gameId = gameId {
+                RankingContentView(router: router, userId: userId, gameId: gameId)
+            } else {
+                VStack {
+                    ProgressView()
+                    Text("ランキング情報を取得中…")
+                }
+                .task {
+                    await loadUserAndGameInfo()
+                }
+            }
+        }
+        .background(Color(Color.backgroundColor).ignoresSafeArea())
+    }
+    
+    private func loadUserAndGameInfo() async {
+        do {
+            // ユーザープロフィールはリフレッシュトークン（authToken）で取得する想定なので、fetchUserProfileはそのまま呼ぶ
+            let user = try await fetchUserProfile()
+
+            // ゲーム情報取得用アクセストークンはTokenManagerを使って取得
+            let accessToken = try await TokenManager.shared.fetchAndCacheAccessToken()
+
+            let gameInfo = try await fetchGameInfo(token: accessToken)
+
+            DispatchQueue.main.async {
+                self.userId = user.id
+                self.gameId = gameInfo.admin?.gameID ?? gameInfo.system.gameID
+            }
+        } catch {
+            print("ユーザ・ゲーム情報取得失敗:", error)
+        }
+
+    }
+}
+
+
+/// ランキング画面本体
+struct RankingContentView: View {
+    @ObservedObject var router: Router
+    let userId: String
+    let gameId: String
+    
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
     
-    // 外部から渡されるID
-    private let userId: String
-    private let gameId: String
-    
     @State private var players: [Player] = []
-    @State private var myRank: Player? = nil       // 自分の順位（APIに含まれていれば）
+    @State private var myRank: Player? = nil
     
-    // プレイヤー情報（ランキング表示用）（できれば違うファイルに分けて欲しい）
     struct Player: Identifiable {
         let id = UUID()
         let name: String
         let points: Int
         let rank: Int
-    }
-    
-    
-    /// イニシャライザで userId, gameId を受け取る
-    init(router: Router, userId: String, gameId: String) {
-        self.router = router
-        self.userId = userId
-        self.gameId = gameId
     }
     
     var body: some View {
@@ -43,13 +77,11 @@ struct SoloRankingView: View {
                     .foregroundColor(Color.textColor)
                 
                 if players.isEmpty && myRank == nil {
-                    // ランキングデータがない（ゲーム未参加）
                     Text("ゲームに参加していないよ！")
                         .foregroundColor(Color.textColor)
                         .frame(height: 300)
                 } else {
-                    VStack{
-                        // ヘッダー
+                    VStack {
                         HStack {
                             Text("プレイヤー")
                                 .frame(maxWidth: .infinity, alignment: .center)
@@ -62,46 +94,32 @@ struct SoloRankingView: View {
                         .foregroundStyle(Color.textColor)
                         .padding(.vertical, 8)
                         
-                        // ランキングカード
                         buildRankingCard()
                     }
-                    
                 }
                 
                 Spacer()
             }
             .padding(.horizontal, 20)
-            // ランキングデータの取得
             .onAppear {
                 loadRanking()
             }
             
-            
-            // ナビゲーションバーの処理
             if isShowMenu {
                 Color.white.opacity(0.5)
                     .ignoresSafeArea()
                     .transition(.opacity)
                 
                 Menu(router: router)
-                    .transition(
-                        .move(edge: .trailing)
-                        .combined(with: .opacity)
-                    )
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-            
             
             BottomNavigationBar(
                 router: router,
                 isChangeBtn: isChangeBtn,
-                onCameraTap: {
-                    router.push(.camera)
-                },
+                onCameraTap: { router.push(.camera) },
                 onMenuTap: {
-                    //   ボタンの見た目切り替えは即時（アニメなし）
                     isChangeBtn.toggle()
-                    
-                    //　　メニュー本体の表示はアニメーション付き
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isShowMenu.toggle()
                     }
@@ -110,12 +128,9 @@ struct SoloRankingView: View {
         }
     }
     
-    // MARK: - ランキング表示カード
     @ViewBuilder
     private func buildRankingCard() -> some View {
-        
-        VStack{
-            // スクロールビューで7人分の高さに固定
+        VStack {
             ScrollView {
                 VStack(spacing: 0) {
                     ForEach(players) { player in
@@ -137,19 +152,17 @@ struct SoloRankingView: View {
                                     .font(.title.bold())
                                     .foregroundStyle(Color.textColor)
                             }
-                            
                         }
                         .padding(.vertical, 16)
                     }
                 }
             }
             .frame(height: 420)
-            // 自分の順位を最後に表示（playersに含まれていない場合）
+            
             if let myRank = myRank,
                !players.contains(where: { $0.name == myRank.name }) {
                 Divider()
                     .padding(.vertical, 8)
-                
                 HStack {
                     Text("自分")
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -180,26 +193,29 @@ struct SoloRankingView: View {
         .frame(maxWidth: 350)
     }
     
-
-    
-    // MARK: - ランキング取得処理
     private func loadRanking() {
-        RankingService.fetchTop10(userId: userId, gameId: gameId) { topRankings in
-            // UI更新はメインスレッドで
-            DispatchQueue.main.async {
-                players = topRankings.enumerated().map { index, top in
-                    Player(name: top.UserId,
-                           points: top.Points,
-                           rank: index + 1)
+        print("gameId:", gameId)
+        Task {
+            do {
+                guard let token = getKeyChain(key: "authToken") else {
+                    return
                 }
+
+                let (ranks, selfRank) = try await RankingService.fetchSoloTop10(gameId: gameId)
+
+                DispatchQueue.main.async {
+                    players = ranks.enumerated().map { (index, rank) in
+                        Player(name: rank.userName, points: rank.points, rank: index + 1)
+                    }
+                    myRank = Player(name: selfRank.userName, points: selfRank.point, rank: selfRank.rank)
+                }
+            } catch {
+                print("ランキング読み込みエラー:", error)
             }
         }
     }
-    
 }
 
 #Preview {
-    SoloRankingView(router: Router(),
-                    userId: "userid-50452766-49e8-4dd9-84a1-d02ee1c2425c",
-                    gameId: "gameid-8a5fafff-0b2e-4f2b-b011-da21a5a724cd")
+    SoloRankingView(router: Router())
 }

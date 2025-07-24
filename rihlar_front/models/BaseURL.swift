@@ -11,19 +11,15 @@ import Foundation
 struct APIConfig {
     static let baseURL = URL(string: "https://rihlar-test.kokomeow.com")!
     static let stagingBaseURL = URL(string: "https://rihlar-stage.kokomeow.com")!
-    
-    
-    
     // ユーザー情報
     static let userInfoEndpoint = "/auth/me"
     // ソロランキングのAPI（ゲームIDが必要！）
-    static func soloRanking(gameId: String) -> URL {
-        // 例: https://rihlar-stage.kokomeow.com/game/ranking/solo/top10/abcd1234
-        return stagingBaseURL.appendingPathComponent("/game/ranking/solo/top10/\(gameId)")
+    static func soloRanking(gameId: String, environment: APIEnvironment = .staging) -> URL {
+        return environment.baseURL.appendingPathComponent("game/ranking/solo/top10/\(gameId)")
     }
-    // 自分のゲーム参加情報を取るAPI
-    static var gameInfo: URL {
-        return stagingBaseURL.appendingPathComponent("/game/info/self")
+    // 自分のゲーム参加情報を取るAPIのURL
+    static func gameUserInfoURL(environment: APIEnvironment = .staging) -> URL {
+        return environment.baseURL.appendingPathComponent("game/info/self")
     }
     //    円の作成 POST.
     static let createCircleEndpoint = "/gcore/create/circle"
