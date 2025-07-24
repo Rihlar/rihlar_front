@@ -44,5 +44,18 @@ extension Color {
     static let subuBtnColor = Color(hex:"#F9D5B0")              // サブボタン
     static let subuBtnLineColor = Color(hex: "#BAA987")         // サブボタンの線
     static let subBtnDecorationColor = Color(hex: "#F2E6B8")    // サブ装飾ボタンの色
-    static let CameraPreviewbgColor = Color(hex: "#D9D9D9")
+    static let CameraPreviewbgColor = Color(hex: "#D9D9D9")     // 使用不可ボタンの塗り チェックボックス
+    
+    // ランキングの色合いの定義
+    static let goldGradientStart = Color(hex: "#DFA700")
+    static let goldGradientMiddle = Color(hex: "#FFF600")
+    
+    static let silverGradientStart = Color(hex: "#7B7B7B")
+    static let silverGradientMiddle = Color(hex: "#CCCCCC")
+    
+    static let bronzeGradientStart = Color(hex: "#C14E01")
+    static let bronzeGradientMiddle = Color(hex: "#E29C6C")
+    
 }
+
+

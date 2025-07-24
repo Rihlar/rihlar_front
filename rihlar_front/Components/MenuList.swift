@@ -27,7 +27,7 @@ struct MenuList: View {
                 }
                 
                 MenuItem(systemName: "circle.bottomhalf.filled", label: "ガチャ") {
-                    print("circleタップ")
+                    router.push(.gacha)
                 }
                 MenuItem(systemName: "duffle.bag", label: "アイテム") {
                     router.push(.items)
