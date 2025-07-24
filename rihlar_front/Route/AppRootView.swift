@@ -38,6 +38,9 @@ struct AppRootView: View {
                             case .profile:
                                 ProfileContainerView(router: router)
                                     .navigationBarBackButtonHidden(true)
+                            case .gacha:
+                                GachaWrapperView(router: router)
+                                    .navigationBarBackButtonHidden(true)
                             case .mode:
                                 ModeSelection(router: router)
                                     .navigationBarBackButtonHidden(true)

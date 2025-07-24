@@ -10,6 +10,9 @@ import SwiftUI
 // MARK: - アイテム用ガチャ画面
 
 struct ItemGachaView: View {
+    @ObservedObject var router: Router
+    @State private var isChangeBtn = false
+    @State private var isShowMenu = false
     // アイテム一覧を管理するViewModel（データソース）
     @StateObject var itemViewModel = ItemViewModel()
     
@@ -23,7 +26,9 @@ struct ItemGachaView: View {
     @Binding var isPresented: Bool
     
     var body: some View {
-        ZStack {
+        ZStack (alignment: .bottom){
+            Color(Color.backgroundColor)
+                .ignoresSafeArea()
             // 背景の暗転（演出中は半透明黒にする）
             Color.black.opacity(animationState.isDimmed ? 0.3 : 0)
                 .ignoresSafeArea()
@@ -48,6 +53,22 @@ struct ItemGachaView: View {
                 Text("アイテムを手に入れよう！")
                     .font(.title2)
                     .bold()
+                // ガチャを引くボタン
+                Button("ガチャを引く") {
+                    // コインが100以上あるなら消費してアニメ開始
+                    if totalCoin >= 100 {
+                        totalCoin -= 100
+                        animationState.startAnimation(items: itemViewModel.items)
+                    }
+                }
+                .frame(width: 150, height: 55)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                // ボタンの表示不透明度はアニメ状態で制御
+                .opacity(animationState.buttonOpacity)
+                // コインが不足しているか、アニメ中は無効化
+                .disabled(totalCoin < 100 || animationState.buttonOpacity == 0.0)
                 
                 // ガチャマシン本体の描画
                 ZStack {
@@ -72,40 +93,31 @@ struct ItemGachaView: View {
                         .offset(x: -2, y: 88)
                 }
                 
-                // ガチャを引くボタン
-                Button("ガチャを引く") {
-                    // コインが100以上あるなら消費してアニメ開始
-                    if totalCoin >= 100 {
-                        totalCoin -= 100
-                        animationState.startAnimation(items: itemViewModel.items)
-                    }
-                }
-                .frame(width: 150, height: 55)
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                // ボタンの表示不透明度はアニメ状態で制御
-                .opacity(animationState.buttonOpacity)
-                // コインが不足しているか、アニメ中は無効化
-                .disabled(totalCoin < 100 || animationState.buttonOpacity == 0.0)
+                
             }
             .offset(y: 70) // 少し下にずらす
+            .padding(.bottom, 180)
             
-            // カプセルの開封演出を表示（演出中かつキャラ詳細が出ていない時）
-            if animationState.gachaActive,
-               !animationState.characterShown,
-               let item = animationState.selectedItem {
-                CapsuleOpeningView(
-                    item: item,
-                    whiteOffset: animationState.whiteCapsuleOffset,
-                    blueOffset: animationState.blueCapsuleOffset
-                )
-            }
-            
-            // ガチャで出たアイテム詳細をポップアップ表示
-            if animationState.popupShown,
-               let item = animationState.selectedItem {
-                ItemDetailPopup(item: item, isPresented: $animationState.popupShown)
+            ZStack {
+                // カプセルの開封演出を表示（演出中かつキャラ詳細が出ていない時）
+                if animationState.gachaActive,
+                   !animationState.characterShown,
+                   let item = animationState.selectedItem {
+                    CapsuleOpeningView(
+                        item: item,
+                        whiteOffset: animationState.whiteCapsuleOffset,
+                        blueOffset: animationState.blueCapsuleOffset
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .transition(.opacity)
+                }
+                // ガチャで出たアイテム詳細をポップアップ表示
+                if animationState.popupShown,
+                   let item = animationState.selectedItem {
+                    ItemDetailPopup(item: item, isPresented: $animationState.popupShown)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .transition(.scale)
+                }
             }
             
             // 白フラッシュ演出（画面全体に白を重ねる）
@@ -114,12 +126,48 @@ struct ItemGachaView: View {
                     .ignoresSafeArea()
                     .zIndex(100) // 他のUIより前面に出す
             }
+            
+            
+            
+            if isShowMenu {
+                Color.white.opacity(0.5)
+                    .ignoresSafeArea()
+                    .transition(.opacity)
+                
+                Menu(router: router)
+                    .transition(
+                        .move(edge: .trailing)
+                        .combined(with: .opacity)
+                    )
+            }
+            
+            
+            BottomNavigationBar(
+                router: router,
+                isChangeBtn: isChangeBtn,
+                onCameraTap: {
+                    router.push(.camera)
+                },
+                onMenuTap: {
+                    //   ボタンの見た目切り替えは即時（アニメなし）
+                    isChangeBtn.toggle()
+                    
+                    //　　メニュー本体の表示はアニメーション付き
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isShowMenu.toggle()
+                    }
+                }
+            )
+            
         }
+        .padding(.horizontal)
     }
 }
 
 // プレビュー用のラッパービュー
-struct PreviewWrapperView: View {
+struct GachaWrapperView: View {
+    @ObservedObject var router: Router
+    
     // プレビュー用に所持コインを用意
     @State var dummyTotalCoin = 1000
     // プレビュー用の表示状態
@@ -127,6 +175,7 @@ struct PreviewWrapperView: View {
     
     var body: some View {
         ItemGachaView(
+            router: router,
             itemViewModel: ItemViewModel(),
             animationState: GachaAnimationState(),
             totalCoin: $dummyTotalCoin,
@@ -136,5 +185,5 @@ struct PreviewWrapperView: View {
 }
 
 #Preview {
-    PreviewWrapperView()
+    GachaWrapperView(router:Router())
 }
