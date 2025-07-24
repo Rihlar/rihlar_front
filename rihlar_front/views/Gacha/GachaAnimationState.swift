@@ -15,35 +15,39 @@ class GachaAnimationState: ObservableObject {
     @Published var whiteout = false
     @Published var gachaActive = false
     @Published var characterShown = false
+    @Published var popupShown = false
+
     @Published var whiteCapsuleOffset: CGSize = .zero
     @Published var blueCapsuleOffset: CGSize = .zero
     @Published var undo: CGFloat = 1
     @Published var buttonOpacity: Double = 1.0
-    @Published var offset: CGFloat = 75 // カプセル位置Y
-    @Published var rotation: Double = 0 // ハンドル回転角度
-    @Published var selectedItem: Item? // ガチャで選ばれたアイテム
-    
-    // アニメ完了時に何かしたいとき用
-    var onFinished: (() -> Void)?
-    
-    // アニメーション開始処理
+    @Published var offset: CGFloat = 75
+    @Published var rotation: Double = 0
+    @Published var selectedItem: Item?
+
     func startAnimation(items: [Item]) {
-        let randomItem = items.randomElement()
-        selectedItem = randomItem
+        let baseItem = items.randomElement()
+        selectedItem = baseItem.map {
+            // 個数は1固定で作成
+            Item(id: $0.id, name: $0.name, count: 1, iconName: $0.iconName, description: $0.description)
+        }
+
         buttonOpacity = 0.0
-        rotation += 720
-        
+        withAnimation(.easeInOut(duration: 0.5)) {
+            rotation += 720 // 回転トリガー
+        }
+
         Task {
-            try? await Task.sleep(nanoseconds: 2_000_000_000) // ハンドル回転
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
             withAnimation { offset = 170 }
 
-            try? await Task.sleep(nanoseconds: 800_000_000) // カプセル出現
+            try? await Task.sleep(nanoseconds: 800_000_000)
             withAnimation { isDimmed = true }
 
             try? await Task.sleep(nanoseconds: 200_000_000)
             withAnimation { gachaActive = true }
 
-            try? await Task.sleep(nanoseconds: 500_000_000) // カプセル開封
+            try? await Task.sleep(nanoseconds: 500_000_000)
             withAnimation {
                 whiteCapsuleOffset = CGSize(width: -90, height: 90)
                 blueCapsuleOffset = CGSize(width: 90, height: 90)
@@ -51,23 +55,30 @@ class GachaAnimationState: ObservableObject {
             }
 
             try? await Task.sleep(nanoseconds: 1_200_000_000)
-            withAnimation(.easeInOut(duration: 2.0)) {
+            withAnimation(.easeInOut(duration: 1.5)) {
                 characterShown = true
-                undo = 0 // whiteout解除
+                undo = 0
             }
 
-            try? await Task.sleep(nanoseconds: 2_300_000_000)
-            reset()
-            onFinished?()
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            withAnimation {
+                popupShown = true
+            }
+
+            // 5秒後に自動でポップアップ非表示＆リセット
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.popupShown = false
+                self.reset()
+            }
         }
     }
-    
-    // アニメーション後に状態を初期化
+
     func reset() {
         isDimmed = false
         whiteout = false
         gachaActive = false
         characterShown = false
+        popupShown = false
         whiteCapsuleOffset = .zero
         blueCapsuleOffset = .zero
         undo = 1

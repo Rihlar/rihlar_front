@@ -19,7 +19,7 @@ struct CapsuleOpeningView: View {
             // アイテム表示（カプセル内）
             Image(item.iconName)
                 .resizable()
-                .frame(width: 180, height: 180)
+                .frame(width: 120, height: 120)
                 .offset(y: -30)
             
             // カプセルの左右の蓋
