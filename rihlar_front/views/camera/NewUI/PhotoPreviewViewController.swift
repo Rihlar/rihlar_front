@@ -216,74 +216,214 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
 
     // MARK: – Actions
     @objc private func didTapSave() {
-        let theme = themeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let theme = themeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let payload: [String: Any] = [
+                "latitude": coordinate?.latitude ?? 0,
+                "longitude": coordinate?.longitude ?? 0,
+                "steps": steps,
+                "theme": theme
+            ]
+            guard let circleURL = URL(string: "https://rihlar-test.kokomeow.com/gcore/create/circle") else { return }
+            
+            Task {
+              do {
+                // 1) サークル作成
+                var req = URLRequest(url: circleURL)
+                req.httpMethod = "POST"
+                req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                req.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
+                req.httpBody = try JSONSerialization.data(withJSONObject: payload)
+                
+                let (data, resp) = try await URLSession.shared.data(for: req)
+                guard
+                  let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode,
+                  let json = try JSONSerialization.jsonObject(with: data) as? [String:Any],
+                  let ids = json["circleIds"] as? [String], let circleID = ids.first
+                else {
+                  print("サークル作成失敗")
+                  return
+                }
 
-        let payload: [String: Any] = [
-            "latitude": coordinate?.latitude ?? 0,
-            "longitude": coordinate?.longitude ?? 0,
-            "steps": steps,
-            "theme": theme
-        ]
-        guard let url = URL(string: "https://rihlar-test.kokomeow.com/gcore/create/circle") else { return }
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
+                // 2) アクセストークン取得
+                let accessToken = try await TokenManager.shared.getAccessToken()
 
-        // ボディ設定
-         if let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) {
-             req.httpBody = jsonData
-         }
+                // 3) multipart body を組み立て
+//                var body = Data()
+//                let imageData = image.pngData()!
+//                body.append("--boundary\r\n".data(using: .utf8)!)
+//                body.append("Content-Disposition: form-data; name=\"image\"; filename=\"image.png\"\r\n".data(using: .utf8)!)
+//                body.append("Content-Type: image/png\r\n\r\n".data(using: .utf8)!)
+//                body.append(imageData)
+//                body.append("\r\n--boundary--\r\n".data(using: .utf8)!)
+                  // ③ Data にまとめる
+                  let boundary = "boundary"
+                  let preamble = """
+                  --\(boundary)
+                  Content-Disposition: form-data; name="image"; filename="image.png"
+                  Content-Type: image/png\r
+                  """
+                  let epilogue = "\r--\(boundary)"
 
-         // 1) サークル作成API
-         URLSession.shared.dataTask(with: req) { data, resp, error in
-             guard
-                 error == nil,
-                 let data = data,
-                 let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode,
-                 let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                 let ids = json["circleIds"] as? [String], let circleID = ids.first
-             else {
-                 print("サークル作成失敗", error ?? "")
-                 return
-             }
+                  // --- body 組み立て ---
+                  var body = Data()
+                  body.append(preamble.data(using: .utf8)!)
+                  let imageData = image.pngData()!     // 実際のバイナリ
+                  body.append(imageData)
+                  body.append(epilogue.data(using: .utf8)!)
 
-             // 2) アクセストークン取得
-             guard let accessToken = getKeyChain(key: "authToken") else {
-                 print("トークンが取れません")
-                 return
-             }
+                  // --- 復元して表示 ---
+                  let preambleLength = preamble.utf8.count
+                  let epilogueLength = epilogue.utf8.count
+                  let totalLength   = body.count
+                  let binaryLength  = totalLength - preambleLength - epilogueLength
 
-             // 3) 画像アップロード
-             self.uploadCircleImage(circleID: circleID, image: self.image, accessToken: accessToken) { success in
-                 DispatchQueue.main.async {
-                     if success {
-                         // 4) 完了アラート
-                         let alert = UIAlertController(
-                             title: "保存完了",
-                             message: "位置・歩数・写真をサーバに保存しました",
-                             preferredStyle: .alert
-                         )
-                         alert.addAction(.init(title: "OK", style: .default) { _ in
-                             self.dismiss(animated: true) {
-                                 self.onClose?()
-                             }
-                         })
-                         self.present(alert, animated: true)
-                     } else {
-                         // 失敗時のハンドリング
-                         let alert = UIAlertController(
-                             title: "アップロード失敗",
-                             message: "写真のアップロードに失敗しました",
-                             preferredStyle: .alert
-                         )
-                         alert.addAction(.init(title: "OK", style: .default, handler: nil))
-                         self.present(alert, animated: true)
-                     }
-                 }
-             }
-         }.resume()
-    }
+                  // 先頭のヘッダー部分
+                  let headerData = body.subdata(in: 0..<preambleLength)
+                  let header     = String(data: headerData, encoding: .utf8)!
+
+                  // 末尾のフッター部分
+                  let footerData = body.subdata(in: (totalLength - epilogueLength)..<totalLength)
+                  let footer     = String(data: footerData, encoding: .utf8)!
+
+                  // 復元文字列
+                  let reconstructed = header
+                                    + "\r<IMAGE DATA \(binaryLength) bytes>\r"
+                                    + footer
+
+                  print("[Debug] Reconstructed multipart body:\n\(reconstructed)")
+
+                  
+                var uploadReq = URLRequest(
+                  url: URL(string: "https://rihlar-stage.kokomeow.com/game/circle/image/upload")!
+                )
+                uploadReq.httpMethod = "POST"
+                uploadReq.setValue(accessToken, forHTTPHeaderField: "Authorization")
+                uploadReq.setValue(circleID, forHTTPHeaderField: "CircleID")
+                uploadReq.setValue("multipart/form-data; boundary=boundary",
+                                   forHTTPHeaderField: "Content-Type")
+                  
+                // ——— ここからデバッグ出力 ———
+                print("[Debug] --- Image Upload Request ---")
+                print("画像データ:\(imageData)")
+                print("URL: \(uploadReq.url!.absoluteString)")
+                print("Headers: \(uploadReq.allHTTPHeaderFields!)")
+                if let prefix = String(data: body.prefix(200), encoding: .utf8) {
+                print("[Debug] Body Prefix:\n\(prefix)")
+                } else {
+                print("[Debug] Body Prefix: <バイナリデータのため表示不可>")
+                }
+                // ————————————————————
+                
+                // 4) 画像アップロード
+                let (uploadData, uploadResp) = try await URLSession.shared.upload(for: uploadReq, from: body)
+                  
+            // ——— レスポンスのデバッグ出力 ———
+            if let httpUpload = uploadResp as? HTTPURLResponse {
+            print("[Debug] HTTP Status Code: \(httpUpload.statusCode)")
+            } else {
+            print("[Debug] uploadResp is not HTTPURLResponse: \(uploadResp)")
+            }
+            if let respBody = String(data: uploadData, encoding: .utf8) {
+            print("[Debug] Response Body:\n\(respBody)")
+            } else {
+            print("[Debug] Response Body: <非テキスト or UTF-8変換失敗>")
+            }
+            // ————————————————————————
+
+                guard let uploadHttp = uploadResp as? HTTPURLResponse,
+                      200..<300 ~= uploadHttp.statusCode
+                else {
+                  print("画像アップロード失敗")
+                  return
+                }
+
+                // 5) 完了アラート
+                await MainActor.run {
+                  let alert = UIAlertController(
+                    title: "保存完了",
+                    message: "位置・歩数・写真をサーバに保存しました",
+                    preferredStyle: .alert
+                  )
+                  alert.addAction(.init(title: "OK", style: .default) { _ in
+                    self.dismiss(animated: true) { self.onClose?() }
+                  })
+                  self.present(alert, animated: true)
+                }
+
+              } catch {
+                print("エラー:", error)
+              }
+            }
+        }
+//    @objc private func didTapSave() {
+//        let theme = themeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+//
+//        let payload: [String: Any] = [
+//            "latitude": coordinate?.latitude ?? 0,
+//            "longitude": coordinate?.longitude ?? 0,
+//            "steps": steps,
+//            "theme": theme
+//        ]
+//        guard let url = URL(string: "https://rihlar-test.kokomeow.com/gcore/create/circle") else { return }
+//        var req = URLRequest(url: url)
+//        req.httpMethod = "POST"
+//        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//        req.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
+//
+//        // ボディ設定
+//         if let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) {
+//             req.httpBody = jsonData
+//         }
+//
+//         // 1) サークル作成API
+//         URLSession.shared.dataTask(with: req) { data, resp, error in
+//             guard
+//                 error == nil,
+//                 let data = data,
+//                 let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode,
+//                 let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+//                 let ids = json["circleIds"] as? [String], let circleID = ids.first
+//             else {
+//                 print("サークル作成失敗", error ?? "")
+//                 return
+//             }
+//
+//             // 2) アクセストークン取得
+//             guard let accessToken = getKeyChain(key: "authToken") else {
+//                 print("トークンが取れません")
+//                 return
+//             }
+//
+//             // 3) 画像アップロード
+//             self.uploadCircleImage(circleID: circleID, image: self.image, accessToken: accessToken) { success in
+//                 DispatchQueue.main.async {
+//                     if success {
+//                         // 4) 完了アラート
+//                         let alert = UIAlertController(
+//                             title: "保存完了",
+//                             message: "位置・歩数・写真をサーバに保存しました",
+//                             preferredStyle: .alert
+//                         )
+//                         alert.addAction(.init(title: "OK", style: .default) { _ in
+//                             self.dismiss(animated: true) {
+//                                 self.onClose?()
+//                             }
+//                         })
+//                         self.present(alert, animated: true)
+//                     } else {
+//                         // 失敗時のハンドリング
+//                         let alert = UIAlertController(
+//                             title: "アップロード失敗",
+//                             message: "写真のアップロードに失敗しました",
+//                             preferredStyle: .alert
+//                         )
+//                         alert.addAction(.init(title: "OK", style: .default, handler: nil))
+//                         self.present(alert, animated: true)
+//                     }
+//                 }
+//             }
+//         }.resume()
+//    }
     
     // MARK: – 画像アップロード
     /// 完了時に success=true/false を返すクロージャを追加
