@@ -16,6 +16,13 @@ struct AppRootView: View {
     
     var body: some View {
         contentView
+            .onChange(of: isLoggedIn) { newValue in
+                if newValue {
+                    Task {
+                        await registerUserProfile()
+                    }
+                }
+            }
     }
     
     @ViewBuilder
@@ -59,9 +66,7 @@ struct AppRootView: View {
                                 ItemView(router: router)
                                     .navigationBarBackButtonHidden(true)
                             case .record:
-                                SoloRankingView(router: router,
-                                    userId: "userid-50452766-49e8-4dd9-84a1-d02ee1c2425c",
-                                                gameId: "gameid-8a5fafff-0b2e-4f2b-b011-da21a5a724cd")
+                                SoloRankingView(router: router)
                                     .navigationBarBackButtonHidden(true)
                             default:
                                 EmptyView()
@@ -74,9 +79,49 @@ struct AppRootView: View {
                     print("ログイン成功！")
                     
                     isLoggedIn = true
+                    
                 }
             }
         }
     }
-    
+    private func registerUserProfile() async {
+        do {
+            guard let token = try await TokenManager.shared.getAccessToken() else {
+                print("アクセストークンが取得できませんでした")
+                return
+            }
+            
+            let bodyDict: [String: String] = [
+                "name": "テスト太郎2",
+                "record_id": "記録2",
+                "comment": "これはテスト用のコメントです。",
+                "region_id": "regionId-c161edb9-6aff-4244-8749-707bff2fa3be",
+                "system_game_id": "",
+                "admin_game_id": ""
+            ]
+            
+            guard let url = URL(string: "https://rihlar-stage.kokomeow.com/user/profile") else {
+                print("URLが不正")
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(token, forHTTPHeaderField: "Authorization")
+            
+            request.httpBody = try JSONSerialization.data(withJSONObject: bodyDict, options: [])
+            
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 200 {
+                    print("プロフィール登録API成功")
+                } else {
+                    print("プロフィール登録APIエラー（無視可）: \(httpResponse.statusCode)")
+                }
+            }
+        } catch {
+            print("通信エラーまたはBodyエンコード失敗: \(error.localizedDescription)")
+        }
+    }
 }

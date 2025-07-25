@@ -35,6 +35,7 @@ struct FriendView: View {
     @ObservedObject var router: Router
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
+    @StateObject private var recordsVM = RecordsViewModel()
     // 現在選択中のタブ（初期値は.friends = フレンド）
     @State private var selectedTab: FriendTab = .friends
     
@@ -82,7 +83,7 @@ struct FriendView: View {
                                 tabContentView()
                             }
                             .padding(.top, 8)
-                            .padding(.horizontal, 20)
+                           
                         }
                         .background(Color.mainDecorationColor)
                     }
@@ -118,24 +119,24 @@ struct FriendView: View {
     private func tabContentView() -> some View {
         switch selectedTab {
         case .friends:
-            ForEach(FriendRecords.mockFriends, id: \.name) { friend in
+            ForEach(FriendRecords.makeMockFriends(from: recordsVM.records), id: \.name) { friend in
                 FriendRowView(
                     userName: friend.name,
                     userImageName: friend.imageName,
                     records: friend.records
                 )
-                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity)
             }
-            
         case .requesting:
             Text("申請中のユーザーを表示します")
-                .foregroundColor(.gray)
-                .padding()
+                .foregroundColor(Color.textColor)
+                .frame(maxWidth: .infinity, alignment: .center)
+                
             
         case .pending:
             Text("承認待ちのリストを表示します")
-                .foregroundColor(.gray)
-                .padding()
+                .foregroundColor(Color.textColor)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
     }
     

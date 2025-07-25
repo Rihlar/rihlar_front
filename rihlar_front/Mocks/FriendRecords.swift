@@ -7,28 +7,25 @@
 
 // 実績のモック
 enum FriendRecords {
-    // モック実績データ（アセット名は "king" を共通使用）
-    static let FriendMockRecords: [Record] = [
-        Record(id: 1, title: "100km歩いた", imageUrl: "king", isSelected: true),
-        Record(id: 2, title: "10000ポイント",  imageUrl: "king", isSelected: true),
-        Record(id: 3, title: "写真100枚", imageUrl: "king", isSelected: true),
-        Record(id: 4, title: "7日連続",  imageUrl: "king", isSelected: true),
-        Record(id: 5, title: "個人戦5勝",  imageUrl: "king", isSelected: true),
-        Record(id: 6, title: "チーム戦5勝",  imageUrl: "king", isSelected: true),
-        Record(id: 7, title: "アイテム10個",  imageUrl: "king", isSelected: true)
+    // 名前リストだけ用意
+    static let friendNames = [
+        "はるるん",
+        "こだっち",
+        "りこぴん",
+        "さくら",
+        "たろう",
+        "ゆかり",
+        "まこと",
+        "みさき",
     ]
     
-    // フレンドデータ（3件ずつ渡す）
-    static var mockFriends: [FriendData] {
-        [
-            FriendData(name: "はるるん", imageName: "user", records: Array(FriendMockRecords[0..<3])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "りこぴん", imageName: "user", records: Array(FriendMockRecords[4..<7])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-            FriendData(name: "こだっち", imageName: "user", records: Array(FriendMockRecords[3..<6])),
-        ]
+    // recordsからランダムに3件選んで友達データを作るメソッド
+    static func makeMockFriends(from records: [Record]) -> [FriendData] {
+        friendNames.map { name in
+            // recordsから3件ランダムに選択（重複なし）
+            let randomRecords = records.shuffled().prefix(3)
+            return FriendData(name: name, imageName: "user", records: Array(randomRecords))
+        }
     }
 }
+
