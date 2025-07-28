@@ -13,7 +13,7 @@ func fetchPhoto() async throws -> [PhotoEntity] {
         throw NSError(domain: "PhotoFetch", code: 401, userInfo: [NSLocalizedDescriptionKey: "アクセストークンが見つかりません"])
     }
     
-    print("fetchPhotoアクセストークン使用: \(accessToken)")
+//    print("fetchPhotoアクセストークン使用: \(accessToken)")
     
     // 写真一覧を取得するAPIのエンドポイント
     let path = APIConfig.photo
