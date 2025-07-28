@@ -58,7 +58,7 @@ final class GameViewModel: ObservableObject {
                 self.currentGame = self.adminGames.first
                 
                 print("[DEBUG] fetched game:", game)
-                print("[DEBUG] fetched currentGame:", currentGame)
+                // print("[DEBUG] fetched currentGame:", currentGame)
                 
                 self.reloadOverlaysAndSteps()
             }
