@@ -39,7 +39,7 @@ class RealGameService: GameServiceProtocol {
                         var request = URLRequest(url: fullURL)
                         request.httpMethod = "GET"
                         request.setValue(token, forHTTPHeaderField: "Authorization")
-                        request.setValue("application/json", forHTTPHeaderField: "Accept")
+                        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
                         // ③ URLSession の async API で呼び出し
                         let (data, response) = try await URLSession.shared.data(for: request)
