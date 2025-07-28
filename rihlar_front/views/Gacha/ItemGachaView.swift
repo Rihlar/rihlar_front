@@ -31,6 +31,8 @@ struct ItemGachaView: View {
         if totalCoin >= 100 && animationState.buttonOpacity > 0.0 {
             totalCoin -= 100
             animationState.startAnimation(items: itemViewModel.items)
+            // ハンドルのモワモワのアニメーションを消す
+            isPulsing = false
         }
     }
     
