@@ -30,6 +30,9 @@ struct TopPage: View {
                 Text("ゲーム情報がありません")
             }
         }
+        .onAppear {
+            PlayerPosition.LocationPermissionManager.shared.request()
+        }
         // ViewのonAppearや.taskで呼び出して使う
         .task {
             vm.loadUserProfile()

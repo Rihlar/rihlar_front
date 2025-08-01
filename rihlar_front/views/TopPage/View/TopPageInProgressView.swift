@@ -79,6 +79,55 @@ struct TopPageInProgressView: View {
                 .blur(radius: isShowMenu ? 10 : 0)
                 .animation(.easeInOut, value: isShowMenu)
                 
+                Group {
+                  if let userLoc = playerPosition.currentLocation {
+                    let center = playerPosition.region.center
+                    let angle = center.bearing(to: userLoc)
+
+                    ZStack {
+                      GeometryReader { geo in
+                          let w = geo.size.width
+                          let h = geo.size.height
+                          let halfW = w / 2
+                          let halfH = h / 2
+
+                          // 北（0°）基準のベアリングをラジアンに
+                          let rad = angle * .pi / 180
+
+                          let dx = sin(rad) * halfW
+                          let dy = -cos(rad) * halfH
+
+                          let topInset = max(0,  cos(rad)) * 10
+                          let bottomInset = max(0, -cos(rad)) * 10
+                          let leadingInset = max(0, -sin(rad)) * 10
+                          let trailingInset = max(0,  sin(rad)) * 10
+                          ZStack {
+                              Image("BubblePointer")
+                                  .rotationEffect(.degrees(angle + 90))
+                                  .position(x: halfW + dx, y: halfH + dy)
+                                  .animation(.easeInOut(duration: 0.3), value: angle)
+                              Text("戻る")
+                                  .foregroundColor(.white)
+                                  .font(.system(size: 12, weight: .semibold))
+                                  .stroke(color: Color("TextColor"), width: 0.8)
+                                  .padding(EdgeInsets(top: topInset, leading: leadingInset, bottom: bottomInset, trailing: trailingInset))
+                                  .position(x: halfW + dx, y: halfH + dy)
+                                  .animation(.easeInOut(duration: 0.3), value: angle)
+                          }
+                          .frame(width: 42, height: 30)
+                          .onTapGesture {
+                              playerPosition.resumeFollow()
+                          }
+                      }
+                      .frame(width: 300, height: 420)
+                    }
+                    .blur(radius: isShowMenu ? 10 : 0)
+                    .animation(.easeInOut, value: isShowMenu)
+                  }
+                }
+                .opacity(isUserOnScreen ? 0 : 1)
+                .animation(.default, value: isUserOnScreen)
+                
                 VStack {
                     Header(
                         vm: vm,
@@ -265,55 +314,6 @@ struct TopPageInProgressView: View {
                     print("photo fetch error:", error)
                 }
             }
-            .overlay(
-                Group {
-                  if let userLoc = playerPosition.currentLocation {
-                    let center = playerPosition.region.center
-                    let angle = center.bearing(to: userLoc)
-
-                    ZStack {
-                      GeometryReader { geo in
-                          let w = geo.size.width
-                          let h = geo.size.height
-                          let halfW = w / 2
-                          let halfH = h / 2
-
-                          // 北（0°）基準のベアリングをラジアンに
-                          let rad = angle * .pi / 180
-
-                          let dx = sin(rad) * halfW
-                          let dy = -cos(rad) * halfH
-                          
-                          let topInset = max(0,  cos(rad)) * 10
-                          let bottomInset = max(0, -cos(rad)) * 10
-                          let leadingInset = max(0, -sin(rad)) * 10
-                          let trailingInset = max(0,  sin(rad)) * 10
-                          ZStack {
-                              Image("BubblePointer")
-                                  .rotationEffect(.degrees(angle + 90))
-                                  .position(x: halfW + dx, y: halfH + dy)
-                                  .animation(.easeInOut(duration: 0.3), value: angle)
-                              Text("戻る")
-                                  .foregroundColor(.white)
-                                  .font(.system(size: 12, weight: .semibold))
-                                  .stroke(color: Color("TextColor"), width: 0.8)
-                                  .padding(EdgeInsets(top: topInset, leading: leadingInset, bottom: bottomInset, trailing: trailingInset))
-                                  .position(x: halfW + dx, y: halfH + dy)
-                                  .animation(.easeInOut(duration: 0.3), value: angle)
-                          }
-                          .frame(width: 42, height: 30)
-                          .onTapGesture {
-                              playerPosition.resumeFollow()
-                          }
-                      }
-                      .frame(width: 300, height: 420)
-                    }
-                  }
-                }
-                .opacity(isUserOnScreen ? 0 : 1)
-                .animation(.default, value: isUserOnScreen),
-                alignment: .center  // 画面中央
-              )
         }
     }
 }

@@ -15,6 +15,7 @@ enum GameType: Int, Codable {
 
 /// 個別ゲーム情報
 struct Game: Codable {
+    let isJoined:  Bool
     let gameID:    String
     let startTime: Date
     let endTime:   Date
@@ -40,6 +41,7 @@ struct Game: Codable {
     var isAdminGame:  Bool { type == .admin }
 
     private enum CodingKeys: String, CodingKey {
+        case isJoined   = "isJoined"
         case gameID     = "gameID"
         case startTime  = "startTime"
         case endTime    = "endTime"
