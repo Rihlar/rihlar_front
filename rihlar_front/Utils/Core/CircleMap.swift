@@ -12,7 +12,7 @@ struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
     let circlesByTeam: [TeamCircles]
     let userStepByTeam: [UserStep]
-    let currentUserTeamID: String = "teamid-32f5eb5f-534b-439e-990e-349e52d70970"
+//    let currentUserTeamID: String = "teamid-32f5eb5f-534b-439e-990e-349e52d70970"
     let gameStatus: GameStatus
     let gameType: GameType
 
@@ -159,12 +159,26 @@ struct CircleMap: UIViewRepresentable {
     }
 
 
-    private func color(for group: String) -> UIColor {
-        if group == "Self" {
+    private func color(for group: MKCircle) -> UIColor {
+        let title = group.title ?? "unknown"
+        if title == "Self" {
             return .blue
         }
+
+        // "Self" チームの teamID を取得
+        guard let selfTeam = circlesByTeam.first(where: { $0.groupName == "Self" }) else {
+            return .black  // fallback（念のため）
+        }
+        
+        // title に対応するチームを取得
+        if let matchingTeam = circlesByTeam.first(where: { $0.groupName == title }) {
+            if matchingTeam.teamID == selfTeam.teamID {
+                return .blue  // 自分のチームと一致していれば青
+            }
+        }
+        
         // それ以外は順位で色分け
-        switch group {
+        switch title {
         case "Top1": return .orange
         case "Top2": return .red
         case "Top3": return .green
@@ -227,9 +241,10 @@ struct CircleMap: UIViewRepresentable {
             rendererFor overlay: MKOverlay
         ) -> MKOverlayRenderer {
             if let circle = overlay as? MKCircle {
+                print("circle確認：\(circle)")
                 let r = MKCircleRenderer(circle: circle)
-                let group = circle.title ?? "unknown"
-                let color = parent.color(for: group)
+//                let group = circle.title ?? "unknown"
+                let color = parent.color(for: circle)
                 r.strokeColor = color.withAlphaComponent(0.6)
                 r.fillColor = color.withAlphaComponent(0.3)
                 r.lineWidth = 2
