@@ -8,14 +8,6 @@
 import Foundation
 import Combine
 
-//サンプルのためのもの
-private struct GamesResponse: Codable {
-    let data: [Game]
-
-    private enum CodingKeys: String, CodingKey {
-        case data = "Data"
-    }
-}
 //    責務：実際のバックエンドから JSON をフェッチ。
 //    注意点：URL やリクエストヘッダ、エラー処理は適宜拡張。
 /// 本番 API 叩く実装
