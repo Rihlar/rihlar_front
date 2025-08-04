@@ -29,10 +29,14 @@ class TokenManager {
                 print("キャッシュからトークンを返す")
                 return savedToken
             } else {
-                print("トークンが古いよ；；")
+                print("トークンが古いよ；；新しいトークンを取ります")
+                // 古いトークンの場合、新規取得へ
             }
+        }else{
+            print("トークンキャッシュなし。新しく取得します")
         }
-        return nil
+        let newToken = try await fetchAndCacheAccessToken()
+        return newToken
     }
     
     // APIからトークンを取得しUserDefaultsに保存
