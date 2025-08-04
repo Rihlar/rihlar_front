@@ -49,6 +49,15 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
 //         位置情報の更新を開始
         manager.startUpdatingLocation()
     }
+    
+    class LocationPermissionManager {
+        static let shared = LocationPermissionManager()
+        private let manager = CLLocationManager()
+        
+        func request() {
+            manager.requestWhenInUseAuthorization()
+        }
+    }
 
 //     MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
