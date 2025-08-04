@@ -18,12 +18,23 @@ struct ItemGachaView: View {
     
     // ガチャ演出の状態管理クラス（回転や演出の状態を保持）
     @StateObject var animationState = GachaAnimationState()
+    @State private var isPulsing = false
     
     // 所持コイン（親ビューと双方向バインディング）
     @Binding var totalCoin: Int
     
     // この画面の表示/非表示を管理するバインディング
     @Binding var isPresented: Bool
+    
+    // ガチャを引く処理
+    private func triggerGacha() {
+        if totalCoin >= 100 && animationState.buttonOpacity > 0.0 {
+            totalCoin -= 100
+            animationState.startAnimation(items: itemViewModel.items)
+            // ハンドルのモワモワのアニメーションを消す
+            isPulsing = false
+        }
+    }
     
     var body: some View {
         ZStack (alignment: .bottom){
@@ -49,7 +60,7 @@ struct ItemGachaView: View {
                 Text("アイテムガチャ")
                     .font(.headline)
                     .bold()
-
+                
                 // 所持コイン表示
                 ZStack {
                     HStack{
@@ -80,10 +91,7 @@ struct ItemGachaView: View {
                     width: 160,
                     height: 60,
                     action: {
-                        if totalCoin >= 100 {
-                            totalCoin -= 100
-                            animationState.startAnimation(items: itemViewModel.items)
-                        }
+                        triggerGacha()
                     },
                     isBigBtn: false
                 )
@@ -104,13 +112,44 @@ struct ItemGachaView: View {
                     Image("gachaFlame")
                         .offset(y: 120)
                     
-                    // ハンドル画像：回転演出を反映
-                    Image("Handle")
-                        .resizable()
-                        .frame(width: 50, height: 60)
-                        .rotationEffect(.degrees(animationState.rotation)) // 回転角度を状態から反映
-                        .animation(.easeInOut(duration: 2.0), value: animationState.rotation) // アニメーションを滑らかに
-                        .offset(x: -2, y: 88)
+                    ZStack {
+                        Circle()
+                            .fill(
+                                RadialGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.red.opacity(0.7),
+                                        Color.red.opacity(0.0)
+                                    ]),
+                                    center: .center,
+                                    startRadius: 10,
+                                    endRadius: 40
+                                )
+                            )
+                            .frame(width: 50, height: 50)
+                            .scaleEffect(isPulsing ? 1.4 : 0)    // 0→1.4で大きくなる
+                            .opacity(isPulsing ? 0.9 : 0)        // 0→0.9で濃くなる
+                            .blur(radius: 10)
+                            .animation(
+                                .easeInOut(duration: 1.2)
+                                .repeatForever(autoreverses: true),
+                                value: isPulsing
+                            )
+                            .onAppear {
+                                isPulsing = true
+                            }
+                        // ハンドル画像：回転演出を反映
+                        Image("Handle")
+                            .resizable()
+                            .frame(width: 50, height: 60)
+                            .rotationEffect(.degrees(animationState.rotation)) // 回転角度を状態から反映
+                            .animation(.easeInOut(duration: 2.0), value: animationState.rotation) // アニメーションを滑らかに
+                            .onTapGesture {
+                                triggerGacha()
+                            }
+                        
+                    }
+                    .offset(x: -2, y: 88)
+                    
                 }
                 
                 
