@@ -10,12 +10,18 @@ import UIKit
 
 struct CameraViewController: UIViewControllerRepresentable {
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject var router: Router
 
         func makeUIViewController(context: Context) -> CameraAVCapture {
             let vc = CameraAVCapture()
+            
+            vc.router = router
             // 必要ならここでプロパティを渡す
             vc.onCancel = {
                 dismiss()
+            }
+            vc.onReturnTop = {
+                router.path.removeAll()
             }
             return vc
         }

@@ -11,6 +11,7 @@ import SwiftUI
 
 class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
     var onClose: (() -> Void)?
+    var onReturnTop: (() -> Void)?
     // MARK: – Properties
     private let image: UIImage
     private let coordinate: CLLocationCoordinate2D?
@@ -329,7 +330,7 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
                 preferredStyle: .alert
               )
               alert.addAction(.init(title: "OK", style: .default) { _ in
-                self.dismiss(animated: true) { self.onClose?() }
+                self.dismiss(animated: true) { self.onReturnTop?() }
               })
               self.present(alert, animated: true)
             }

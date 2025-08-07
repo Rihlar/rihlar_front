@@ -243,7 +243,7 @@ struct CircleMap: UIViewRepresentable {
             rendererFor overlay: MKOverlay
         ) -> MKOverlayRenderer {
             if let circle = overlay as? MKCircle {
-                print("circle確認：\(circle)")
+                // print("circle確認：\(circle)")
                 let r = MKCircleRenderer(circle: circle)
 //                let group = circle.title ?? "unknown"
                 let color = parent.color(for: circle)

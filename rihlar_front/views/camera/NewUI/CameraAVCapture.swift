@@ -13,6 +13,8 @@ class CameraAVCapture: UIViewController,
                                  AVCapturePhotoCaptureDelegate,
                                  CLLocationManagerDelegate {
     var onCancel: (() -> Void)?
+    var onReturnTop: (() -> Void)?
+    var router: Router?
     // — カメラ関連 —
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
@@ -548,6 +550,9 @@ class CameraAVCapture: UIViewController,
               coordinate: self.lastLocation?.coordinate,
               steps: self.stepsHK.steps
             )
+            previewVC.onReturnTop = { [weak self] in
+                self?.router?.path.removeAll() // TopPageに戻る
+            }
             previewVC.modalPresentationStyle = .fullScreen
             self.present(previewVC, animated: true)
         }
