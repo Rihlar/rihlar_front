@@ -12,9 +12,11 @@ struct CircleMap: UIViewRepresentable {
     @ObservedObject var playerPosition: PlayerPosition
     let circlesByTeam: [TeamCircles]
     let userStepByTeam: [UserStep]
+    let game: GameResponse.Game?
+    let currentGameIsAdmin: Bool
 //    let currentUserTeamID: String = "teamid-32f5eb5f-534b-439e-990e-349e52d70970"
-    let gameStatus: GameStatus
-    let gameType: GameType
+//    let gameStatus: GameStatus
+//    let gameType: GameType
 
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
@@ -70,7 +72,7 @@ struct CircleMap: UIViewRepresentable {
           }
 
 //         ─────────── 歩いた軌跡を描画（進行中 or コレクションモードのときだけ） ───────────
-        if gameStatus == .inProgress || gameType == .system {
+        if ((game?.IsAdminJoined ?? false) && (game?.admin.IsStarted ?? false)) || !currentGameIsAdmin {
             let coords = playerPosition.track
             if coords.count >= 2 {
                 uiView.addOverlay(MKPolyline(coordinates: coords, count: coords.count))
@@ -78,7 +80,7 @@ struct CircleMap: UIViewRepresentable {
         }
 
         // Show circles if in progress or in collection mode
-        if gameStatus == .inProgress || gameType == .system {
+        if ((game?.IsAdminJoined ?? false) && (game?.admin.IsStarted ?? false)) || !currentGameIsAdmin {
             addOverlays(to: uiView, using: context.coordinator)
         }
     }
@@ -99,7 +101,7 @@ struct CircleMap: UIViewRepresentable {
         // ② gameType によって表示対象データを取得
         var items: [(String, CLLocationCoordinate2D, CLLocationDistance)] = []
 
-        if gameType == .system {
+        if !currentGameIsAdmin {
             // ── コレクションモード ──
             // 自分のチームだけ、歩数ではなく circlesByTeam の自分チームの円を表示
             if let myTeam = circlesByTeam.first(where: { $0.groupName == "Self" }) {
@@ -192,21 +194,21 @@ struct CircleMap: UIViewRepresentable {
         var isSettingRegionProgrammatically = false
         var hasAnimatedCircles = false
         var isAnimatingCircles = false
-        private var lastGameType: GameType
-        private var lastGameStatus: GameStatus
+        var currentGameIsAdmin: Bool
+        var game: GameResponse.Game?
 
         init(_ parent: CircleMap) {
             self.parent = parent
-            self.lastGameType = parent.gameType
-            self.lastGameStatus = parent.gameStatus
+            self.currentGameIsAdmin = parent.currentGameIsAdmin
+            self.game = parent.game
         }
 
         func resetIfNeeded() {
-            if lastGameType != parent.gameType
-                || lastGameStatus != parent.gameStatus {
+            if currentGameIsAdmin != parent.currentGameIsAdmin
+                || (game?.admin.IsStarted ?? false) != (parent.game?.admin.IsStarted ?? false) {
                 hasAnimatedCircles = false
-                lastGameType = parent.gameType
-                lastGameStatus = parent.gameStatus
+                currentGameIsAdmin = parent.currentGameIsAdmin
+                game = parent.game
             }
         }
 

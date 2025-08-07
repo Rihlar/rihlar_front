@@ -36,7 +36,7 @@ struct APIConfig {
     //    写真取得
     static let photo = "/photos"
 //    ゲーム情報取得
-    static let gameInformation = "/game/allgames"
+    static let gameInformation = "/game/info/self"
 }
 
 enum APIEnvironment {

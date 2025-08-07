@@ -12,7 +12,7 @@ import CoreLocation
 //    責務：View 側に必要なデータを保持し、サービスからの取得・エラーも管理。
 //    ポイント：Combine を使って非同期を扱い、UI へのバインディングは @Published。
 final class GameViewModel: ObservableObject {
-    @Published var game: [Game] = []
+    @Published var game: GameResponse.Game?
     @Published var circlesByTeam: [TeamCircles] = []
     @Published var userStepByTeam: [UserStep] = []
     @Published var isLoadingGame = false
@@ -20,10 +20,12 @@ final class GameViewModel: ObservableObject {
     @Published var isLoadingUserStep = false
     @Published var errorMessage: String?
     // 種別ごとの配列
-    @Published private(set) var systemGames: [Game] = []
-    @Published private(set) var adminGames:  [Game] = []
+    @Published var systemGames: GameResponse.systemGame?
+    @Published var adminGames: GameResponse.adminGame?
+//    trueだったらadminGame falseだったらsystemGame
+    @Published var currentGameIsAdmin: Bool
     //    今ビューで使う単一のゲーム
-    @Published var currentGame:   Game?
+//    @Published private(set) var currentGame: GameResponse.Game
     // プロフィール取得結果を保持するプロパティ
     @Published var profile: UserProfile?
     @Published var profileError: String?
@@ -33,11 +35,23 @@ final class GameViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastSentCoordinate: CLLocationCoordinate2D?
     
-    /// デフォルトで Real、テスト時に Mock を渡せる
     init(service: GameServiceProtocol = RealGameService(), stepsHK: StepsHealthKit = StepsHealthKit()) {
         self.service = service
         self.stepsHK = stepsHK
+        self.game                = nil
+        self.systemGames         = nil
+        self.adminGames          = nil
+        self.currentGameIsAdmin  = false
+        
         fetchGame(by: "GameID")
+    }
+    
+    var currentGameID: String? {
+        if currentGameIsAdmin {
+            return adminGames?.GameID
+        } else {
+            return systemGames?.GameID
+        }
     }
     
     /// ゲーム情報だけ取得
@@ -49,16 +63,18 @@ final class GameViewModel: ObservableObject {
                 if case .failure(let err) = completion {
                     self?.errorMessage = err.localizedDescription
                 }
-            } receiveValue: { [weak self] games in
+            } receiveValue: { [weak self] response in
                 guard let self = self else { return }
-                self.game = games
-                self.systemGames = games.filter { $0.isSystemGame }
-                self.adminGames  = games.filter { $0.isAdminGame  }
+                self.game = response
+
+                // system/admin に分けて格納
+                self.systemGames = response.system
+                self.adminGames  = response.admin
                 
-                self.currentGame = self.adminGames.first
+                self.currentGameIsAdmin = response.IsAdminJoined
                 
-                print("[DEBUG] fetched game:", game)
-                // print("[DEBUG] fetched currentGame:", currentGame)
+                print("[DEBUG] fetched systemgame:", systemGames)
+                print("[DEBUG] fetched adminGames:", adminGames)
                 
                 self.reloadOverlaysAndSteps()
             }
@@ -67,34 +83,31 @@ final class GameViewModel: ObservableObject {
     
 //    currentGame が変わるたびに呼び出すヘルパー
     private func reloadOverlaysAndSteps() {
-        guard let game = currentGame else { return }
-        guard let userID = profile?.user_id else {
-            print("⚠️ ユーザーIDがまだ取得できていません")
+        guard let gameID = currentGameID,
+              let userID = profile?.user_id
+        else {
+            print("⚠️ userID or gameID がまだありません")
             return
         }
-        fetchCircles(for: game.gameID, userID: userID)
-        fetchUserStep(for: game.gameID, userID: userID)
+        fetchCircles(for: gameID, userID: userID)
+        fetchUserStep(for: gameID, userID: userID)
     }
     
     /// 円情報だけ取得
     func fetchCircles(for gameID: String, userID: String) {
         isLoadingCircles = true
-        service.getTop3CircleRankingURL(for: gameID, userID: userID)
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] (completion: Subscribers.Completion<Error>) in
-                    self?.isLoadingCircles = false
-                    if case .failure(let err) = completion {
-                        print("❌ fetchCircles エラー: \(err.localizedDescription)")
-                        self?.errorMessage = err.localizedDescription
-                    } else {
-                        print("✅ fetchCircles 成功")
-                    }
-                },
-                receiveValue: { [weak self] (respDict: [String: TeamCirclesEntity]) in
-                                    //    print("🌐 fetchCircles レスポンス内容: \(respDict)")
+        errorMessage = nil
+        
+        Task {
+            do {
+                let respDict = try await service.getTop3CircleRanking(for: gameID, userID: userID)
+                
+                await MainActor.run {
+                    print("✅ fetchCircles 成功")
+                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
+                    
                     // 辞書 → [TeamCircles] へ変換
-                    self?.circlesByTeam = respDict.map { key, entity in
+                    self.circlesByTeam = respDict.map { key, entity in
                         TeamCircles(
                             groupName: key,
                             teamID: entity.teamID,
@@ -112,9 +125,34 @@ final class GameViewModel: ObservableObject {
                             }
                         )
                     }
+                    
+                    self.isLoadingCircles = false
                 }
-            )
-            .store(in: &cancellables)
+                
+            } catch let error as URLError {
+                await MainActor.run {
+                    switch error.code {
+                    case .notConnectedToInternet:
+                        self.errorMessage = "インターネット接続がありません"
+                    case .timedOut:
+                        self.errorMessage = "リクエストがタイムアウトしました"
+                    case .userAuthenticationRequired:
+                        self.errorMessage = "認証が必要です"
+                    default:
+                        self.errorMessage = "ネットワークエラー: \(error.localizedDescription)"
+                    }
+                    print("❌ fetchCircles URLError: \(self.errorMessage ?? "")")
+                    self.isLoadingCircles = false
+                }
+                
+            } catch {
+                await MainActor.run {
+                    print("❌ fetchCircles エラー: \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                    self.isLoadingCircles = false
+                }
+            }
+        }
     }
     
     /// ユーザーの歩数情報だけ取得
@@ -250,48 +288,40 @@ final class GameViewModel: ObservableObject {
     }
     
     /// system ↔ admin 切り替え
-     func toggleCurrentGameType() {
-       guard let before = currentGame else { return }
-       // モード切り替え
-       if before.isSystemGame, let next = adminGames.first {
-         currentGame = next
-       } else if before.isAdminGame, let next = systemGames.first {
-         currentGame = next
-       }
-
-       // 🔄 切り替え後のゲームIDで再フェッチ
-       if let after = currentGame {
-         let gameID = after.gameID
-         let userID = "userid-79541130-3275-4b90-8677-01323045aca5"
-         fetchCircles(for: gameID, userID: userID)
-         fetchUserStep(for: gameID, userID: userID)
-       }
-
-       print("[GameViewModel] currentGame changed to:", currentGame?.gameID ?? "nil")
-     }
+    func toggleCurrentGameType() {
+        // game が nil なら早期リターン
+        guard let game = game else { return }
+        // 参加していなければ切り替え不可
+//        guard game.IsAdminJoined else { return }
+        // フラグを反転
+        currentGameIsAdmin.toggle()
+        // 切り替え後の GameID で再フェッチ
+        reloadOverlaysAndSteps()
+        print("[GameViewModel] 切り替え後のモード isAdmin=", currentGameIsAdmin, " gameID=", currentGameID ?? "nil")
+    }
     
     /// ゲーム開始ボタン押下時に呼ぶ
-    func startGameLocally() {
-        guard var g = currentGame else { return }
-        g.statusRaw = GameStatus.inProgress.rawValue
-        currentGame = g
-        replace(in: &systemGames, or: &adminGames, with: g)
-    }
-    
-    /// ゲーム終了ボタン押下時に呼ぶ
-    func endGameLocally() {
-        guard var g = currentGame else { return }
-        g.statusRaw = GameStatus.ended.rawValue
-        currentGame = g
-        replace(in: &systemGames, or: &adminGames, with: g)
-    }
-    
-    private func replace(in sys: inout [Game], or adm: inout [Game], with updated: Game) {
-        if let idx = sys.firstIndex(where: { $0.gameID == updated.gameID }) {
-            sys[idx] = updated
-        }
-        if let idx = adm.firstIndex(where: { $0.gameID == updated.gameID }) {
-            adm[idx] = updated
-        }
-    }
+//    func startGameLocally() {
+//        guard var g = currentGame else { return }
+//        g.statusRaw = GameStatus.inProgress.rawValue
+//        currentGame = g
+//        replace(in: &systemGames, or: &adminGames, with: g)
+//    }
+//    
+//    /// ゲーム終了ボタン押下時に呼ぶ
+//    func endGameLocally() {
+//        guard var g = currentGame else { return }
+//        g.statusRaw = GameStatus.ended.rawValue
+//        currentGame = g
+//        replace(in: &systemGames, or: &adminGames, with: g)
+//    }
+//    
+//    private func replace(in sys: inout [Game], or adm: inout [Game], with updated: Game) {
+//        if let idx = sys.firstIndex(where: { $0.gameID == updated.gameID }) {
+//            sys[idx] = updated
+//        }
+//        if let idx = adm.firstIndex(where: { $0.gameID == updated.gameID }) {
+//            adm[idx] = updated
+//        }
+//    }
 }

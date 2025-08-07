@@ -16,11 +16,11 @@ struct TopPage: View {
         Group {
             if vm.isLoadingGame {
                 ProgressView("読み込み中…")
-            } else if let game = vm.currentGame {
+            } else if let game = vm.game {
                 TopPageInProgressView(
                     vm: vm,
-                    router: router,
-                    game: game
+                    router: router
+//                    game: game
                 )
             } else if let err = vm.errorMessage {
                 Text("エラー: \(err)")

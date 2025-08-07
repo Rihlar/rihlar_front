@@ -9,10 +9,28 @@ import Foundation
 
 /// API から返ってくる「Data」配列全体を受け取るラッパー
 struct GameResponse: Codable {
-    let data: [Game]    // JSON の "Data" キーに対応
-    // JSON 側のキー名が大文字なので CodingKeys でマッピング
+    let data: Game
     private enum CodingKeys: String, CodingKey {
         case data = "Data"
+    }
+    
+    /// 個別ゲーム情報
+    struct Game: Codable {
+        let IsAdminJoined:  Bool
+        let admin: adminGame
+        let system: systemGame
+    }
+    
+    struct adminGame: Codable {
+        let IsFinished:  Bool
+        let IsStarted:   Bool
+        let GameID: String
+        let StartTime: Date
+        let EndTime: Date
+    }
+
+    struct systemGame: Codable {
+        let GameID: String
     }
 }
 

@@ -15,7 +15,7 @@ struct TopPageNotStartedView: View {
             .font(.title).bold()
 
         Button("ゲームを開始する") {
-            vm.startGameLocally()
+//            vm.startGameLocally()
         }
         .padding()
         .background(Color.blue)

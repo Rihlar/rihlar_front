@@ -17,52 +17,54 @@ struct Footer: View {
     var onMenuTap: () -> Void
 
     @ObservedObject var vm: GameViewModel
-    let game: Game
-    var gameType: GameType
+//    let game: Game
+//    var gameType: GameType
     
     var body: some View {
         VStack {
-            if (game.status == .notStarted && game.startTime >= Date()) || game.status == .ended {
-                if gameType == .admin {
-                    Notice(
-                        label: "ゲームが開始されるまでしばらくお待ちください",
-                        graColor: Color.buttonColor,
-                        height: 20
-                    )
-                }
-            }
-            
-            HStack {
-                //            ─── カメラボタン ───
-                FooterBtn(
-                    iconName: "cameraIcon",
-                    label: "カメラ",
-                    action: onCameraTap,
-                    padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
-                )
-                
-                if game.status == .notStarted && game.isAdminGame && game.startTime <= Date() {
-                    BlueBtn(
-                        label: "プレイ",
-                        width: 160,
-                        height: 100,
-                        action: {
-                            router.push(.mode)
-                        },
-                        isBigBtn: true
-                    )
-                    .padding( EdgeInsets(top: -100, leading: 0, bottom: 0, trailing: 0))
-                } else {
-                    Spacer()
+            if let game = vm.game {
+                if !game.IsAdminJoined && !game.admin.IsStarted ?? false {
+                    if vm.currentGameIsAdmin {
+                        Notice(
+                            label: "ゲームが開始されるまでしばらくお待ちください",
+                            graColor: Color.buttonColor,
+                            height: 20
+                        )
+                    }
                 }
                 
-                //            ─── メニュー⇄戻る 切り替えボタン ───
-                FooterBtn(
-                    iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
-                    label: isChangeBtn ? "戻る" : "メニュー",
-                    action: onMenuTap,
-                    padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
-                )
+                HStack {
+                    //            ─── カメラボタン ───
+                    FooterBtn(
+                        iconName: "cameraIcon",
+                        label: "カメラ",
+                        action: onCameraTap,
+                        padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
+                    )
+                    
+                    if !game.IsAdminJoined && game.admin.IsStarted ?? false {
+                        BlueBtn(
+                            label: "プレイ",
+                            width: 160,
+                            height: 100,
+                            action: {
+                                router.push(.mode)
+                            },
+                            isBigBtn: true
+                        )
+                        .padding( EdgeInsets(top: -100, leading: 0, bottom: 0, trailing: 0))
+                    } else {
+                        Spacer()
+                    }
+                    
+                    //            ─── メニュー⇄戻る 切り替えボタン ───
+                    FooterBtn(
+                        iconName: isChangeBtn ? "backArrowIcon" : "menuIcon",
+                        label: isChangeBtn ? "戻る" : "メニュー",
+                        action: onMenuTap,
+                        padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 40)
+                    )
+                }
             }
         }
     }
