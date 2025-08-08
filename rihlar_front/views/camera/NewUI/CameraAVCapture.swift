@@ -13,6 +13,8 @@ class CameraAVCapture: UIViewController,
                                  AVCapturePhotoCaptureDelegate,
                                  CLLocationManagerDelegate {
     var onCancel: (() -> Void)?
+    var onReturnTop: (() -> Void)?
+    var router: Router?
     // — カメラ関連 —
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
@@ -96,6 +98,20 @@ class CameraAVCapture: UIViewController,
         b.addTarget(self, action: #selector(didTapSwitch), for: .touchUpInside)
         return b
     }()
+    
+    private lazy var topBar: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
+    private lazy var bottomBar: UIView = {
+        let v = UIView()
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -171,44 +187,58 @@ class CameraAVCapture: UIViewController,
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.bounds
         previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer)
+        view.layer.insertSublayer(previewLayer, at: 0)
+//        view.layer.addSublayer(previewLayer)
     }
 
     private func setupUI() {
-        // キャンセルボタン
-        view.addSubview(cancelButton)
+        view.addSubview(topBar)
         NSLayoutConstraint.activate([
-            cancelButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            cancelButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            cancelButton.widthAnchor.constraint(equalToConstant: 120),
-            cancelButton.heightAnchor.constraint(equalToConstant: 44)
+          // --- Top Bar ---
+          topBar.topAnchor.constraint(equalTo: view.topAnchor),
+          topBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+          topBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+          topBar.heightAnchor.constraint(equalToConstant: 88),  // ステータス＋余裕。調整OK
         ])
-
-        // 撮影ボタン
-        view.addSubview(captureButton)
+        
+        view.addSubview(bottomBar)
         NSLayoutConstraint.activate([
-            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100),
-            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            captureButton.widthAnchor.constraint(equalToConstant: 64),
-            captureButton.heightAnchor.constraint(equalToConstant: 64),
+          // --- Bottom Bar ---
+          bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+          bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+          bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+          bottomBar.heightAnchor.constraint(equalToConstant: 200),
         ])
-
-        // カメラ切り替えボタン
-        view.addSubview(switchButton)
+        
+        [cancelButton, captureButton, switchButton, gridToggleButton].forEach {
+          bottomBar.addSubview($0)
+          $0.translatesAutoresizingMaskIntoConstraints = false
+        }
+    
         NSLayoutConstraint.activate([
-            switchButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 100),
-            switchButton.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
-            switchButton.widthAnchor.constraint(equalToConstant: 40),
-            switchButton.heightAnchor.constraint(equalToConstant: 40),
-        ])
+          // 再撮影（キャンセル）ボタン
+          cancelButton.bottomAnchor.constraint(equalTo: bottomBar.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+          cancelButton.centerXAnchor.constraint(equalTo: bottomBar.centerXAnchor),
+          cancelButton.widthAnchor.constraint(equalToConstant: 120),
+          cancelButton.heightAnchor.constraint(equalToConstant: 44),
 
-        // グリッドトグルボタン
-        view.addSubview(gridToggleButton)
-        NSLayoutConstraint.activate([
-            gridToggleButton.trailingAnchor.constraint(equalTo: captureButton.leadingAnchor, constant: -100),
-            gridToggleButton.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
-            gridToggleButton.widthAnchor.constraint(equalToConstant: 40),
-            gridToggleButton.heightAnchor.constraint(equalToConstant: 40),
+          // 撮影ボタン
+          captureButton.centerXAnchor.constraint(equalTo: bottomBar.centerXAnchor),
+          captureButton.bottomAnchor.constraint(equalTo: bottomBar.safeAreaLayoutGuide.bottomAnchor, constant: -80),
+          captureButton.widthAnchor.constraint(equalToConstant: 64),
+          captureButton.heightAnchor.constraint(equalToConstant: 64),
+
+          // カメラ切替ボタン
+          switchButton.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
+          switchButton.leadingAnchor.constraint(equalTo: captureButton.trailingAnchor, constant: 80),
+          switchButton.widthAnchor.constraint(equalToConstant: 40),
+          switchButton.heightAnchor.constraint(equalToConstant: 40),
+
+          // グリッドトグルボタン
+          gridToggleButton.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
+          gridToggleButton.trailingAnchor.constraint(equalTo: captureButton.leadingAnchor, constant: -80),
+          gridToggleButton.widthAnchor.constraint(equalToConstant: 40),
+          gridToggleButton.heightAnchor.constraint(equalToConstant: 40),
         ])
     }
 
@@ -405,19 +435,27 @@ class CameraAVCapture: UIViewController,
 
     private func addGridOverlay() {
         gridLayer?.removeFromSuperlayer()
+        // グリッドを描く対象の矩形領域を計算
+        // topBar の下端〜bottomBar の上端までを囲む矩形
+        let yMin = topBar.frame.maxY
+        let yMax = bottomBar.frame.minY
+        let gridRect = CGRect(
+            x: 0,
+            y: yMin,
+            width: view.bounds.width,
+            height: yMax - yMin
+        )
         let layer = CAShapeLayer()
         let path = UIBezierPath()
-        let w = view.bounds.width
-        let h = view.bounds.height
         for i in 1...2 {
-            let x = CGFloat(i) * w / 3
-            path.move(to: CGPoint(x: x, y: 0))
-            path.addLine(to: CGPoint(x: x, y: h))
+            let x = gridRect.origin.x + gridRect.width * CGFloat(i) / 3
+            path.move(to: CGPoint(x: x, y: gridRect.origin.y))
+            path.addLine(to: CGPoint(x: x, y: gridRect.origin.y + gridRect.height))
         }
         for i in 1...2 {
-            let y = CGFloat(i) * h / 3
-            path.move(to: CGPoint(x: 0, y: y))
-            path.addLine(to: CGPoint(x: w, y: y))
+            let y = gridRect.origin.y + gridRect.height * CGFloat(i) / 3
+            path.move(to: CGPoint(x: gridRect.origin.x, y: y))
+            path.addLine(to: CGPoint(x: gridRect.origin.x + gridRect.width, y: y))
         }
         layer.path = path.cgPath
         layer.strokeColor = UIColor.white.withAlphaComponent(0.6).cgColor
@@ -450,6 +488,47 @@ class CameraAVCapture: UIViewController,
     }
 
     // MARK: - AVCapturePhotoCaptureDelegate
+    private func croppedToVisiblePreview(image fullImage: UIImage) -> UIImage {
+        guard let cg = fullImage.cgImage else { return fullImage }
+
+        // ① カメラ映像が実際に映っているレイヤー内の矩形を計算
+        //    topBar と bottomBar を除いた領域
+        let topBarHeight    = topBar.frame.maxY
+        let bottomBarMinY   = bottomBar.frame.minY
+        let visibleHeight   = bottomBarMinY - topBarHeight
+        let visibleLayerRect = CGRect(
+          x: 0,
+          y: topBarHeight,
+          width: previewLayer.bounds.width,
+          height: visibleHeight
+        )
+
+        // ② そのレイヤー座標をメタデータ座標系に変換
+        let metadataRect = previewLayer.metadataOutputRectConverted(
+          fromLayerRect: visibleLayerRect)
+
+        // ③ フル画像のピクセルサイズ
+        let pixelW = CGFloat(cg.width)
+        let pixelH = CGFloat(cg.height)
+
+        // ④ 正規化→ピクセル座標に変換
+        let cropRect = CGRect(
+          x: metadataRect.origin.x * pixelW,
+          y: metadataRect.origin.y * pixelH,
+          width:  metadataRect.size.width  * pixelW,
+          height: metadataRect.size.height * pixelH
+        )
+
+        // ⑤ クロップ実行
+        guard let croppedCG = cg.cropping(to: cropRect) else {
+          return fullImage
+        }
+        return UIImage(
+          cgImage: croppedCG,
+          scale: fullImage.scale,
+          orientation: fullImage.imageOrientation
+        )
+    }
 
     func photoOutput(_ output: AVCapturePhotoOutput,
                      didFinishProcessingPhoto photo: AVCapturePhoto,
@@ -459,19 +538,25 @@ class CameraAVCapture: UIViewController,
 
         guard let data = photo.fileDataRepresentation(),
               let image = UIImage(data: data) else { return }
+        
+        let original = UIImage(data: photo.fileDataRepresentation()!)!
+        let finalImage = croppedToVisiblePreview(image: original)
 
+
+        // CameraAVCapture.swift の photoOutput(_:didFinishProcessingPhoto:) 内
         DispatchQueue.main.async {
             let previewVC = PhotoPreviewViewController(
-                captured: image,
-                coordinate: self.lastLocation?.coordinate,
-                steps: steps
+              captured: finalImage,
+              coordinate: self.lastLocation?.coordinate,
+              steps: self.stepsHK.steps
             )
-            previewVC.onClose = { [weak self] in
-                self?.onCancel?()
+            previewVC.onReturnTop = { [weak self] in
+                self?.router?.path.removeAll() // TopPageに戻る
             }
             previewVC.modalPresentationStyle = .fullScreen
             self.present(previewVC, animated: true)
         }
+
     }
 
     // MARK: - CLLocationManagerDelegate
@@ -494,4 +579,33 @@ extension CameraAVCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
         // フレームごとの処理（例えば画像解析など）
     }
 }
+
+extension UIImage {
+    /// 中央から targetSize に近い縦横比でクロップした画像を返す
+    func cropped(to targetSize: CGSize) -> UIImage? {
+        // 元画像のピクセルサイズ
+        let imgSize = CGSize(width: self.size.width * self.scale,
+                             height: self.size.height * self.scale)
+        // 比率計算
+        let targetRatio = targetSize.width / targetSize.height
+        let imgRatio    = imgSize.width / imgSize.height
+
+        var cropRect = CGRect.zero
+        if imgRatio > targetRatio {
+            // 元画像が横長 → 横を切り詰める
+            let newWidth = imgSize.height * targetRatio
+            cropRect.size = CGSize(width: newWidth, height: imgSize.height)
+            cropRect.origin = CGPoint(x: (imgSize.width - newWidth) / 2, y: 0)
+        } else {
+            // 元画像が縦長 → 縦を切り詰める
+            let newHeight = imgSize.width / targetRatio
+            cropRect.size = CGSize(width: imgSize.width, height: newHeight)
+            cropRect.origin = CGPoint(x: 0, y: (imgSize.height - newHeight) / 2)
+        }
+
+        guard let cgImage = self.cgImage?.cropping(to: cropRect) else { return nil }
+        return UIImage(cgImage: cgImage, scale: self.scale, orientation: self.imageOrientation)
+    }
+}
+
 

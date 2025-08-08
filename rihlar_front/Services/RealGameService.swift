@@ -12,13 +12,13 @@ import Combine
 //    注意点：URL やリクエストヘッダ、エラー処理は適宜拡張。
 /// 本番 API 叩く実装
 class RealGameService: GameServiceProtocol {
-    func fetchGame(id: String) -> AnyPublisher<[Game], Error> {
+    func fetchGame(id: String) -> AnyPublisher<GameResponse.Game, Error> {
 //        1. path の組み立て
         let path = APIConfig.gameInformation
         let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
         
         return Deferred {
-            Future<[Game], Error> { promise in
+            Future<GameResponse.Game, Error> { promise in
                 // Task を使って async/await の呼び出しをラップ
                 Task {
                     do {
@@ -31,8 +31,7 @@ class RealGameService: GameServiceProtocol {
                         var request = URLRequest(url: fullURL)
                         request.httpMethod = "GET"
                         request.setValue(token, forHTTPHeaderField: "Authorization")
-                        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+                        print("トークン確認\(token)")
                         // ③ URLSession の async API で呼び出し
                         let (data, response) = try await URLSession.shared.data(for: request)
                         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
@@ -61,34 +60,47 @@ class RealGameService: GameServiceProtocol {
         .eraseToAnyPublisher()
     }
     
-    func getTop3CircleRankingURL(for gameID: String, userID: String) -> AnyPublisher<[String: TeamCirclesEntity], Error> {
-//        1. path の組み立て
+    func getTop3CircleRanking(for gameID: String, userID: String) async throws -> [String: TeamCirclesEntity] {
+        // 1. path の組み立て
         let path = APIConfig.top3CirclesRankingEndpoint.replacingOccurrences(of: "{gameId}", with: gameID)
-        let fullURL = APIConfig.baseURL.appendingPathComponent(path)
+        let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
         
-//        2. URLRequest の生成
+        // 2. URLRequest の生成
         var request = URLRequest(url: fullURL)
         request.httpMethod = "GET"
         
-//        3. 標準ヘッダー設定
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        // 3. トークン取得
+        guard let token = try await TokenManager.shared.getAccessToken() else {
+            throw URLError(.userAuthenticationRequired)
+        }
         
-//        4. ヘッダー情報にuserIDを追加
+        // 4. 標準ヘッダー設定
+        request.setValue(token, forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 5. ヘッダー情報にuserIDを追加
         request.setValue(userID, forHTTPHeaderField: "UserID")
         
-//        5. dataTaskPublisher 実行
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .tryMap { output in
-//                print("📦 トップ3円のレスポンスJSON文字列:")
-                if let jsonString = String(data: output.data, encoding: .utf8) {
-//                    print(jsonString)
-                }
-                return output.data
-            }
-            .decode(type: OuterCirclesResponse.self, decoder: JSONDecoder())
-            .map { $0.data }
-            .receive(on: RunLoop.main)
-            .eraseToAnyPublisher()
+        // 6. 非同期リクエスト実行
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        // 7. HTTPレスポンスのステータスコードチェック
+        guard let httpResponse = response as? HTTPURLResponse,
+              200...299 ~= httpResponse.statusCode else {
+            throw URLError(.badServerResponse)
+        }
+        
+        // 8. デバッグ用JSONログ出力（オプション）
+        if let jsonString = String(data: data, encoding: .utf8) {
+            // print("📦 トップ3円のレスポンスJSON文字列:")
+            // print(jsonString)
+        }
+        
+        // 9. JSONデコード
+        let decoder = JSONDecoder()
+        let outerResponse = try decoder.decode(OuterCirclesResponse.self, from: data)
+        
+        return outerResponse.data
     }
     
     func getUserStep(for gameID: String, userID: String) -> AnyPublisher<[UserStep], any Error> {

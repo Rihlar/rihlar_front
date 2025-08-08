@@ -39,7 +39,7 @@ struct LoadingView : View {
                     if frameindex == frames.count - 1{
                         router.didStartFromLoading = true
                         router.path.removeAll()
-                        vm.startGameLocally()
+//                        vm.startGameLocally()
                     }
                 }
             NavigationLink(

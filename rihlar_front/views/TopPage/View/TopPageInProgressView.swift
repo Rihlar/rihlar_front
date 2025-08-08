@@ -21,7 +21,7 @@ struct TopPageInProgressView: View {
     @State private var isShowMenu = false
     //    メニューボタンと戻るボタンの制御
     @State private var isChangeBtn = false
-    let game: Game
+//    let game: GameResponse.Game
     //    ゲームが終了しているかのフラグ
     @State private var isGameOverFlag = false
     
@@ -47,27 +47,30 @@ struct TopPageInProgressView: View {
     }
     
     var body: some View {
-        if let game = vm.currentGame {
+//        if let game = vm.currentGame {
             ZStack {
                 // mapkitを使用した地図表示
                 CircleMap(
                     playerPosition: playerPosition,
                     circlesByTeam: vm.circlesByTeam,
                     userStepByTeam: vm.userStepByTeam,
-                    gameStatus: GameStatus(rawValue: game.statusRaw) ?? .notStarted,
-                    gameType: game.type
+                    game: vm.game,
+                    currentGameIsAdmin: vm.currentGameIsAdmin
+//                    gameStatus: GameStatus(rawValue: game.statusRaw) ?? .notStarted,
+//                    gameType: game.type
                 )
                 .ignoresSafeArea()
                 .onAppear {
-                    guard let userID = vm.profile?.user_id else {
+                    guard let userID = vm.profile?.user_id,
+                          let gameID = vm.currentGameID else {
                         print("ユーザープロフィールまだです")
                         return
                     }
-                    vm.fetchCircles(for: game.gameID, userID: userID)
-                    vm.fetchUserStep(for: game.gameID, userID: userID)
+                    vm.fetchCircles(for: gameID, userID: userID)
+                    vm.fetchUserStep(for: gameID, userID: userID)
                     vm.bindPlayerPositionUpdates(for: userID, playerPosition: playerPosition)
-                    vm.fetchCircles(for: game.gameID, userID: userID)
-                    vm.fetchUserStep(for: game.gameID, userID: userID)
+                    vm.fetchCircles(for: gameID, userID: userID)
+                    vm.fetchUserStep(for: gameID, userID: userID)
                 }
                 .onChange(of: vm.userStepByTeam) { steps in
                     let apiCoords = steps.map { CLLocationCoordinate2D(
@@ -130,8 +133,8 @@ struct TopPageInProgressView: View {
                 
                 VStack {
                     Header(
-                        vm: vm,
-                        game: game
+                        vm: vm
+//                        game: vm.game
                     )
                     
                     Spacer()
@@ -142,24 +145,27 @@ struct TopPageInProgressView: View {
                 //            見た目は無いけど、remainingTimeString の変化を監視してフラグを立てる）
                 Color.clear
                     .onReceive(timer) { _ in
-                        let newValue = remainingTimeString(until: game.endTime)
-                        timeString = newValue
+                        if let endTime = vm.game?.admin.EndTime {
+                            let newValue = remainingTimeString(until: endTime)
+                            timeString = newValue
+                        }
                     }
                     .onChange(of: timeString) { newValue in
-                        if newValue == "終了" {
-                            isGameOverFlag = true
+                        if let game = vm.game {
+                            if newValue == "終了" && game.admin.IsFinished ?? false {
+                                isGameOverFlag = true
+                            }
                         }
                     }
                 
-                if isGameOverFlag && game.status == .inProgress {
+                if isGameOverFlag && !vm.currentGameIsAdmin {
                     ModalView(
                         isModal: $isGameOverFlag,
                         titleLabel: "結果",
                         closeFlag: true,
                         action: {
                             isGameOverFlag = false
-                            vm.endGameLocally()
-                            
+//                            vm.endGameLocally()
                         },
                         content: {
                             VStack {
@@ -297,9 +303,9 @@ struct TopPageInProgressView: View {
                                 isShowMenu.toggle()
                             }
                         },
-                        vm: vm,
-                        game: game,
-                        gameType: game.type
+                        vm: vm
+//                        game: vm.game,
+//                        gameType: game.type
                     )
                 }
                 .zIndex(1)
@@ -314,7 +320,7 @@ struct TopPageInProgressView: View {
                     print("photo fetch error:", error)
                 }
             }
-        }
+//        }
     }
 }
 

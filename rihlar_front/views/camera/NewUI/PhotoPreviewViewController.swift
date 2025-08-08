@@ -11,6 +11,7 @@ import SwiftUI
 
 class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
     var onClose: (() -> Void)?
+    var onReturnTop: (() -> Void)?
     // MARK: – Properties
     private let image: UIImage
     private let coordinate: CLLocationCoordinate2D?
@@ -26,6 +27,16 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
         self.steps = steps
         super.init(nibName: nil, bundle: nil)
     }
+    
+    private lazy var themeTextField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = self.pholder
+        tf.borderStyle = .roundedRect
+        tf.returnKeyType = .done
+        tf.delegate = self
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        return tf
+    }()
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -94,12 +105,6 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
         view.addSubview(textLabel)
 
         // テーマ入力欄
-        let themeTextField = UITextField()
-        themeTextField.placeholder = pholder
-        themeTextField.borderStyle = .roundedRect
-        themeTextField.returnKeyType = .done
-        themeTextField.delegate = self
-        themeTextField.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(themeTextField)
 
         // 保存ボタン
@@ -118,7 +123,7 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
         closeButton.setTitle("再撮影", for: .normal)
         closeButton.setTitleColor(UIColor(Color.textColor), for: .normal)
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
+        closeButton.addTarget(self, action: #selector(didTapRetake), for: .touchUpInside)
         view.addSubview(closeButton)
 
         // Auto Layout
@@ -209,45 +214,131 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
+    
+    // MARK: - Response Models
+    struct CircleIds: Codable {
+        let IsAdmin: Bool
+        let AdminCircleID: String
+        let SystemCircleID: String
+    }
 
+    struct CreateCircleResponse: Codable {
+        let circleIds: CircleIds
+        let result: String
+    }
+    
     // MARK: – Actions
     @objc private func didTapSave() {
+        let theme = themeTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let payload: [String: Any] = [
             "latitude": coordinate?.latitude ?? 0,
             "longitude": coordinate?.longitude ?? 0,
-            "steps": steps
+            "steps": steps,
+            "theme": theme
         ]
-        guard let url = URL(string: "https://rihlar-test.kokomeow.com/gcore/create/circle") else { return }
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        req.setValue("userid-79541130-3275-4b90-8677-01323045aca5", forHTTPHeaderField: "UserID")
+        guard let circleURL = URL(string: "https://rihlar-stage.kokomeow.com/gcore/create/circle") else { return }
+        
+        Task {
+          do {
+              // アクセストークン取得
+              let accessToken = try await TokenManager.shared.getAccessToken()
+              
+            // サークル作成
+            var req = URLRequest(url: circleURL)
+            req.httpMethod = "POST"
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.setValue(accessToken, forHTTPHeaderField: "Authorization")
+              
+            do {
+              // PayloadをJSON化してセット
+              let jsonBody = try JSONSerialization.data(withJSONObject: payload)
+              req.httpBody = jsonBody
 
-        // デバッグ用ログ出力
-        if let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            print("📤 JSON Payload: \(jsonString)")
-            req.httpBody = jsonData
+              // デバッグ用：送信内容確認
+              if let bodyString = String(data: jsonBody, encoding: .utf8) {
+                  print("▶️ 送信するJSON: \(bodyString)")
+              }
+              
+              // 通信開始
+              let (data, resp) = try await URLSession.shared.data(for: req)
+
+              // HTTPレスポンス確認
+              guard let http = resp as? HTTPURLResponse else {
+                  print("❌ HTTPレスポンスが無効です")
+                  return
+              }
+
+              print("📡 ステータスコード: \(http.statusCode)")
+              
+              // ステータスコードが成功（200台）であるか
+              guard 200..<300 ~= http.statusCode else {
+                  print("❌ サーバーエラー（コード: \(http.statusCode)）")
+                  if let responseString = String(data: data, encoding: .utf8) {
+                      print("📨 サーバーからのエラーレスポンス: \(responseString)")
+                  }
+                  return
+              }
+
+              // デバッグ用：受信データ確認
+              if let responseString = String(data: data, encoding: .utf8) {
+                  print("✅ サーバーからのレスポンス: \(responseString)")
+              }
+
+              // JSONデコード（型が一致するか確認）
+              guard
+                  let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+              else {
+                  print("❌ JSON解析に失敗しました")
+                  return
+              }
+
+              // AdminCircleIDの取り出し
+              if
+                  let circleIds = json["circleIds"] as? [String: Any],
+                  let circleID = circleIds["SystemCircleID"] as? String {
+                  print("🎉 サークル作成成功！ID: \(circleID)")
+                  
+                  uploadCircleImage(
+                      accessToken: accessToken!,
+                      circleId: circleID,
+                      image: image
+                  ) { result in
+                      switch result {
+                      case .success(let response):
+                          // 成功時の処理
+                          print("アップロード成功: \(response.data)")
+                          
+                      case .failure(let error):
+                          // エラー時の処理
+                          print("エラー: \(error.localizedDescription)")
+                      }
+                  }
+              } else {
+                  print("❌ AdminCircleIDが見つかりませんでした")
+              }
+
+            } catch {
+              // 通信や変換エラーの捕捉
+              print("❌ エラー発生: \(error.localizedDescription)")
+            }
+
+            // 5) 完了アラート
+            await MainActor.run {
+              let alert = UIAlertController(
+                title: "保存完了",
+                message: "位置・歩数・写真をサーバに保存しました",
+                preferredStyle: .alert
+              )
+              alert.addAction(.init(title: "OK", style: .default) { _ in
+                self.dismiss(animated: true) { self.onReturnTop?() }
+              })
+              self.present(alert, animated: true)
+            }
+
+          } catch {
+            print("エラー:", error)
+          }
         }
-
-        URLSession.shared.dataTask(with: req) { data, resp, error in
-            guard let http = resp as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-                print("保存失敗:", error ?? "ステータスコード \((resp as? HTTPURLResponse)?.statusCode ?? -1)")
-                return
-            }
-            DispatchQueue.main.async {
-                let alert = UIAlertController(
-                    title: "保存完了",
-                    message: "位置と歩数をサーバに保存しました",
-                    preferredStyle: .alert)
-                alert.addAction(.init(title: "OK", style: .default) { _ in
-                    self.dismiss(animated: true) {
-                        self.onClose?()
-                    }
-                })
-                self.present(alert, animated: true)
-            }
-        }.resume()
     }
 
     @objc private func didTapClose() {
@@ -255,5 +346,10 @@ class PhotoPreviewViewController: UIViewController, UITextFieldDelegate {
             // CameraThreeViewController 経由でさらに SwiftUI 側を pop
             self.onClose?()
         }
+    }
+    
+    @objc private func didTapRetake() {
+        // ここでは純粋にプレビュー画面を閉じるだけ
+        dismiss(animated: true, completion: nil)
     }
 }

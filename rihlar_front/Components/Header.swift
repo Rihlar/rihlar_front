@@ -9,12 +9,12 @@ import SwiftUI
 
 struct Header: View {
     @ObservedObject var vm: GameViewModel
-    let game: Game
+//    let game: GameResponse.Game?
     
     var body: some View {
-        let mode: GameType = game.type
+//        let mode: GameType = game.type
         
-        if mode == .admin {
+        if vm.currentGameIsAdmin {
             VStack {
                 HStack(spacing: 10) {
                     ZStack {
@@ -36,12 +36,15 @@ struct Header: View {
                         }
                     }
                     .opacity(0)
-                    if game.status == .inProgress {
-                        Image("matchHeader")
-                            .overlay(Text(remainingTimeString(until: game.endTime))
-                                .foregroundColor(Color("TextColor"))
-                                .font(.system(size: 16, weight: .bold))
-                            )
+                    
+                    if vm.game?.admin.IsStarted ?? false {
+                        if let endTime = vm.game?.admin.EndTime {
+                            Image("matchHeader")
+                                .overlay(Text(remainingTimeString(until: endTime))
+                                    .foregroundColor(Color("TextColor"))
+                                    .font(.system(size: 16, weight: .bold))
+                                )
+                        }
                     } else {
                         Image("matchHeader")
                             .overlay(Text("対戦モード")
@@ -82,7 +85,7 @@ struct Header: View {
                         
                         Spacer()
                         
-                        if game.status == .inProgress {
+                        if vm.game?.admin.IsStarted ?? false {
                             ScoreStatusPanel(rank: 10, currentScore: 0)
                                 .padding(.trailing)
                         }
