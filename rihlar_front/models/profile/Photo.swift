@@ -10,8 +10,11 @@ import Foundation
 // 写真情報のモデル定義
 struct Photo: Codable, Identifiable {
     let id: String          // imgID
-    let url: String         // 写真のurl
-    let theme: String?      // 写真のテーマ
+    let userId: String      // userID
     let createdAt: Date     // 投稿した日時
+    let theme: String?      // 写真のテーマ
+    let shared: Bool        // 共有するかどうか
+    let gameId: String      // gameID
+    let url: String         // 写真のurl
 }
 
