@@ -18,6 +18,9 @@ struct ProfileView: View {
     @State private var isEditing = false
     @FocusState private var isNameFieldFocused: Bool    // フォーカス管理
     
+    // 画像の情報
+    @StateObject private var photoViewModel = ProfileViewModel()
+    
     // タップされた画像のインデックスを管理するState（Optional）
     @State private var selectedImageIndex: ImageIndex? = nil
     // ViewModelを状態として保持（画面に紐づく）
@@ -120,8 +123,8 @@ struct ProfileView: View {
                             ZStack {
                                 
                                 Circle()
-                                        .fill(Color.clear)
-                                        .frame(width: 90, height: 90)
+                                    .fill(Color.clear)
+                                    .frame(width: 90, height: 90)
                                 if index < selectedRecords.count {
                                     let record = selectedRecords[index]
                                     
@@ -169,22 +172,17 @@ struct ProfileView: View {
                 // 写真一覧（下にスペース追加）
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-                        ForEach(viewData.photos.indices, id: \.self) { index in
-                            let photo = viewData.photos[index]
+                        ForEach(photoViewModel.photos.indices, id: \.self) { index in
+                            let photo = photoViewModel.photos[index]
                             
                             Group {
-                                if photo.url.contains("http"),
-                                   let url = URL(string: photo.url) {
+                                if let url = URL(string: photo.url) {
                                     AsyncImage(url: url) { image in
                                         image.resizable().scaledToFill()
                                     } placeholder: {
                                         RoundedRectangle(cornerRadius: 10)
                                             .fill(Color.gray.opacity(0.2))
                                     }
-                                } else {
-                                    Image(photo.url)
-                                        .resizable()
-                                        .scaledToFill()
                                 }
                             }
                             .frame(height: 160)
@@ -197,6 +195,10 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal)
                     .padding(.bottom, 120)
+                }
+                // 画面表示時に呼び出し
+                .task {
+                    await photoViewModel.loadPhotos()
                 }
             }
             if isShowMenu {
@@ -231,9 +233,7 @@ struct ProfileView: View {
         }
         //selectedImageIndexがセットされたら、対応する画像からPhotoViewerViewをsheet表示
         .sheet(item: $selectedImageIndex) { imageIndex in
-            
-            PhotoViewerView(photos: viewData.photos, startIndex: imageIndex.id)
-                .presentationDragIndicator(.hidden)
+            PhotoViewerView(photos: photoViewModel.photos, startIndex: imageIndex.id)
         }
         
         
