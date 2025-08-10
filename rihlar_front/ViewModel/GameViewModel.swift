@@ -193,83 +193,74 @@ final class GameViewModel: ObservableObject {
     
     ///    playerPosition.track の変化を監視して最新座標だけを POST
     ///    座標が変わったらPOST
-    //    func bindPlayerPositionUpdates(for userID: String, playerPosition: PlayerPosition) {
-    //        playerPosition.$track
-    //            .dropFirst()                            // 初回シード除外
-    //            .compactMap { $0.last }                 // 配列の最後の１点だけ
-    //            .removeDuplicates { a, b in
-    //                a.latitude == b.latitude && a.longitude == b.longitude
-    //            }
-    //            .throttle(for: .seconds(10), scheduler: RunLoop.main, latest: true)
-    //            .sink { [weak self] latest in
-    //                guard let self = self else { return }
-    //                let steps = self.stepsHK.steps // ここは HealthKit 等から実際の歩数を取得してください
-    //                print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
-    //
-    //                self.service.postUserStep(
-    //                    userID:   userID,
-    //                    latitude: latest.latitude,
-    //                    longitude: latest.longitude,
-    //                    steps:    steps
-    //                )
-    //                .sink(
-    //                    receiveCompletion: { comp in
-    //                        if case .failure(let err) = comp {
-    //                            print("POST歩数エラー:", err)
-    //                        }
-    //                    },
-    //                    receiveValue: { resp in
-    //                        print("POST歩数成功:", resp.result)
-    //                        print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
-    //                    }
-    //                )
-    //                .store(in: &self.cancellables)
-    //            }
-    //            .store(in: &cancellables)
-    //    }
-    
-    //    10秒タイマー
-    func bindPlayerPositionUpdates(for userID: String, playerPosition: PlayerPosition) {
-        Timer
-            .publish(every: 10.0, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                // 現在の最新座標を取り出す
-                guard let latest = playerPosition.track.last else { return }
-                
-                // 前回送信座標と同じなら何もしない
-                if let prev = self.lastSentCoordinate,
-                   prev.latitude  == latest.latitude,
-                   prev.longitude == latest.longitude {
-                    return
+        func bindPlayerPositionUpdates(for userID: String, playerPosition: PlayerPosition) {
+            let positionPublisher = playerPosition.$track
+//                .print("[PP]")
+//                .dropFirst()                            // 初回シード除外
+                .compactMap { $0.last }                 // 配列の最後の１点だけ
+                .removeDuplicates { a, b in
+                    a.latitude == b.latitude && a.longitude == b.longitude
                 }
-                
-                // 座標が変わっていればPOST
-                self.lastSentCoordinate = latest
-                let steps = self.stepsHK.steps
-                
-                self.service.postUserStep(
-                    userID:   userID,
-                    latitude: latest.latitude,
-                    longitude: latest.longitude,
-                    steps:    steps
-                )
-                .sink(
-                    receiveCompletion: { comp in
-                        if case .failure(let err) = comp {
-                            print("POST歩数エラー:", err)
-                        }
-                    },
-                    receiveValue: { resp in
-                        print("POST歩数成功:", resp.result)
-                        print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
-                    }
-                )
-                .store(in: &self.cancellables)
-            }
-            .store(in: &cancellables)
-    }
+                .throttle(for: .seconds(10), scheduler: RunLoop.main, latest: true)
+                .eraseToAnyPublisher()
+            
+            positionPublisher
+                .sink { [weak self] latest in
+                    guard let self = self else { return }
+                    
+                    let steps = self.stepsHK.steps // ここは HealthKit 等から実際の歩数を取得してください
+                    print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
+    
+                    let postPub = self.service.postUserStep(
+                        userID:   userID,
+                        latitude: latest.latitude,
+                        longitude: latest.longitude,
+                        steps:    steps
+                    )
+                    
+                    postPub
+                        .receive(on: DispatchQueue.main)
+                        .sink(
+                            receiveCompletion: { comp in
+                                if case .failure(let err) = comp {
+                                    print("POST歩数エラー:", err)
+                                    
+                                    // URLError の詳細情報を確認
+                                    if let urlError = err as? URLError {
+                                        print("URLError code: \(urlError.code.rawValue)")
+                                        print("URLError description: \(urlError.localizedDescription)")
+                                        print("URLError userInfo: \(urlError.userInfo)")
+                                        
+                                        // HTTPレスポンスがあれば確認
+                                        if let httpResponse = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? HTTPURLResponse {
+                                            print("HTTP Status Code: \(httpResponse.statusCode)")
+                                        }
+                                    }
+                                    
+                                    // NSErrorとしての詳細も確認
+                                    let nsError = err as NSError
+                                    print("Error domain: \(nsError.domain)")
+                                    print("Error code: \(nsError.code)")
+                                    print("Error userInfo: \(nsError.userInfo)")
+                                }
+                            },
+                            receiveValue: { resp in
+                                // ===== 新レスポンス構造に合わせたログ =====
+                                // IsSyetemSuccess（APIのスペルに合わせる）
+                                let sysOK = resp.isSystemSuccess
+                                // 先頭要素のメッセージやステータスを例示
+                                let first = resp.adminGames.first
+                                let msg = first?.message ?? "-"
+                                let status = first?.status ?? -1
+
+                                print("POST歩数成功: system=\(sysOK), status=\(status), message=\(msg)")
+                                print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
+                            }
+                        )
+                        .store(in: &self.cancellables)
+                }
+                .store(in: &cancellables)
+        }
     
 //    ユーザープロフィール取得を呼び出す
     func loadUserProfile() {

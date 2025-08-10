@@ -78,6 +78,7 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
             lastLocation = newLocation
 //             トラック配列に最初の座標を追加
             track.append(newLocation.coordinate)
+            print(track)
             return
         }
 
@@ -95,6 +96,7 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
         lastLocation = newLocation
 //         移動座標をトラックに追加
         track.append(newLocation.coordinate)
+        print(track)
         
 //         --- (4) 追従モード中なら地図中心を更新 ---
         if isFollowing {
