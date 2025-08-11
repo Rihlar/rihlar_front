@@ -40,8 +40,8 @@ func fetchInfo()async throws -> UserInfo {
 //    do {
         //    getKeyChain 関数を使って、Keychain（セキュアなストレージ）から "authToken" を取得
         let getToken = getKeyChain(key: "authToken")
-        //        トークンが取得できたかどうか、デバッグ出力
-        debugPrint(getToken)
+//        //        トークンが取得できたかどうか、デバッグ出力
+//        debugPrint(getToken)
         //        トークンが取得できなければ、空の UserProfile を返して早期リターン
         if getToken == nil {
             return UserInfo(email: "", name: "", provCode: "", provUID: "0", userId: "")

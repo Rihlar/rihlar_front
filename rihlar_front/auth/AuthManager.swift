@@ -22,11 +22,11 @@ class AuthManager: ObservableObject {
     private init() {}
     
     func startAuthentication(callback: @escaping (URL) -> Void) -> Bool {
-        print("認証開始チェック - isAuthenticating: \(isAuthenticating), hasCompletedAuth: \(hasCompletedAuth)")
+//        print("認証開始チェック - isAuthenticating: \(isAuthenticating), hasCompletedAuth: \(hasCompletedAuth)")
         
         // 既に認証中または完了済みの場合は何もしない
         guard !isAuthenticating && !hasCompletedAuth else {
-            print("認証スキップ - 既に実行中または完了済み")
+//            print("認証スキップ - 既に実行中または完了済み")
             return false
         }
         
@@ -53,11 +53,11 @@ class AuthManager: ObservableObject {
                 self.isAuthenticating = false
                 
                 if let callbackURL {
-                    print("認証成功: \(callbackURL.absoluteString)")
+//                    print("認証成功: \(callbackURL.absoluteString)")
                     self.hasCompletedAuth = true
                     callback(callbackURL)
                 } else if let error {
-                    print("認証失敗: \(error.localizedDescription)")
+//                    print("認証失敗: \(error.localizedDescription)")
                     // エラーコード2（キャンセル）の場合は特別な処理をしない
                     if (error as NSError).code != 2 {
                         // キャンセル以外のエラーの場合のみログ出力
@@ -77,7 +77,7 @@ class AuthManager: ObservableObject {
         // 少し遅延させてから開始（UIの準備を待つ）
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             session.start()
-            print("認証セッション start() 実行")
+//            print("認証セッション start() 実行")
         }
         
         return true
@@ -96,7 +96,7 @@ class AuthManager: ObservableObject {
 // プレゼンテーションコンテキスト用の独立クラス
 class AuthPresentationContext: NSObject, ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        print("presentationAnchor 呼び出し")
+//        print("presentationAnchor 呼び出し")
         
         // より安全なwindow取得方法
         if let windowScene = UIApplication.shared.connectedScenes
