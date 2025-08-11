@@ -18,18 +18,13 @@ final class ProfileViewModel: ObservableObject {
         errorMessage = nil
         do {
             let summaries = try await GameImageAPI.shared.fetchImageList()
-            print("📦 取得したサマリー一覧:")
-            for summary in summaries {
-                print("circleId: \(summary.id), theme: \(summary.theme ?? "なし"), timestamp: \(summary.timestamp)")
-            }
-
+            
             var newPhotos: [Photo] = []
 
+            // 詳細情報を複数APIで取得（for await もしくは async let で並列化可能）
             for summary in summaries {
                 do {
                     let detail = try await GameImageAPI.shared.fetchPhotoDetail(circleId: summary.id)
-                    print("🔍 詳細情報: \(detail)")
-
                     let createdAt = ISO8601DateFormatter().date(from: detail.created_at) ?? Date()
                     let photo = Photo(
                         id: detail.image_id,
@@ -43,16 +38,14 @@ final class ProfileViewModel: ObservableObject {
                     )
                     newPhotos.append(photo)
                 } catch {
-                    print("⚠️ 詳細取得エラー: \(error.localizedDescription) - circleId: \(summary.id)")
+                    // 詳細取得失敗しても他は続ける（必要に応じてログなど）
                 }
             }
 
-            print("✅ 最終的にセットしたPhoto配列の件数: \(newPhotos.count)")
             photos = newPhotos
 
         } catch {
             errorMessage = "画像リストの取得に失敗しました"
-            print("❌ サマリー取得エラー: \(error.localizedDescription)")
         }
         isLoading = false
     }

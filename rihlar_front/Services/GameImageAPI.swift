@@ -33,6 +33,7 @@ final class GameImageAPI {
         // URLSessionを使って非同期にデータを取得
         let (data, _) = try await URLSession.shared.data(for: request)
         
+        
         // JSONのデコード準備
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601  // 日付をISO8601形式でデコード
