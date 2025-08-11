@@ -53,9 +53,9 @@ func saveKeyChain(tag: String, value: String) -> Bool{
     }else if matchingStatus == errSecSuccess{
         //        古いデータを削除してから保存し直す
         if SecItemDelete(saveQuery as CFDictionary) == errSecSuccess {
-            print("削除成功")
+//            print("削除成功")
         }else {
-            print("削除失敗")
+//            print("削除失敗")
         }
         //        保存を行う
         itemAddStatus = SecItemAdd(saveQuery as CFDictionary, nil)
@@ -67,7 +67,7 @@ func saveKeyChain(tag: String, value: String) -> Bool{
     
     //    保存に成功したかのチェック
     if itemAddStatus == errSecSuccess {
-        print("正常終了")
+//        print("正常終了")
     }else{
         return false
     }
