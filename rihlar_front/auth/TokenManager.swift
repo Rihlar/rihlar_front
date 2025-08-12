@@ -26,14 +26,14 @@ class TokenManager {
             let secondsPassed = now.timeIntervalSince(savedTime)
             
             if secondsPassed < 180 {
-                print("キャッシュからトークンを返す")
+//                print("キャッシュからトークンを返す")
                 return savedToken
             } else {
-                print("トークンが古いよ；；新しいトークンを取ります")
+//                print("トークンが古いよ；；新しいトークンを取ります")
                 // 古いトークンの場合、新規取得へ
             }
         }else{
-            print("トークンキャッシュなし。新しく取得します")
+//            print("トークンキャッシュなし。新しく取得します")
         }
         let newToken = try await fetchAndCacheAccessToken()
         return newToken
@@ -45,7 +45,7 @@ class TokenManager {
             throw NSError(domain: "TokenManager", code: 401,
                           userInfo: [NSLocalizedDescriptionKey: "Authorizationトークンがありません"])
         }
-        print("KeyChainから取得したトークン: [\(autoToken)]")
+//        print("KeyChainから取得したトークン: [\(autoToken)]")
         
 //        guard let url = URL(string: "https://authbase-test.kokomeow.com/auth/token") else {
 //            throw NSError(domain: "TokenManager", code: 400,
@@ -77,7 +77,7 @@ class TokenManager {
         }
         
         if let raw = String(data: data, encoding: .utf8) {
-            print("レスポンスの生データ: \(raw)")
+//            print("レスポンスの生データ: \(raw)")
         }
         
         struct TokenResponse: Codable {
@@ -91,7 +91,7 @@ class TokenManager {
         UserDefaults.standard.set(token, forKey: tokenKey)
         UserDefaults.standard.set(Date(), forKey: tokenTimeKey)
         
-        print("新しいトークンを取得しました！")
+//        print("新しいトークンを取得しました！")
         
         return token
     }

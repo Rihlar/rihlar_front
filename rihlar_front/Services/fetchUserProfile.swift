@@ -11,19 +11,19 @@ func fetchUserProfile() async throws -> User {
         throw NSError(domain: "UserFetch", code: 401, userInfo: [NSLocalizedDescriptionKey: "リフレッシュトークンが見つかりません"])
     }
 
-    print("リフレッシュトークン使用: \(refreshToken)")
+//    print("リフレッシュトークン使用: \(refreshToken)")
 
     let url = URL(string: "https://rihlar-stage.kokomeow.com/auth/me")!
-    print("プロフィール取得URL: \(url.absoluteString)")
+//    print("プロフィール取得URL: \(url.absoluteString)")
 
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.setValue(refreshToken, forHTTPHeaderField: "Authorization") 
-    print("Authorizationヘッダー: \(refreshToken)")
+//    print("Authorizationヘッダー: \(refreshToken)")
 
     let (data, response) = try await URLSession.shared.data(for: request)
-    print(String(data: data, encoding: .utf8) ?? "No body")
+//    print(String(data: data, encoding: .utf8) ?? "No body")
 
     if let httpResponse = response as? HTTPURLResponse,
        !(200...299).contains(httpResponse.statusCode) {
@@ -38,7 +38,7 @@ func fetchUserProfile() async throws -> User {
 //    decoder.keyDecodingStrategy = .convertFromSnakeCase
 
     let userInfo = try decoder.decode(User.self, from: data)
-    print("取得したユーザー情報: \(userInfo)")
+//    print("取得したユーザー情報: \(userInfo)")
 
     return userInfo
 }
