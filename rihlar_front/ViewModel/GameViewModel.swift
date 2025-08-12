@@ -27,7 +27,7 @@ final class GameViewModel: ObservableObject {
     //    今ビューで使う単一のゲーム
 //    @Published private(set) var currentGame: GameResponse.Game
     // プロフィール取得結果を保持するプロパティ
-    @Published var profile: UserProfile?
+    @Published var profile: String
     @Published var profileError: String?
     
     private let service: GameServiceProtocol
@@ -42,6 +42,7 @@ final class GameViewModel: ObservableObject {
         self.systemGames         = nil
         self.adminGames          = nil
         self.currentGameIsAdmin  = false
+        self.profile             = ""
         
         fetchGame(by: "GameID")
     }
@@ -83,12 +84,17 @@ final class GameViewModel: ObservableObject {
     
 //    currentGame が変わるたびに呼び出すヘルパー
     private func reloadOverlaysAndSteps() {
-        guard let gameID = currentGameID,
-              let userID = profile?.user_id
-        else {
-            print("⚠️ userID or gameID がまだありません")
+        guard let gameID = currentGameID else {
+            print("❌ currentGameID が nil です")
             return
         }
+        
+        guard !profile.isEmpty else {     // ← nil ではなく空文字をチェック
+            print("❌ profile が未設定です")
+            return
+        }
+        let userID = profile
+        print("✅ 両方の値が取得できました - gameID: \(gameID), userID: \(userID)")
         fetchCircles(for: gameID, userID: userID)
         fetchUserStep(for: gameID, userID: userID)
     }
@@ -227,13 +233,13 @@ final class GameViewModel: ObservableObject {
                                     
                                     // URLError の詳細情報を確認
                                     if let urlError = err as? URLError {
-                                        print("URLError code: \(urlError.code.rawValue)")
-                                        print("URLError description: \(urlError.localizedDescription)")
-                                        print("URLError userInfo: \(urlError.userInfo)")
+//                                        print("URLError code: \(urlError.code.rawValue)")
+//                                        print("URLError description: \(urlError.localizedDescription)")
+//                                        print("URLError userInfo: \(urlError.userInfo)")
                                         
                                         // HTTPレスポンスがあれば確認
                                         if let httpResponse = urlError.userInfo[NSURLErrorFailingURLErrorKey] as? HTTPURLResponse {
-                                            print("HTTP Status Code: \(httpResponse.statusCode)")
+//                                            print("HTTP Status Code: \(httpResponse.statusCode)")
                                         }
                                     }
                                     
@@ -266,9 +272,9 @@ final class GameViewModel: ObservableObject {
     func loadUserProfile() {
         Task {
             do {
-                let profile = try await service.fetchUserProfile()
+                let profile = try await fetchUserProfile()
                 await MainActor.run {
-                    self.profile = profile
+                    self.profile = profile.id
                 }
             } catch {
                 await MainActor.run {

@@ -92,8 +92,8 @@ class RealGameService: GameServiceProtocol {
         
         // 8. デバッグ用JSONログ出力（オプション）
         if let jsonString = String(data: data, encoding: .utf8) {
-            // print("📦 トップ3円のレスポンスJSON文字列:")
-            // print(jsonString)
+             print("📦 トップ3円のレスポンスJSON文字列:")
+             print(jsonString)
         }
         
         // 9. JSONデコード
@@ -170,7 +170,7 @@ class RealGameService: GameServiceProtocol {
                             
                             // トークンを追加
                             request.setValue(token, forHTTPHeaderField: "Authorization")
-//                            request.setValue(userID, forHTTPHeaderField: "UserID")
+                            request.setValue(userID, forHTTPHeaderField: "UserID")
                             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                             
     //                        最新の１点だけ bodyで送る
@@ -182,26 +182,26 @@ class RealGameService: GameServiceProtocol {
                             request.httpBody = try JSONSerialization.data(withJSONObject: body)
                             
                             // === デバッグ用ログ追加 ===
-                            print("=== API Request Debug ===")
-                            print("URL: \(fullURL)")
-                            print("Token: \(token.prefix(20))...") // トークンの最初の20文字だけ表示
-                            print("Body: \(String(data: request.httpBody!, encoding: .utf8) ?? "No body")")
-                            print("Headers: \(request.allHTTPHeaderFields ?? [:])")
+//                            print("=== API Request Debug ===")
+//                            print("URL: \(fullURL)")
+//                            print("Token: \(token.prefix(20))...") // トークンの最初の20文字だけ表示
+//                            print("Body: \(String(data: request.httpBody!, encoding: .utf8) ?? "No body")")
+//                            print("Headers: \(request.allHTTPHeaderFields ?? [:])")
                             
                             let (data, response) = try await URLSession.shared.data(for: request)
                             
                             // === レスポンス詳細ログ追加 ===
                             if let httpResponse = response as? HTTPURLResponse {
-                                print("=== API Response Debug ===")
-                                print("Status Code: \(httpResponse.statusCode)")
-                                print("Response Headers: \(httpResponse.allHeaderFields)")
-                                print("Response Body: \(String(data: data, encoding: .utf8) ?? "No body")")
+//                                print("=== API Response Debug ===")
+//                                print("Status Code: \(httpResponse.statusCode)")
+//                                print("Response Headers: \(httpResponse.allHeaderFields)")
+//                                print("Response Body: \(String(data: data, encoding: .utf8) ?? "No body")")
                             }
                             
                             guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
                                 if let httpResponse = response as? HTTPURLResponse {
-                                    print("HTTP Error - Status: \(httpResponse.statusCode)")
-                                    print("Error Response Body: \(String(data: data, encoding: .utf8) ?? "No body")")
+//                                    print("HTTP Error - Status: \(httpResponse.statusCode)")
+//                                    print("Error Response Body: \(String(data: data, encoding: .utf8) ?? "No body")")
                                 }
                                 throw URLError(.badServerResponse)
                             }
