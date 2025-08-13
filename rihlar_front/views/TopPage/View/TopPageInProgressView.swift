@@ -61,16 +61,14 @@ struct TopPageInProgressView: View {
                 )
                 .ignoresSafeArea()
                 .onAppear {
-                    guard let userID = vm.profile?.user_id,
+                    guard !vm.profile.isEmpty,
                           let gameID = vm.currentGameID else {
                         print("ユーザープロフィールまだです")
                         return
                     }
-                    vm.fetchCircles(for: gameID, userID: userID)
-                    vm.fetchUserStep(for: gameID, userID: userID)
-                    vm.bindPlayerPositionUpdates(for: userID, playerPosition: playerPosition)
-                    vm.fetchCircles(for: gameID, userID: userID)
-                    vm.fetchUserStep(for: gameID, userID: userID)
+                    vm.fetchCircles(for: gameID, userID: vm.profile)
+                    vm.fetchUserStep(for: gameID, userID: vm.profile)
+                    vm.bindPlayerPositionUpdates(for: vm.profile, playerPosition: playerPosition)
                 }
                 .onChange(of: vm.userStepByTeam) { steps in
                     let apiCoords = steps.map { CLLocationCoordinate2D(
@@ -79,6 +77,13 @@ struct TopPageInProgressView: View {
                     ) }
                     playerPosition.seedTrack(with: apiCoords)
                 }
+//                .onReceive(playerPosition.$track) { _ in
+//                    guard let userID = vm.profile?.user_id else {
+//                        print("ユーザープロフィールまだです")
+//                        return
+//                    }
+//                    vm.bindPlayerPositionUpdates(for: userID, playerPosition: playerPosition)
+//                }
                 .blur(radius: isShowMenu ? 10 : 0)
                 .animation(.easeInOut, value: isShowMenu)
                 
