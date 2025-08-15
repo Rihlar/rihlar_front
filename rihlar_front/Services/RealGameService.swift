@@ -60,6 +60,100 @@ class RealGameService: GameServiceProtocol {
         .eraseToAnyPublisher()
     }
     
+    func fetchAllGame() -> AnyPublisher<AllGameEntity, Error> {
+        let path = APIConfig.AllGame
+        let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
+        
+        return Deferred {
+            Future<AllGameEntity, Error> { promise in
+                Task {
+                    do {
+                        // ① トークンを非同期に取得
+                        guard let token = try await TokenManager.shared.getAccessToken() else {
+                            throw URLError(.userAuthenticationRequired)
+                        }
+
+                        // ② リクエスト組み立て
+                        var request = URLRequest(url: fullURL)
+                        request.httpMethod = "GET"
+                        request.setValue(token, forHTTPHeaderField: "Authorization")
+                        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//                        print("トークン確認\(token)")
+                        // ③ URLSession の async API で呼び出し
+                        let (data, response) = try await URLSession.shared.data(for: request)
+                        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                            throw URLError(.badServerResponse)
+                        }
+                        
+                        if let jsonText = String(data: data, encoding: .utf8) {
+//                            print("📦 すべてのゲーム一覧のレスポンスJSON文字列:")
+//                            print(jsonText)
+                        }
+
+                        // ④ デコードして成功を返す
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .secondsSince1970
+                        let wrapper = try decoder.decode(AllGameEntity.self, from: data)
+                        promise(.success(wrapper))
+                    } catch {
+                        // ⑤ エラーを返す
+                        promise(.failure(error))
+                    }
+                }
+            }
+        }
+        .receive(on: RunLoop.main)
+        .eraseToAnyPublisher()
+    }
+    
+    func fetchTopRanking(UserID: String, GameID: String) -> AnyPublisher<TopRankingEntity, Error> {
+        let path = APIConfig.topRankingEndpoint.replacingOccurrences(of: "{game_uuid}", with: GameID)
+        let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
+
+        return Deferred {
+            Future<TopRankingEntity, Error> { promise in
+                Task {
+                    do {
+                        // ① トークンを非同期に取得
+                        guard let token = try await TokenManager.shared.getAccessToken() else {
+                            throw URLError(.userAuthenticationRequired)
+                        }
+
+                        // ② リクエスト組み立て
+                        var request = URLRequest(url: fullURL)
+                        request.httpMethod = "GET"
+                        request.setValue(token, forHTTPHeaderField: "Authorization")
+//                        request.setValue(UserID, forHTTPHeaderField: "UserID")
+//                        request.setValue(GameID, forHTTPHeaderField: "GameID")
+//                        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//                        print("トークン確認\(token)")
+                        // ③ URLSession の async API で呼び出し
+                        let (data, response) = try await URLSession.shared.data(for: request)
+                        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                            throw URLError(.badServerResponse)
+                        }
+                        
+                        if let jsonText = String(data: data, encoding: .utf8) {
+//                            print("📦 ランキングのレスポンスJSON文字列:")
+//                            print(jsonText)
+                        }
+
+                        // ④ デコードして成功を返す
+                        let decoder = JSONDecoder()
+                        decoder.dateDecodingStrategy = .secondsSince1970
+                        let wrapper = try decoder.decode(TopRankingEntity.self, from: data)
+                        promise(.success(wrapper))
+                    } catch {
+                        // ⑤ エラーを返す
+                        promise(.failure(error))
+                    }
+                }
+            }
+        }
+        .receive(on: RunLoop.main)
+        .eraseToAnyPublisher()
+    }
+    
     func getTop3CircleRanking(for gameID: String, userID: String) async throws -> [String: TeamCirclesEntity] {
         // 1. path の組み立て
         let path = APIConfig.top3CirclesRankingEndpoint.replacingOccurrences(of: "{gameId}", with: gameID)
@@ -92,8 +186,8 @@ class RealGameService: GameServiceProtocol {
         
         // 8. デバッグ用JSONログ出力（オプション）
         if let jsonString = String(data: data, encoding: .utf8) {
-             print("📦 トップ3円のレスポンスJSON文字列:")
-             print(jsonString)
+//             print("📦 トップ3円のレスポンスJSON文字列:")
+//             print(jsonString)
         }
         
         // 9. JSONデコード

@@ -17,14 +17,27 @@ struct Footer: View {
     var onMenuTap: () -> Void
 
     @ObservedObject var vm: GameViewModel
-//    let game: Game
-//    var gameType: GameType
+    
+    func joined() -> Bool {
+        guard let allGame = vm.AllGame else {
+            print("AllGameがnilです")
+            return false
+        }
+        
+        for game in allGame.Data {
+            if game.isJoined {
+                return false
+            }
+        }
+        
+        return true
+    }
     
     var body: some View {
         VStack {
             if let game = vm.game {
-                if !game.IsAdminJoined && !game.admin.IsStarted ?? false {
-                    if vm.currentGameIsAdmin {
+                if !joined() && vm.currentGameIsAdmin {
+                    if !game.IsAdminJoined {
                         Notice(
                             label: "ゲームが開始されるまでしばらくお待ちください",
                             graColor: Color.buttonColor,
@@ -42,7 +55,7 @@ struct Footer: View {
                         padding: EdgeInsets(top: 0, leading: 40, bottom: 0, trailing: 0)
                     )
                     
-                    if !game.IsAdminJoined && game.admin.IsStarted ?? false {
+                    if  joined() && vm.currentGameIsAdmin{
                         BlueBtn(
                             label: "プレイ",
                             width: 160,

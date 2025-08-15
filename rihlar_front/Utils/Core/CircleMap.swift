@@ -14,6 +14,7 @@ struct CircleMap: UIViewRepresentable {
     let userStepByTeam: [UserStep]
     let game: GameResponse.Game?
     let currentGameIsAdmin: Bool
+    @ObservedObject var vm: GameViewModel
 //    let currentUserTeamID: String = "teamid-32f5eb5f-534b-439e-990e-349e52d70970"
 //    let gameStatus: GameStatus
 //    let gameType: GameType
@@ -72,16 +73,18 @@ struct CircleMap: UIViewRepresentable {
           }
 
 //         ─────────── 歩いた軌跡を描画（進行中 or コレクションモードのときだけ） ───────────
-        if ((game?.IsAdminJoined ?? false) && (game?.admin.IsStarted ?? false)) || !currentGameIsAdmin {
-            let coords = playerPosition.track
-            if coords.count >= 2 {
-                uiView.addOverlay(MKPolyline(coordinates: coords, count: coords.count))
+        if let game = vm.game {
+            if game.IsAdminJoined || !currentGameIsAdmin {
+                let coords = playerPosition.track
+                if coords.count >= 2 {
+                    uiView.addOverlay(MKPolyline(coordinates: coords, count: coords.count))
+                }
             }
-        }
-
-        // Show circles if in progress or in collection mode
-        if ((game?.IsAdminJoined ?? false) && (game?.admin.IsStarted ?? false)) || !currentGameIsAdmin {
-            addOverlays(to: uiView, using: context.coordinator)
+            
+            // Show circles if in progress or in collection mode
+            if game.IsAdminJoined || !currentGameIsAdmin {
+                addOverlays(to: uiView, using: context.coordinator)
+            }
         }
     }
 
@@ -95,7 +98,7 @@ struct CircleMap: UIViewRepresentable {
     ) {
         // ① ３日以内フィルタのための cutoff を計算
 //        let threeDays: TimeInterval = 3 * 24 * 60 * 60
-        let threeDays: TimeInterval = 6 * 24 * 60 * 60
+        let threeDays: TimeInterval = 365 * 24 * 60 * 60
         let cutoff = Date().addingTimeInterval(-threeDays)
 
         // ② gameType によって表示対象データを取得
@@ -163,27 +166,25 @@ struct CircleMap: UIViewRepresentable {
 
     private func color(for group: MKCircle) -> UIColor {
         let title = group.title ?? "unknown"
-        if title == "Self" {
-            return .blue
-        }
-
-        // "Self" チームの teamID を取得
-        guard let selfTeam = circlesByTeam.first(where: { $0.groupName == "Self" }) else {
-            return .black  // fallback（念のため）
-        }
-        
-        // title に対応するチームを取得
-        if let matchingTeam = circlesByTeam.first(where: { $0.groupName == title }) {
-            if matchingTeam.teamID == selfTeam.teamID {
-                return .blue  // 自分のチームと一致していれば青
-            }
-        }
         
         // それ以外は順位で色分け
         switch title {
-        case "Top1": return .orange
-        case "Top2": return .red
-        case "Top3": return .green
+        case "Self": return .blue
+        case "Top1":
+            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+                return .blue
+            }
+            return .orange
+        case "Top2":
+            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+                return .blue
+            }
+            return .red
+        case "Top3":
+            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+                return .blue
+            }
+            return .green
         case "Other": return .white
         default:     return .black
         }

@@ -86,7 +86,7 @@ struct Header: View {
                         Spacer()
                         
                         if vm.game?.admin.IsStarted ?? false {
-                            ScoreStatusPanel(rank: 10, currentScore: 0)
+                            ScoreStatusPanel(topRanking: vm.TopRanking)
                                 .padding(.trailing)
                         }
                     }

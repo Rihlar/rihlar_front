@@ -27,8 +27,8 @@ struct APIConfig {
     static let top3CirclesRankingEndpoint = "/game/ranking/top/{gameId}"
     //    自分が歩いた記録 GET
     static let userMovementEndpoint = "/gcore/get/movement"
-    //    ランキング GET
-    static let topRankingEndpoint = "/gcore/get/top"
+    //    ランキングTOP10  (ソロ) GET
+    static let topRankingEndpoint = "/game/ranking/solo/top10/{game_uuid}"
     //    歩いたデータを送る POST
     static let sendUserStepEndpoint = "/gcore/report/movement"
     //    ユーザーのプロフィール　GET
@@ -37,6 +37,8 @@ struct APIConfig {
     static let photo = "/photos"
 //    ゲーム情報取得
     static let gameInformation = "/game/info/self"
+//    すべてのゲーム一覧
+    static let AllGame = "/game/allgames"
 }
 
 enum APIEnvironment {

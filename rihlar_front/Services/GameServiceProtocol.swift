@@ -13,7 +13,10 @@ import Combine
 protocol GameServiceProtocol {
 /// ゲーム情報を返す既存メソッド
     func fetchGame(id: String) -> AnyPublisher<GameResponse.Game, Error>
-    
+/// すべてのゲーム一覧
+    func fetchAllGame() -> AnyPublisher<AllGameEntity, Error>
+/// ランキング GET
+    func fetchTopRanking(UserID: String, GameID: String) -> AnyPublisher<TopRankingEntity, Error>
 /// 円データを取得するメソッド
     func getTop3CircleRanking(for gameID: String, userID: String) async throws -> [String: TeamCirclesEntity]
     

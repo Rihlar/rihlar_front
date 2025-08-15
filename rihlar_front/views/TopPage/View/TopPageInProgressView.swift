@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreLocation
+import Combine
 
 struct TopPageInProgressView: View {
     @ObservedObject var vm: GameViewModel
@@ -46,6 +47,15 @@ struct TopPageInProgressView: View {
       return playerPosition.region.center.bearing(to: user)
     }
     
+    private func tryStartFetching() {
+        guard !vm.profile.isEmpty, let gameID = vm.currentGameID else { return }
+        print("🚀 call getTopRanking")
+        vm.fetchCircles(for: gameID, userID: vm.profile)
+        vm.fetchUserStep(for: gameID, userID: vm.profile)
+        vm.getTopRanking(UserID: vm.profile, gameID: gameID)
+        vm.bindPlayerPositionUpdates(for: vm.profile, playerPosition: playerPosition)
+    }
+    
     var body: some View {
 //        if let game = vm.currentGame {
             ZStack {
@@ -55,21 +65,13 @@ struct TopPageInProgressView: View {
                     circlesByTeam: vm.circlesByTeam,
                     userStepByTeam: vm.userStepByTeam,
                     game: vm.game,
-                    currentGameIsAdmin: vm.currentGameIsAdmin
-//                    gameStatus: GameStatus(rawValue: game.statusRaw) ?? .notStarted,
-//                    gameType: game.type
+                    currentGameIsAdmin: vm.currentGameIsAdmin,
+                    vm: vm
                 )
                 .ignoresSafeArea()
-                .onAppear {
-                    guard !vm.profile.isEmpty,
-                          let gameID = vm.currentGameID else {
-                        print("ユーザープロフィールまだです")
-                        return
-                    }
-                    vm.fetchCircles(for: gameID, userID: vm.profile)
-                    vm.fetchUserStep(for: gameID, userID: vm.profile)
-                    vm.bindPlayerPositionUpdates(for: vm.profile, playerPosition: playerPosition)
-                }
+                .onAppear { tryStartFetching() }
+                .onChange(of: vm.profile) { _ in tryStartFetching() }
+                .onChange(of: vm.currentGameID) { _ in tryStartFetching() }
                 .onChange(of: vm.userStepByTeam) { steps in
                     let apiCoords = steps.map { CLLocationCoordinate2D(
                         latitude: $0.latitude,
@@ -162,6 +164,14 @@ struct TopPageInProgressView: View {
                             }
                         }
                     }
+                
+//                Button("POST") {
+//                    guard !vm.profile.isEmpty else {
+//                        print("ユーザープロフィールまだです")
+//                        return
+//                    }
+//                    vm.bindPlayerPositionUpdates(for: vm.profile, playerPosition: playerPosition)
+//                }
                 
                 if isGameOverFlag && !vm.currentGameIsAdmin {
                     ModalView(
@@ -328,4 +338,5 @@ struct TopPageInProgressView: View {
 //        }
     }
 }
+
 
