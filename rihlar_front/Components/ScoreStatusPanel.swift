@@ -12,8 +12,17 @@ struct ScoreStatusPanel: View {
     let height:CGFloat = 95
     
     // 動的なデータ
-    var rank: Int
-    var currentScore: Int
+    var topRanking: TopRankingEntity?
+    
+    private var selfRank: Int {
+        topRanking?.data.selfRanking.rank ?? 0
+    }
+    private var selfPoint: Int {
+        topRanking?.data.selfRanking.point ?? 0
+    }
+    private var top3: [TeamRanking] {
+        Array(topRanking?.data.ranks.prefix(3) ?? [])
+    }
     
     var body: some View {
         ZStack {
@@ -27,68 +36,28 @@ struct ScoreStatusPanel: View {
                 .opacity(0.8)
             
             VStack(spacing: 3) {
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.orange)
-                        .frame(width: 10, height: 10)
-                    
-                    Text("1位")
-                        .font(.system(size: 12,weight: .bold))
-                        .foregroundColor(.textColor)
-                    
-                    Text("転々")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
-                    
-                    Spacer()
-                    
-                    Text("10000pt")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
+                ForEach(Array(top3.enumerated()), id: \.offset) { idx, item in
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(idx == 0 ? Color.orange : idx == 1 ? Color.red : Color.green)
+                            .frame(width: 10, height: 10)
+
+                        Text("\(idx + 1)位")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.textColor)
+
+                        Text(item.userName)
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.textColor)
+
+                        Spacer()
+
+                        Text("\(item.points)pt")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.textColor)
+                    }
+                    .frame(width: width - 40)
                 }
-                .frame(width: width - 40)
-                
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.red)
-                        .frame(width: 10, height: 10)
-                    
-                    Text("2位")
-                        .font(.system(size: 12,weight: .bold))
-                        .foregroundColor(.textColor)
-                    
-                    Text("山田太郎")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
-                    
-                    Spacer()
-                    
-                    Text("5030pt")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
-                }
-                .frame(width: width - 40)
-                
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Color.green)
-                        .frame(width: 10, height: 10)
-                    
-                    Text("3位")
-                        .font(.system(size: 12,weight: .bold))
-                        .foregroundColor(.textColor)
-                    
-                    Text("サーモン丼")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
-                    
-                    Spacer()
-                    
-                    Text("3300pt")
-                        .font(.system(size: 10,weight: .medium))
-                        .foregroundColor(.textColor)
-                }
-                .frame(width: width - 40)
                 
                 RoundedRectangle(cornerRadius: 0)
                     .fill(Color("LineColor").opacity(0.2))
@@ -99,7 +68,7 @@ struct ScoreStatusPanel: View {
                         .fill(Color.blue)
                         .frame(width: 10, height: 10)
                     
-                    Text("\(rank)位")
+                    Text("\(selfRank)位")
                         .font(.system(size: 12,weight: .bold))
                         .foregroundColor(.textColor)
                     
@@ -109,7 +78,7 @@ struct ScoreStatusPanel: View {
                     
                     Spacer()
                     
-                    Text("\(currentScore)pt")
+                    Text("\(selfPoint)pt")
                         .font(.system(size: 10,weight: .medium))
                         .foregroundColor(.textColor)
                 }
@@ -119,9 +88,9 @@ struct ScoreStatusPanel: View {
     }
 }
 
-#Preview {
-    ScoreStatusPanel(
-        rank: 10,
-        currentScore: 0
-    )
-}
+//#Preview {
+//    ScoreStatusPanel(
+//        rank: 10,
+//        currentScore: 0
+//    )
+//}

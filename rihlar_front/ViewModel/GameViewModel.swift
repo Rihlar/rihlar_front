@@ -13,6 +13,8 @@ import CoreLocation
 //    ポイント：Combine を使って非同期を扱い、UI へのバインディングは @Published。
 final class GameViewModel: ObservableObject {
     @Published var game: GameResponse.Game?
+    @Published var AllGame: AllGameEntity?
+    @Published var TopRanking: TopRankingEntity?
     @Published var circlesByTeam: [TeamCircles] = []
     @Published var userStepByTeam: [UserStep] = []
     @Published var isLoadingGame = false
@@ -39,12 +41,15 @@ final class GameViewModel: ObservableObject {
         self.service = service
         self.stepsHK = stepsHK
         self.game                = nil
+        self.AllGame             = nil
+        self.TopRanking          = nil
         self.systemGames         = nil
         self.adminGames          = nil
         self.currentGameIsAdmin  = false
         self.profile             = ""
         
         fetchGame(by: "GameID")
+        getAllGames()
     }
     
     var currentGameID: String? {
@@ -82,6 +87,44 @@ final class GameViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    func getAllGames() {
+        errorMessage = nil
+        service.fetchAllGame()
+            .sink{ [weak self] completion in
+                if case .failure(let err) = completion {
+                    self?.errorMessage = err.localizedDescription
+                    print("❌ エラー: \(err.localizedDescription)")
+                } else {
+                    print("✅ 通信完了")
+                }
+            } receiveValue: { [weak self] response in
+                guard let self = self else { return }
+                print("📦 取得したゲーム一覧: \(response.Data)")
+                
+                self.AllGame = response
+            }
+            .store(in: &cancellables)
+    }
+    
+    func getTopRanking(UserID: String, gameID: String) {
+        errorMessage = nil
+        service.fetchTopRanking(UserID: UserID, GameID: gameID)
+            .sink{ [weak self] completion in
+                if case .failure(let err) = completion {
+                    self?.errorMessage = err.localizedDescription
+                    print("❌ getTopRankingエラー: \(err.localizedDescription)")
+                } else {
+                    print("✅ 通信完了")
+                }
+            } receiveValue: { [weak self] response in
+                guard let self = self else { return }
+//                print("📦 ランキング GET.: \(response)")
+                
+                self.TopRanking = response
+            }
+            .store(in: &cancellables)
+    }
+    
 //    currentGame が変わるたびに呼び出すヘルパー
     private func reloadOverlaysAndSteps() {
         guard let gameID = currentGameID else {
@@ -110,7 +153,7 @@ final class GameViewModel: ObservableObject {
                 
                 await MainActor.run {
                     print("✅ fetchCircles 成功")
-                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
+//                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
                     
                     // 辞書 → [TeamCircles] へ変換
                     self.circlesByTeam = respDict.map { key, entity in
@@ -259,7 +302,7 @@ final class GameViewModel: ObservableObject {
                                 let msg = first?.message ?? "-"
                                 let status = first?.status ?? -1
 
-                                print("POST歩数成功: system=\(sysOK), status=\(status), message=\(msg)")
+                                print("POST歩数成功: \(resp)")
                                 print("緯度:\(latest.latitude),経度:\(latest.longitude),歩数:\(steps)")
                             }
                         )

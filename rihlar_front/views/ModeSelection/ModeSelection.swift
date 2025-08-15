@@ -12,6 +12,14 @@ struct ModeSelection: View {
     @State private var isModeFlag: Bool = false
     @State private var isChangeBtn = false
     @State private var isShowMenu = false
+    var joinRoomID: String = ""
+    
+    
+    func joinRoom() -> String {
+        // この中にvm.AllGame(開催しているゲーム一覧)からどこかに参加するコードを書く
+        
+        return joinRoomID
+    }
     
     var body: some View {
         ZStack {
@@ -149,7 +157,7 @@ class GameAPI {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(token, forHTTPHeaderField: "Authorization")
         request.setValue(gameId, forHTTPHeaderField: "GameID")
-
+        
         let (_, response) = try await URLSession.shared.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
