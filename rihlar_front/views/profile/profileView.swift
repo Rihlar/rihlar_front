@@ -15,36 +15,36 @@ struct ProfileView: View {
     @State private var isShowMenu = false
     @State private var isEditing = false
     @FocusState private var isNameFieldFocused: Bool
-    
+
     // 写真一覧を保持
-    @StateObject private var photoViewModel = ProfileViewModel()
-    
+    @EnvironmentObject var photoViewModel: ProfileViewModel
+
     // 選択中の画像インデックス
     @State private var selectedImageIndex: ImageIndex? = nil
-    
+
     @StateObject private var viewModel = RecordsViewModel()
     @State private var showAchievementSheet = false
-    
+
     // 実績最大3つまで
     var selectedRecords: [Record] {
         Array(viewModel.records.filter { $0.isSelected }.prefix(3))
     }
-    
+
     init(viewData: UserProfileViewData, router: Router) {
         self.viewData = viewData
         _router = ObservedObject(initialValue: router)
         _editableName = State(initialValue: viewData.user.name)
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(Color.backgroundColor)
                 .ignoresSafeArea()
-            
+
             VStack(spacing: 20) {
                 Spacer().frame(height: 0)
                     .navigationBarBackButtonHidden(true)
-                
+
                 // プロフィール画像
                 ZStack {
                     Circle()
@@ -60,7 +60,7 @@ struct ProfileView: View {
                     .frame(width: 120, height: 120)
                     .clipShape(Circle())
                 }
-                
+
                 // 名前＋編集ボタン
                 HStack(alignment: .center, spacing: 10) {
                     VStack(spacing: 5) {
@@ -82,7 +82,7 @@ struct ProfileView: View {
                                     .foregroundColor(Color.textColor)
                                     .frame(width:150)
                             }
-                            
+
                             Button {
                                 if isEditing {
                                     isNameFieldFocused = false
@@ -99,13 +99,13 @@ struct ProfileView: View {
                                     .shadow(radius: 4)
                             }
                         }
-                        
+
                         Rectangle()
                             .frame(width: 236, height: 1)
                             .foregroundColor(Color.separatorLine)
                     }
                 }
-                
+
                 // 実績バッジ
                 Button {
                     showAchievementSheet = true
@@ -149,56 +149,62 @@ struct ProfileView: View {
                     .frame(width:300,height:90)
                     .cornerRadius(20)
                 }
-                
+
                 // 記録した写真
                 Text("記録した写真")
                     .font(.title3)
                     .fontWeight(.medium)
                     .foregroundColor(Color.textColor)
-                
+
                 ScrollView {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
-                        ForEach(Array(photoViewModel.photos.indices), id: \.self) { index in
+                        ForEach(photoViewModel.photos.indices, id: \.self) { index in
                             let photo = photoViewModel.photos[index]
-                            
-                            Group {
-                                if let url = URL(string: photo.url) {
+
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color.gray.opacity(0.2))
+                                    .frame(height: 160)
+
+                                if let uiImage = photo.cachedImage {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(height: 160)
+                                        .clipped()
+                                        .cornerRadius(10)
+                                } else if let url = URL(string: photo.url) {
                                     AsyncImage(url: url) { image in
                                         image.resizable().scaledToFill()
                                     } placeholder: {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color.gray.opacity(0.2))
+                                        ProgressView().frame(height: 160)
                                     }
+                                    .frame(height: 160)
+                                    .clipped()
+                                    .cornerRadius(10)
                                 }
                             }
-                            .frame(height: 160)
-                            .clipped()
-                            .cornerRadius(10)
                             .onTapGesture {
                                 selectedImageIndex = ImageIndex(id: index)
                             }
                         }
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 120)
-                }
-                .task {
-                    await photoViewModel.loadPhotos()
                 }
             }
-            
+
             if isShowMenu {
                 Color.white.opacity(0.5)
                     .ignoresSafeArea()
                     .transition(.opacity)
-                
+
                 Menu(router: router)
                     .transition(
                         .move(edge: .trailing)
                         .combined(with: .opacity)
                     )
             }
-            
+
             BottomNavigationBar(
                 router: router,
                 isChangeBtn: isChangeBtn,
@@ -241,7 +247,7 @@ func limitTextWithVisualWeight(_ text: String,
     var result = ""
     for char in text {
         let weight: Double
-        
+
         if ("\u{3040}"..."\u{309F}").contains(char) {
             weight = 1.5 // ひらがな
         } else if ("a"..."z").contains(char.lowercased()) {
@@ -251,15 +257,15 @@ func limitTextWithVisualWeight(_ text: String,
         } else {
             weight = 2.0 // 漢字や記号など
         }
-        
+
         if visualLength + weight > maxVisualLength {
             result += "…"
             break
         }
-        
+
         visualLength += weight
         result.append(char)
     }
-    
+
     return result
 }

@@ -42,12 +42,12 @@ struct MenuList: View {
                     .frame(width: 230, height: 1)
 
                 // 下段アイコン群
-                MenuItem(systemName: "questionmark.circle", label: "ゲームのヒント") {
-                    print("helpタップ")
-                }
-                MenuItem(systemName: "envelope", label: "お知らせ") {
-                    print("envelopeタップ")
-                }
+//                MenuItem(systemName: "questionmark.circle", label: "ゲームのヒント") {
+//                    print("helpタップ")
+//                }
+//                MenuItem(systemName: "envelope", label: "お知らせ") {
+//                    print("envelopeタップ")
+//                }
                 MenuItem(systemName: "gearshape", label: "設定") {
                     print("settingsタップ")
                 }

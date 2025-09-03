@@ -118,7 +118,7 @@ struct ModeSelection: View {
                                         return
                                     }
                                     
-                                    let gameId = "gameid-413a287b-213c-414f-a287-c1397db8f9bf"
+                                    let gameId = "gameid-996e5916-28b7-4222-ad5c-b332c1f892ec"
                                     try await GameAPI.joinGame(gameId: gameId, token: token)
                                     
                                     router.push(.loading)

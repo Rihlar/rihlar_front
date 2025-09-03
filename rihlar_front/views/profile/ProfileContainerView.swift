@@ -8,18 +8,22 @@
 import Foundation
 import SwiftUI
 
+// ProfileContainerView.swift
 struct ProfileContainerView: View {
     @ObservedObject var router: Router
     @State private var viewData: UserProfileViewData?
+    @StateObject private var photoViewModel = ProfileViewModel()
     @State private var isLoading = true
     @State private var errorMessage: String?
-    
+
     var body: some View {
         Group {
             if isLoading {
                 ProgressView("読み込み中…")
+                    .progressViewStyle(CircularProgressViewStyle())
             } else if let viewData = viewData {
                 ProfileView(viewData: viewData, router: router)
+                    .environmentObject(photoViewModel) // 事前ロード済みデータを渡す
                     .navigationBarBackButtonHidden(true)
             } else if let errorMessage = errorMessage {
                 Text("エラー: \(errorMessage)")
@@ -29,7 +33,11 @@ struct ProfileContainerView: View {
             do {
                 print("プロフィール取得開始")
                 viewData = try await makeUserProfileViewData()
-                print("プロフィール取得成功: \(String(describing: viewData))")
+
+                // 写真の先読み
+                await photoViewModel.loadPhotos()
+
+                print("プロフィール＋写真取得成功")
             } catch {
                 errorMessage = error.localizedDescription
                 print("プロフィール取得失敗: \(error.localizedDescription)")

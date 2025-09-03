@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 // 写真情報のモデル定義
 struct Photo: Codable, Identifiable {
@@ -17,7 +18,11 @@ struct Photo: Codable, Identifiable {
     let gameId: String      // gameID
     let url: String         // 写真のurl
     let circleId: String?   // circle_id (円に紐づく)
-    
+
+
+
+    var cachedImage: UIImage? = nil
+
     enum CodingKeys: String, CodingKey {
         case id = "image_id"
         case userId = "user_id"
@@ -27,6 +32,32 @@ struct Photo: Codable, Identifiable {
         case gameId = "game_id"
         case url = "image_url"
         case circleId = "circle_id"
+    }
+}
+
+
+struct CircleDetail: Codable {
+    let gameId: String
+    let userId: String
+    let size: Int
+    let latitude: Double
+    let longitude: Double
+    let level: Int
+    let step: Int
+    let createdAt: Date
+    let imageId: String
+
+    enum CodingKeys: String, CodingKey {
+        case gameId = "GameID"
+        case userId = "UserID"
+        case size = "Size"
+        case latitude = "Latitude"
+        case longitude = "Longitude"
+        case level = "Level"
+        case step = "Step"
+        case createdAt = "CreateAT"
+        case imageId = "ImageID"
+
     }
 }
 

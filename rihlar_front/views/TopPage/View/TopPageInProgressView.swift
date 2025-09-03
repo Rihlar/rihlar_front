@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreLocation
 import Combine
+import Foundation
 
 struct TopPageInProgressView: View {
     @ObservedObject var vm: GameViewModel
@@ -79,6 +80,7 @@ struct TopPageInProgressView: View {
                     ) }
                     playerPosition.seedTrack(with: apiCoords)
                 }
+
 //                .onReceive(playerPosition.$track) { _ in
 //                    guard let userID = vm.profile?.user_id else {
 //                        print("ユーザープロフィールまだです")
