@@ -92,7 +92,7 @@ struct AppRootView: View {
             }
             
             let bodyDict: [String: String] = [
-                "name": "テスト太郎2",
+                "name": "川岸遥奈",
                 "record_id": "記録2",
                 "comment": "これはテスト用のコメントです。",
                 "region_id": "regionId-c161edb9-6aff-4244-8749-707bff2fa3be",
