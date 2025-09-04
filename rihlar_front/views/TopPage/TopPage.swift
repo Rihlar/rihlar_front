@@ -16,26 +16,17 @@ struct TopPage: View {
         Group {
             if vm.isLoadingGame {
                 ProgressView("読み込み中…")
-            } else if let game = vm.game {
-                TopPageInProgressView(
-                    vm: vm,
-                    router: router
-//                    game: game
-                )
             } else if let err = vm.errorMessage {
                 Text("エラー: \(err)")
                     .foregroundColor(.red)
+            } else {
+                // ゲーム情報がなくてもTopPageInProgressViewを表示
+                // 初期化とデータフェッチはTopPageInProgressView内で行う
+                TopPageInProgressView(
+                    vm: vm,
+                    router: router
+                )
             }
-            else {
-                Text("ゲーム情報がありません")
-            }
-        }
-        .onAppear {
-            PlayerPosition.LocationPermissionManager.shared.request()
-        }
-        // ViewのonAppearや.taskで呼び出して使う
-        .task {
-            vm.loadUserProfile()
         }
     }
 }

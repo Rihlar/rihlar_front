@@ -11,8 +11,8 @@ import Combine
 //    メリット：実装をモック／本番と入れ替えやすくなる。
 /// ゲーム情報取得の振る舞いを定義するプロトコル
 protocol GameServiceProtocol {
-/// ゲーム情報を返す既存メソッド
-    func fetchGame(id: String) -> AnyPublisher<GameResponse.Game, Error>
+/// ゲーム情報を返す既存メソッド（自分の参加ゲーム情報）
+    func fetchGame() -> AnyPublisher<GameResponse.Game, Error>
 /// すべてのゲーム一覧
     func fetchAllGame() -> AnyPublisher<AllGameEntity, Error>
 /// ランキング GET

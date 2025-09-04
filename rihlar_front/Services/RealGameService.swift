@@ -12,9 +12,9 @@ import Combine
 //    注意点：URL やリクエストヘッダ、エラー処理は適宜拡張。
 /// 本番 API 叩く実装
 class RealGameService: GameServiceProtocol {
-    func fetchGame(id: String) -> AnyPublisher<GameResponse.Game, Error> {
-//        1. path の組み立て
-        let path = APIConfig.gameInformation
+    func fetchGame() -> AnyPublisher<GameResponse.Game, Error> {
+//        1. path の組み立て（IDは不要、自分の参加ゲーム情報を取得）
+        let path = APIConfig.gameInformation  // "/game/info/self"
         let fullURL = APIConfig.stagingBaseURL.appendingPathComponent(path)
         
         return Deferred {
@@ -30,24 +30,74 @@ class RealGameService: GameServiceProtocol {
                         // ② リクエスト組み立て
                         var request = URLRequest(url: fullURL)
                         request.httpMethod = "GET"
+                        
+                        // トークンをそのまま使用（Bearerプレフィックスは不要）
                         request.setValue(token, forHTTPHeaderField: "Authorization")
-//                        print("トークン確認\(token)")
+                        // request.setValue("application/json", forHTTPHeaderField: "Accept")
+                        
+                        print("📤 リクエスト詳細:")
+                        print("  - URL: \(fullURL)")
+                        print("  - Method: GET")
+                        print("  - Authorization Header: \(token.prefix(20))...")
+                        print("  - All Headers: \(request.allHTTPHeaderFields ?? [:])")
                         // ③ URLSession の async API で呼び出し
                         let (data, response) = try await URLSession.shared.data(for: request)
-                        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
-                            throw URLError(.badServerResponse)
+                        
+                        // HTTPレスポンスの詳細ログ
+                        if let http = response as? HTTPURLResponse {
+                            print("📡 fetchGame HTTPレスポンス詳細:")
+                            print("  - ステータスコード: \(http.statusCode)")
+                            print("  - レスポンスヘッダー: \(http.allHeaderFields)")
+                            print("  - データサイズ: \(data.count) bytes")
                         }
                         
+                        // 404エラーでもレスポンス内容を確認
                         if let jsonText = String(data: data, encoding: .utf8) {
-                            print("📦 gameデータ取得のレスポンスJSON文字列:")
                             print(jsonText)
+                        } else {
+                            print("❌ レスポンスデータをUTF-8文字列に変換できませんでした")
+                        }
+                        
+                        guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
+                            print("❌ リクエストURL: \(fullURL)")
+                            throw URLError(.badServerResponse)
                         }
 
                         // ④ デコードして成功を返す
+                        print("🔄 JSONデコード開始...")
                         let decoder = JSONDecoder()
                         decoder.dateDecodingStrategy = .secondsSince1970
-                        let wrapper = try decoder.decode(GameResponse.self, from: data)
-                        promise(.success(wrapper.data))
+                        
+                        do {
+                            // まず生の辞書として読み込んで構造を確認
+                            if let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                                print("📋 受信したJSONの構造:")
+                                for (key, value) in jsonObject {
+                                    print("  - \(key): \(type(of: value))")
+                                }
+                            }
+                            
+                            let wrapper = try decoder.decode(GameResponse.self, from: data)
+                            print("✅ JSONデコード成功")
+                            promise(.success(wrapper.data))
+                        } catch let decodingError {
+                            print("❌ JSONデコードエラー: \(decodingError)")
+                            if let decodingError = decodingError as? DecodingError {
+                                switch decodingError {
+                                case .dataCorrupted(let context):
+                                    print("  - データ破損: \(context)")
+                                case .keyNotFound(let key, let context):
+                                    print("  - キー不足: \(key) at \(context)")
+                                case .typeMismatch(let type, let context):
+                                    print("  - 型不一致: \(type) at \(context)")
+                                case .valueNotFound(let type, let context):
+                                    print("  - 値不足: \(type) at \(context)")
+                                @unknown default:
+                                    print("  - 不明なデコードエラー")
+                                }
+                            }
+                            throw decodingError
+                        }
 
                     } catch {
                         // ⑤ エラーを返す

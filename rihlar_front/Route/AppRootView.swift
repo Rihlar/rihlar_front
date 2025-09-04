@@ -117,7 +117,7 @@ struct AppRootView: View {
                 if httpResponse.statusCode == 200 {
                     print("プロフィール登録API成功")
                 } else {
-                    print("プロフィール登録APIエラー（無視可）: \(httpResponse.statusCode)")
+                    // print("プロフィール登録APIエラー（無視可）: \(httpResponse.statusCode)")
                 }
             }
         } catch {

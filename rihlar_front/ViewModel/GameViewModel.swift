@@ -48,8 +48,42 @@ final class GameViewModel: ObservableObject {
         self.currentGameIsAdmin  = false
         self.profile             = ""
         
-        fetchGame(by: "GameID")
-        getAllGames()
+        // 初期化時はAPI呼び出しを行わない
+        // ログイン完了後にフェッチするため
+        print("🏗️ GameViewModel 初期化完了")
+    }
+    
+    /// ログイン完了後に呼び出すメソッド
+    func initializeAfterLogin() {
+        print("🚀 ログイン完了後の初期化開始")
+        
+        // トークン状態をデバッグ
+        Task {
+            do {
+                // Keychainからのトークン確認
+                if let keychainToken = getKeyChain(key: "authToken") {
+                    print("🔑 Keychain authToken: \(keychainToken.prefix(20))...")
+                } else {
+                    print("❌ Keychain authToken: なし")
+                }
+                
+                // TokenManagerからのトークン確認
+                let managerToken = try await TokenManager.shared.getAccessToken()
+                if let token = managerToken {
+                    print("🎫 TokenManager token: \(token.prefix(20))...")
+                } else {
+                    print("❌ TokenManager token: なし")
+                }
+                
+                await MainActor.run {
+                    loadUserProfile()
+                    fetchGame()
+                    getAllGames()
+                }
+            } catch {
+                print("❌ トークン確認エラー: \(error)")
+            }
+        }
     }
     
     var currentGameID: String? {
@@ -61,13 +95,28 @@ final class GameViewModel: ObservableObject {
     }
     
     /// ゲーム情報だけ取得
-    func fetchGame(by id: String) {
+    func fetchGame() {
         isLoadingGame = true
-        service.fetchGame(id: id)
+        errorMessage = nil
+        print("📡 fetchGame開始: /game/info/self エンドポイント")
+        
+        service.fetchGame()
             .sink { [weak self] completion in
                 self?.isLoadingGame = false
                 if case .failure(let err) = completion {
-                    self?.errorMessage = err.localizedDescription
+                    let errorMsg = err.localizedDescription
+                    print("❌ fetchGame エラー: \(errorMsg)")
+                    
+                    // NSURLErrorの詳細情報を出力
+                    if let urlError = err as? URLError {
+                        print("  - URLError Code: \(urlError.code.rawValue)")
+                        print("  - URLError Description: \(urlError.localizedDescription)")
+                        print("  - URLError UserInfo: \(urlError.userInfo)")
+                    }
+                    
+                    self?.errorMessage = errorMsg
+                } else {
+                    print("✅ fetchGame 完了")
                 }
             } receiveValue: { [weak self] response in
                 guard let self = self else { return }

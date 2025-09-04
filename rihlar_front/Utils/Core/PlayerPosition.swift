@@ -15,6 +15,10 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
 //     CLLocationManager のインスタンス。権限要求と更新開始に使用
     private let manager = CLLocationManager()
     
+//     MARK: - 許可状態管理
+    @Published var locationPermissionStatus: CLAuthorizationStatus = .notDetermined
+    @Published var isLocationPermissionGranted: Bool = false
+    
 //     MARK: - 地図表示関連
 //    現在の地図表示領域（中心座標＋ズーム度合）を保持
     @Published var region = MKCoordinateRegion(
@@ -44,22 +48,53 @@ class PlayerPosition: NSObject, ObservableObject, CLLocationManagerDelegate {
         manager.delegate = self
 //         精度設定
         manager.desiredAccuracy = kCLLocationAccuracyBest
-//         権限要求ダイアログを表示
-        manager.requestWhenInUseAuthorization()
-//         位置情報の更新を開始
-        manager.startUpdatingLocation()
+//         初期状態を設定
+        locationPermissionStatus = manager.authorizationStatus
+        updatePermissionStatus()
     }
     
-    class LocationPermissionManager {
-        static let shared = LocationPermissionManager()
-        private let manager = CLLocationManager()
-        
-        func request() {
-            manager.requestWhenInUseAuthorization()
+    // 許可状態の更新
+    private func updatePermissionStatus() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            print("🔐 位置情報許可状態更新:")
+            print("  - Status: \(self.locationPermissionStatus)")
+            print("  - IsGranted: \(self.isLocationPermissionGranted)")
+            
+            switch self.locationPermissionStatus {
+            case .authorizedWhenInUse, .authorizedAlways:
+                print("✅ 位置情報許可: 承認済み")
+                self.isLocationPermissionGranted = true
+                self.manager.startUpdatingLocation()
+            case .denied:
+                print("❌ 位置情報許可: 拒否")
+                self.isLocationPermissionGranted = false
+            case .restricted:
+                print("❌ 位置情報許可: 制限")
+                self.isLocationPermissionGranted = false
+            case .notDetermined:
+                print("⏳ 位置情報許可: 未決定 - 許可要求中")
+                self.isLocationPermissionGranted = false
+                self.manager.requestWhenInUseAuthorization()
+            @unknown default:
+                print("❓ 位置情報許可: 不明な状態")
+                self.isLocationPermissionGranted = false
+            }
         }
     }
 
 //     MARK: - CLLocationManagerDelegate
+    
+    // 位置情報の許可状態が変更された時に呼ばれる
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        print("🔄 位置情報許可状態変更: \(status)")
+        DispatchQueue.main.async { [weak self] in
+            self?.locationPermissionStatus = status
+            self?.updatePermissionStatus()
+        }
+    }
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
 //         最新の位置情報を取得
         guard let newLocation = locations.last else { return }

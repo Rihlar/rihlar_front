@@ -22,11 +22,11 @@ struct GameResponse: Codable {
     }
     
     struct adminGame: Codable {
-        let IsFinished:  Bool
-        let IsStarted:   Bool
+        let IsFinished:  Bool?
+        let IsStarted:   Bool?
         let GameID: String
-        let StartTime: Date
-        let EndTime: Date
+        let StartTime: Date?
+        let EndTime: Date?
     }
 
     struct systemGame: Codable {

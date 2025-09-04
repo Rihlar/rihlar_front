@@ -20,6 +20,7 @@ struct CircleMap: UIViewRepresentable {
 //    let gameType: GameType
 
     func makeUIView(context: Context) -> MKMapView {
+        print("🗺️ CircleMap makeUIView 開始")
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
@@ -33,6 +34,7 @@ struct CircleMap: UIViewRepresentable {
             longitudinalMeters: 500
         )
         mapView.setRegion(region, animated: false)
+        print("✅ CircleMap makeUIView 完了")
         return mapView
     }
 
