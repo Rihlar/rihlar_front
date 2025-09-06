@@ -153,7 +153,7 @@ final class GameViewModel: ObservableObject {
                 
                 await MainActor.run {
                     print("✅ fetchCircles 成功")
-//                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
+                    print("🌐 fetchCircles レスポンス内容: \(respDict)")
                     
                     // 辞書 → [TeamCircles] へ変換
                     self.circlesByTeam = respDict.map { key, entity in

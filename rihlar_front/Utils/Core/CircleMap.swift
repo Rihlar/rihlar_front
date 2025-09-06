@@ -171,19 +171,19 @@ struct CircleMap: UIViewRepresentable {
         switch title {
         case "Self": return .blue
         case "Top1":
-            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
-                return .blue
-            }
+//            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+//                return .blue
+//            }
             return .orange
         case "Top2":
-            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
-                return .blue
-            }
+//            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+//                return .blue
+//            }
             return .red
         case "Top3":
-            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
-                return .blue
-            }
+//            if circlesByTeam.first(where: { $0.groupName == "Self" })?.teamID == circlesByTeam.first(where: { $0.groupName == title })?.teamID {
+//                return .blue
+//            }
             return .green
         case "Other": return .white
         default:     return .black
